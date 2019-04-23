@@ -1,0 +1,15 @@
+[package]
+name = "gw2api"
+version = "0.1.0"
+authors = ["Greaka <mrgreaka@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+"rest-client" = "0.1"
+reqwest = "0.9"
+
+[dependencies.serde]
+version = "1.0"
+features = [
+    "derive"
+]
