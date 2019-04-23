@@ -3,136 +3,136 @@
 Last update: 22.4.19
 
 - achievements
-  - [] achievements
-    - [] daily
-      - [] tomorrow
-    - [] groups
-    - [] categories
+  - [ ] achievements
+    - [ ] daily
+      - [ ] tomorrow
+    - [ ] groups
+    - [ ] categories
 - authenticated
-  - [] account
-    - [] achievements
-    - [] bank
-    - [] dailycrafting
-    - [] dungeons
-    - [] dyes
-    - [] finishers
-    - [] gliders
+  - [ ] account
+    - [ ] achievements
+    - [ ] bank
+    - [ ] dailycrafting
+    - [ ] dungeons
+    - [ ] dyes
+    - [ ] finishers
+    - [ ] gliders
     - home
-      - [] cats
-      - [] nodes
-    - [] inventory
-    - [] luck
-    - [] mailcarries
-    - [] mapchests
-    - [] masteries
+      - [ ] cats
+      - [ ] nodes
+    - [ ] inventory
+    - [ ] luck
+    - [ ] mailcarries
+    - [ ] mapchests
+    - [ ] masteries
     - mastery
-      - [] points
-    - [] materials
-    - [] minis
+      - [ ] points
+    - [ ] materials
+    - [ ] minis
     - mounts
-      - [] skins
-      - [] types
-    - [] outfits
+      - [ ] skins
+      - [ ] types
+    - [ ] outfits
     - pvp
-      - [] heroes
-    - [] raids
-    - [] recipes
-    - [] skins
-    - [] titles
-    - [] wallet
-    - [] worldbosses
-  - [] characters
+      - [ ] heroes
+    - [ ] raids
+    - [ ] recipes
+    - [ ] skins
+    - [ ] titles
+    - [ ] wallet
+    - [ ] worldbosses
+  - [ ] characters
   - commerce
-    - [] transactions
+    - [ ] transactions
   - pvp
-    - [] stats
-    - [] games
-    - [] standings
-  - [] tokeninfo
+    - [ ] stats
+    - [ ] games
+    - [ ] standings
+  - [ ] tokeninfo
 - daily rewards
-  - [] dailycrafting
-  - [] mapchests
-  - [] worldbosses
+  - [ ] dailycrafting
+  - [ ] mapchests
+  - [ ] worldbosses
 - game mechanics
-  - [] masteries
-  - [] mounts
-    - [] skins
-    - [] types
-  - [] outfits
-  - [] pets
-  - [] professions
-  - [] races
-  - [] specializations
-  - [] skills
-  - [] traits
-  - [] legends
+  - [ ] masteries
+  - [ ] mounts
+    - [ ] skins
+    - [ ] types
+  - [ ] outfits
+  - [ ] pets
+  - [ ] professions
+  - [ ] races
+  - [ ] specializations
+  - [ ] skills
+  - [ ] traits
+  - [ ] legends
 - guild
   - guild
-    - [] :id
-    - [] permissions
-    - [] search
-    - [] upgrades
-  - [] emblem
+    - [ ] :id
+    - [ ] permissions
+    - [ ] search
+    - [ ] upgrades
+  - [ ] emblem
 - guild authenticated
   - guild
     - :id
-      - [] log
-      - [] members
-      - [] ranks
-      - [] stash
-      - [] treasury
-      - [] teams
-      - [] upgrades
+      - [ ] log
+      - [ ] members
+      - [ ] ranks
+      - [ ] stash
+      - [ ] treasury
+      - [ ] teams
+      - [ ] upgrades
 - home instance
   - home
-    - [] cats
-    - [] nodes
+    - [ ] cats
+    - [ ] nodes
 - items
-  - [] finishers
-  - [] items
-  - [] itemstats
-  - [] materials
+  - [ ] finishers
+  - [ ] items
+  - [ ] itemstats
+  - [ ] materials
   - pvp
-    - [] amulets
-  - [] recipes
-    - [] search
-  - [] skins
+    - [ ] amulets
+  - [ ] recipes
+    - [ ] search
+  - [ ] skins
 - map information
-  - [] continents
-  - [] maps
+  - [ ] continents
+  - [ ] maps
 - Miscellaneous
   - [x] Build
   - [x] colors
   - [x] currencies
-  - [] dungeons
-  - [] files
-  - [] quaggans
-  - [] minis
-  - [] raids
-  - [] titles
-  - [] worlds
+  - [ ] dungeons
+  - [ ] files
+  - [ ] quaggans
+  - [ ] minis
+  - [ ] raids
+  - [ ] titles
+  - [ ] worlds
 - Story
   - backstory
-    - [] answers
-    - [] questions
-  - [] stories
-    - [] seasons
+    - [ ] answers
+    - [ ] questions
+  - [ ] stories
+    - [ ] seasons
 - sPvP
-  - [] pvp
-    - [] ranks
-    - [] seasons
-      - [] leaderboards
+  - [ ] pvp
+    - [ ] ranks
+    - [ ] seasons
+      - [ ] leaderboards
 - trading post
   - commerce
-    - [] listings
-    - [] exchange
-      - [] coins
-      - [] gems
-    - [] prices
+    - [ ] listings
+    - [ ] exchange
+      - [ ] coins
+      - [ ] gems
+    - [ ] prices
 - world v world
-  - [] wvw
-    - [] abilities
-    - [] matches
-    - [] objectives
-    - [] ranks
-    - [] upgrades
+  - [ ] wvw
+    - [ ] abilities
+    - [ ] matches
+    - [ ] objectives
+    - [ ] ranks
+    - [ ] upgrades
