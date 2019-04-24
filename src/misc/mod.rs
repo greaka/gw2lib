@@ -62,8 +62,7 @@ pub struct Color {
     leather: MaterialDetails,
     metal: MaterialDetails,
     fur: Option<MaterialDetails>,
-    #[serde(rename = "item")]
-    item_id: u64,
+    item: u64,
     categories: (Hue, Material, Rarity),
 }
 

@@ -9,7 +9,7 @@ Last update: 22.4.19
     - [ ] groups
     - [ ] categories
 - authenticated
-  - [ ] account
+  - [x] account
     - [ ] achievements
     - [ ] bank
     - [ ] dailycrafting
