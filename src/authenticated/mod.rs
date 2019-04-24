@@ -1,5 +1,11 @@
 use rest_client::*;
 use serde::Deserialize;
+use crate::utils;
+
+pub mod account;
+pub mod characters;
+pub mod commerce;
+pub mod pvp;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -24,7 +30,7 @@ pub struct Tokeninfo {
     permissions: Vec<Permissions>,
 }
 
-pub fn get_tokeninfo(api_key: String) -> Result<Box<Tokeninfo>, Box<std::error::Error>> {
+pub fn get_tokeninfo(api_key: &str) -> Result<Box<Tokeninfo>, Box<std::error::Error>> {
     Tokeninfo::get(vec![api_key])
 }
 
@@ -46,7 +52,7 @@ pub struct Account {
     world: u16,
     guilds: Vec<String>,
     guild_leader: Vec<String>,
-    created: String,
+    created: utils::TimeStamp,
     access: Vec<Access>,
     commander: bool,
     fractal_level: Option<u8>,
@@ -56,7 +62,7 @@ pub struct Account {
     last_modified: String,
 }
 
-pub fn get_account(api_key: String) -> Result<Box<Account>, Box<std::error::Error>> {
+pub fn get_account(api_key: &str) -> Result<Box<Account>, Box<std::error::Error>> {
     Account::get(vec![api_key])
 }
 
@@ -68,7 +74,7 @@ mod tests {
     #[test]
     fn test_get_tokeninfo() {
         get_tokeninfo(
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015".to_owned(),
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
         )
         .unwrap();
     }
@@ -77,7 +83,7 @@ mod tests {
     #[test]
     fn test_get_account() {
         get_account(
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015".to_owned(),
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
         )
         .unwrap();
     }

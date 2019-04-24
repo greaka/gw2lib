@@ -13,3 +13,5 @@ impl Display for Language {
         Debug::fmt(self, f)
     }
 }
+
+pub type TimeStamp = String;

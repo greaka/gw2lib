@@ -41,7 +41,19 @@ Last update: 22.4.19
     - [ ] titles
     - [ ] wallet
     - [ ] worldbosses
-  - [ ] characters
+  - characters
+    - [ ] :id
+      - [x] backstory
+      - [x] core
+      - [x] crafting
+      - [x] equipment
+      - [ ] heropoints
+      - [x] inventory
+      - [ ] recipes
+      - [ ] sab
+      - [x] skills
+      - [ ] specializations
+      - [ ] training
   - commerce
     - [ ] transactions
   - pvp
