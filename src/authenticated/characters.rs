@@ -2,6 +2,7 @@ use crate::utils;
 
 use rest_client::*;
 use serde::Deserialize;
+
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/backstory?access_token={}&v=2019-04-22T00:00:00Z"
 )]
@@ -243,6 +244,130 @@ pub fn get_skills(
     Skills::get(vec![character_name, api_key])
 }
 
+pub type TraitSet = (Option<u64>, Option<u64>, Option<u64>);
+
+#[derive(Deserialize)]
+pub struct TraitLine {
+    id: u64,
+    traits: TraitSet,
+}
+
+pub type Specialization = (Option<TraitLine>, Option<TraitLine>, Option<TraitLine>);
+
+#[derive(Deserialize)]
+pub struct SpecializationSet {
+    pve: Specialization,
+    pvp: Specialization,
+    wvw: Specialization,
+}
+
+#[rest("https://api.guildwars2.com/v2/characters/{}/specializations?access_token={}&v=2019-04-22T00:00:00Z")]
+#[derive(Deserialize)]
+pub struct Specializations {
+    specializations: SpecializationSet,
+}
+
+pub fn get_specializations(
+    character_name: &str,
+    api_key: &str,
+) -> Result<Box<Specializations>, Box<std::error::Error>> {
+    Specializations::get(vec![character_name, api_key])
+}
+
+#[derive(Deserialize)]
+pub struct TrainingSet {
+    id: u64,
+    spent: u16,
+    done: bool,
+}
+
+#[rest(
+    "https://api.guildwars2.com/v2/characters/{}/training?access_token={}&v=2019-04-22T00:00:00Z"
+)]
+#[derive(Deserialize)]
+pub struct Training {
+    training: Vec<TrainingSet>,
+}
+
+pub fn get_training(
+    character_name: &str,
+    api_key: &str,
+) -> Result<Box<Training>, Box<std::error::Error>> {
+    Training::get(vec![character_name, api_key])
+}
+
+#[rest(
+    "https://api.guildwars2.com/v2/characters/{}/recipes?access_token={}&v=2019-04-22T00:00:00Z"
+)]
+#[derive(Deserialize)]
+pub struct Recipes {
+    recipes: Vec<u64>,
+}
+
+pub fn get_recipes(
+    character_name: &str,
+    api_key: &str,
+) -> Result<Box<Recipes>, Box<std::error::Error>> {
+    Recipes::get(vec![character_name, api_key])
+}
+
+#[derive(Deserialize)]
+pub struct WvwAbility {
+    id: u64,
+    rank: u8,
+}
+
+#[derive(Deserialize)]
+pub struct EquipmentPvp {
+    amulet: u64,
+    rune: u64,
+    sigils: (u64, u64, u64, u64),
+}
+
+#[derive(Deserialize)]
+pub enum Flags {
+    Beta,
+}
+
+#[rest("https://api.guildwars2.com/v2/characters/{}?access_token={}&v=2019-04-22T00:00:00Z")]
+#[rest("https://api.guildwars2.com/v2/characters?access_token={}&v=2019-04-22T00:00:00Z&page=0", vec)]
+#[derive(Deserialize)]
+pub struct Character {
+    #[serde(flatten)]
+    backstory: Backstory,
+    #[serde(flatten)]
+    core: Core,
+    #[serde(flatten)]
+    crafting: Crafting,
+    #[serde(flatten)]
+    equipment: Equipment,
+    #[serde(flatten)]
+    inventory: Inventory,
+    #[serde(flatten)]
+    recipes: Recipes,
+    #[serde(flatten)]
+    skills: Skills,
+    #[serde(flatten)]
+    specializations: Specializations,
+    #[serde(flatten)]
+    training: Training,
+
+    wvw_abilities: Vec<WvwAbility>,
+    equipment_pvp: EquipmentPvp,
+    flags: Vec<Flags>,
+}
+
+pub fn get_character(
+    character_name: &str,
+    api_key: &str,
+) -> Result<Box<Character>, Box<std::error::Error>> {
+    Character::get(vec![character_name, api_key])
+}
+
+pub fn get_all_characters(api_key: &str) -> Result<Vec<Box<Character>>, Box<std::error::Error>> {
+    Character::gets(vec![api_key])
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -292,6 +417,55 @@ mod tests {
     fn test_get_skills() {
         get_skills(
             "Eff Testing Ele",
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+        )
+        .unwrap();
+    }
+
+    #[allow(unused_must_use)]
+    #[test]
+    fn test_get_specializations() {
+        get_specializations(
+            "Eff Testing Ele",
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+        )
+        .unwrap();
+    }
+
+    #[allow(unused_must_use)]
+    #[test]
+    fn test_get_training() {
+        get_training(
+            "Eff Testing Ele",
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+        )
+        .unwrap();
+    }
+
+    #[allow(unused_must_use)]
+    #[test]
+    fn test_get_recipes() {
+        get_recipes(
+            "Eff Testing Ele",
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+        )
+        .unwrap();
+    }
+
+    #[allow(unused_must_use)]
+    #[test]
+    fn test_get_character() {
+        get_character(
+            "Eff Testing Ele",
+            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+        )
+        .unwrap();
+    }
+
+    #[allow(unused_must_use)]
+    #[test]
+    fn test_get_all_characters() {
+        get_all_characters(
             "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
         )
         .unwrap();
