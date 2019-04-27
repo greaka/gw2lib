@@ -101,7 +101,7 @@ Last update: 22.4.19
     - [ ] nodes
 - items
   - [ ] finishers
-  - [ ] items
+  - [x] items
   - [ ] itemstats
   - [ ] materials
   - pvp
