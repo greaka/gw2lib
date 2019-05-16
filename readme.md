@@ -136,11 +136,11 @@ Last update: 22.4.19
       - [ ] leaderboards
 - trading post
   - commerce
-    - [ ] listings
+    - [x] listings
     - [ ] exchange
       - [ ] coins
       - [ ] gems
-    - [ ] prices
+    - [x] prices
 - world v world
   - [ ] wvw
     - [ ] abilities

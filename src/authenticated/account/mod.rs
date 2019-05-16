@@ -2,7 +2,7 @@ use crate::utils;
 use serde::Deserialize;
 use rest_client::*;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub enum Access {
     None,
     PlayForFree,
@@ -14,20 +14,20 @@ pub enum Access {
 #[rest("https://api.guildwars2.com/v2/account?access_token={}&v=2019-04-22T00:00:00Z")]
 #[derive(Deserialize)]
 pub struct Account {
-    id: String,
-    age: u64,
-    name: String,
-    world: u16,
-    guilds: Vec<String>,
-    guild_leader: Vec<String>,
-    created: utils::TimeStamp,
-    access: Vec<Access>,
-    commander: bool,
-    fractal_level: Option<u8>,
-    daily_ap: Option<u16>,
-    monthly_ap: Option<u16>,
-    wvw_rank: Option<u16>,
-    last_modified: String,
+    pub id: String,
+    pub age: u64,
+    pub name: String,
+    pub world: u16,
+    pub guilds: Vec<String>,
+    pub guild_leader: Vec<String>,
+    pub created: utils::TimeStamp,
+    pub access: Vec<Access>,
+    pub commander: bool,
+    pub fractal_level: Option<u8>,
+    pub daily_ap: Option<u16>,
+    pub monthly_ap: Option<u16>,
+    pub wvw_rank: Option<u16>,
+    pub last_modified: String,
 }
 
 pub fn get_account(api_key: &str) -> Result<Box<Account>, Box<std::error::Error>> {

@@ -7,3 +7,4 @@ pub mod authenticated;
 pub mod items;
 pub mod misc;
 pub mod utils;
+pub mod tradingpost;

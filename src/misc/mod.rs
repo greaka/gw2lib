@@ -5,7 +5,7 @@ use serde::Deserialize;
 #[rest("https://api.guildwars2.com/v2/build?v=2019-04-22T00:00:00Z")]
 #[derive(Deserialize)]
 pub struct Build {
-    id: u64,
+    pub id: u64,
 }
 
 pub fn get_build() -> Result<Box<Build>, Box<std::error::Error>> {
@@ -16,15 +16,15 @@ pub type RGB = (u8, u8, u8);
 
 #[derive(Deserialize)]
 pub struct MaterialDetails {
-    brightness: u8,
-    contrast: f32,
-    hue: u8,
-    saturation: f32,
-    lightness: f32,
-    rgb: RGB,
+    pub brightness: u8,
+    pub contrast: f32,
+    pub hue: u8,
+    pub saturation: f32,
+    pub lightness: f32,
+    pub rgb: RGB,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub enum Hue {
     Gray,
     Brown,
@@ -36,14 +36,14 @@ pub enum Hue {
     Purple,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub enum Material {
     Vibrant,
     Leather,
     Metal,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub enum Rarity {
     Starter,
     Common,
@@ -55,15 +55,15 @@ pub enum Rarity {
 #[rest("https://api.guildwars2.com/v2/colors/{}?lang={}&v=2019-04-22T00:00:00Z")]
 #[derive(Deserialize)]
 pub struct Color {
-    id: u64,
-    name: String,
-    base_rgb: RGB,
-    cloth: MaterialDetails,
-    leather: MaterialDetails,
-    metal: MaterialDetails,
-    fur: Option<MaterialDetails>,
-    item: u64,
-    categories: (Hue, Material, Rarity),
+    pub id: u64,
+    pub name: String,
+    pub base_rgb: RGB,
+    pub cloth: MaterialDetails,
+    pub leather: MaterialDetails,
+    pub metal: MaterialDetails,
+    pub fur: Option<MaterialDetails>,
+    pub item: u64,
+    pub categories: (Hue, Material, Rarity),
 }
 
 pub fn get_color(id: u64, lang: Language) -> Result<Box<Color>, Box<std::error::Error>> {
@@ -73,11 +73,11 @@ pub fn get_color(id: u64, lang: Language) -> Result<Box<Color>, Box<std::error::
 #[rest("https://api.guildwars2.com/v2/currencies/{}?lang={}&v=2019-04-22T00:00:00Z")]
 #[derive(Deserialize)]
 pub struct Currency {
-    id: u64,
-    name: String,
-    description: String,
-    icon: String,
-    order: u8,
+    pub id: u64,
+    pub name: String,
+    pub description: String,
+    pub icon: String,
+    pub order: u8,
 }
 
 pub fn get_currency(id: u64, lang: Language) -> Result<Box<Currency>, Box<std::error::Error>> {
