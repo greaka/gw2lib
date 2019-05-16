@@ -1,12 +1,12 @@
 
 use rest_client::*;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 pub mod account;
 pub mod characters;
 pub mod commerce;
 pub mod pvp;
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
     Account,
@@ -22,7 +22,7 @@ pub enum Permissions {
 }
 
 #[rest("https://api.guildwars2.com/v2/tokeninfo?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Tokeninfo {
     pub id: String,
     pub name: String,

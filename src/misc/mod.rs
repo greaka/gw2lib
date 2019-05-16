@@ -1,9 +1,9 @@
 use crate::utils::*;
 use rest_client::*;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
 #[rest("https://api.guildwars2.com/v2/build?v=2019-04-22T00:00:00Z")]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Build {
     pub id: u64,
 }
@@ -14,7 +14,7 @@ pub fn get_build() -> Result<Box<Build>, Box<std::error::Error>> {
 
 pub type RGB = (u8, u8, u8);
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct MaterialDetails {
     pub brightness: u8,
     pub contrast: f32,
@@ -24,7 +24,7 @@ pub struct MaterialDetails {
     pub rgb: RGB,
 }
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub enum Hue {
     Gray,
     Brown,
@@ -36,14 +36,14 @@ pub enum Hue {
     Purple,
 }
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub enum Material {
     Vibrant,
     Leather,
     Metal,
 }
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub enum Rarity {
     Starter,
     Common,
@@ -53,7 +53,7 @@ pub enum Rarity {
 }
 
 #[rest("https://api.guildwars2.com/v2/colors/{}?lang={}&v=2019-04-22T00:00:00Z")]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Color {
     pub id: u64,
     pub name: String,
@@ -71,7 +71,7 @@ pub fn get_color(id: u64, lang: Language) -> Result<Box<Color>, Box<std::error::
 }
 
 #[rest("https://api.guildwars2.com/v2/currencies/{}?lang={}&v=2019-04-22T00:00:00Z")]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Currency {
     pub id: u64,
     pub name: String,

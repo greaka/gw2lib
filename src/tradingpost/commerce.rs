@@ -1,8 +1,8 @@
 use rest_client::*;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::fmt::Display;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ListingDetails {
     pub listings: u64,
     pub unit_price: u64,
@@ -11,7 +11,7 @@ pub struct ListingDetails {
 
 #[rest("https://api.guildwars2.com/v2/commerce/listings/{}")]
 #[rest("https://api.guildwars2.com/v2/commerce/listings?ids={}", vec)]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Listings {
     pub id: u64,
     pub buys: Vec<ListingDetails>,
@@ -28,7 +28,7 @@ pub fn get_multiple_listings(
     Listings::gets(item_ids)
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct PriceDetails {
     pub unit_price: u64,
     pub quantity: u64,
@@ -36,7 +36,7 @@ pub struct PriceDetails {
 
 #[rest("https://api.guildwars2.com/v2/commerce/prices/{}")]
 #[rest("https://api.guildwars2.com/v2/commerce/prices?ids={}", vec)]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Prices {
     pub id: u64,
     pub whitelisted: bool,

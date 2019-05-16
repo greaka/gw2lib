@@ -1,8 +1,8 @@
 use crate::utils;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use rest_client::*;
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub enum Access {
     None,
     PlayForFree,
@@ -12,7 +12,7 @@ pub enum Access {
 }
 
 #[rest("https://api.guildwars2.com/v2/account?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Account {
     pub id: String,
     pub age: u64,
