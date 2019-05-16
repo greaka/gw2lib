@@ -154,6 +154,7 @@ pub struct Upgrades {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ArmorDetails {
     #[serde(rename = "type")]
     pub slot_type: ArmorSlot,
@@ -164,12 +165,14 @@ pub struct ArmorDetails {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct BackItemDetails {
     #[serde(flatten)]
     pub upgrades: Upgrades,
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct BagDetails {
     pub size: u8,
     pub no_sell_or_sort: bool,
@@ -212,6 +215,7 @@ pub enum UnlockType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ConsumableDetails {
     #[serde(rename = "type")]
     pub consumable_type: ConsumableType,
@@ -237,6 +241,7 @@ pub enum ContainerType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct ContainerDetails {
     #[serde(rename = "type")]
     pub container_type: ContainerType,
@@ -250,6 +255,7 @@ pub enum GatheringToolsType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct GatheringToolsDetails {
     #[serde(rename = "type")]
     pub gathering_tools_type: GatheringToolsType,
@@ -264,6 +270,7 @@ pub enum GizmoType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct GizmoDetails {
     #[serde(rename = "type")]
     pub gizmo_type: GizmoType,
@@ -271,6 +278,7 @@ pub struct GizmoDetails {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MiniatureDetails {
     pub minipet_id: u64,
 }
@@ -281,6 +289,7 @@ pub enum SalvageKitType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct SalvageKitDetails {
     #[serde(rename = "type")]
     pub salvage_type: SalvageKitType,
@@ -295,6 +304,7 @@ pub enum TrinketType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct TrinketDetails {
     #[serde(rename = "type")]
     pub trinket_type: TrinketType,
@@ -348,9 +358,12 @@ pub enum InfusionUpgradeFlags {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct UpgradeComponentDetails {
     #[serde(rename = "type")]
     pub upgrade_component_type: UpgradeComponentType,
+    pub flags: Vec<UpgradeComponentFlags>,
+    pub infusion_upgrade_flags: Vec<InfusionUpgradeFlags>,
     pub suffix: String,
     pub infix_upgrade: InfixUpgrade,
     pub bonuses: Option<Vec<String>>,
@@ -393,6 +406,7 @@ pub enum DamageType {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct WeaponDetails {
     #[serde(rename = "type")]
     pub weapon_type: WeaponType,
@@ -405,7 +419,7 @@ pub struct WeaponDetails {
 }
 
 #[derive(Deserialize)]
-#[serde(tag = "type", content = "details")]
+#[serde(untagged)]
 pub enum Details {
     Armor(ArmorDetails),
     Back(BackItemDetails),
