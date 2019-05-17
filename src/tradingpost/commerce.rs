@@ -1,8 +1,9 @@
 use rest_client::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use crate::utils::*;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ListingDetails {
     pub listings: u64,
     pub unit_price: u64,
@@ -11,7 +12,7 @@ pub struct ListingDetails {
 
 #[rest("https://api.guildwars2.com/v2/commerce/listings/{}")]
 #[rest("https://api.guildwars2.com/v2/commerce/listings?ids={}", vec)]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Listings {
     pub id: u64,
     pub buys: Vec<ListingDetails>,
@@ -25,10 +26,11 @@ pub fn get_listings(item_id: impl Display) -> Result<Box<Listings>, Box<std::err
 pub fn get_multiple_listings(
     item_ids: impl IntoIterator<Item = impl Display>,
 ) -> Result<Vec<Box<Listings>>, Box<std::error::Error>> {
-    Listings::gets(item_ids)
+    let item_ids = format_ids(item_ids);
+    Listings::gets(vec![item_ids])
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PriceDetails {
     pub unit_price: u64,
     pub quantity: u64,
@@ -36,7 +38,7 @@ pub struct PriceDetails {
 
 #[rest("https://api.guildwars2.com/v2/commerce/prices/{}")]
 #[rest("https://api.guildwars2.com/v2/commerce/prices?ids={}", vec)]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Prices {
     pub id: u64,
     pub whitelisted: bool,
@@ -51,13 +53,13 @@ pub fn get_prices(item_id: impl Display) -> Result<Box<Prices>, Box<std::error::
 pub fn get_multiple_prices(
     item_ids: impl IntoIterator<Item = impl Display>,
 ) -> Result<Vec<Box<Prices>>, Box<std::error::Error>> {
-    Prices::gets(item_ids)
+    let item_ids = format_ids(item_ids);
+    Prices::gets(vec![item_ids])
 }
 
 pub fn get_all_items() -> Result<Vec<u64>, Box<std::error::Error>> {
-	let new_self = reqwest::get("https://api.guildwars2.com/v2/commerce/prices")?
-		.json()?;
-	Ok(new_self)
+    let new_self = reqwest::get("https://api.guildwars2.com/v2/commerce/prices")?.json()?;
+    Ok(new_self)
 }
 
 #[cfg(test)]

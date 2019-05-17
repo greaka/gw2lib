@@ -6,7 +6,7 @@ pub mod characters;
 pub mod commerce;
 pub mod pvp;
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
     Account,
@@ -22,7 +22,7 @@ pub enum Permissions {
 }
 
 #[rest("https://api.guildwars2.com/v2/tokeninfo?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Tokeninfo {
     pub id: String,
     pub name: String,

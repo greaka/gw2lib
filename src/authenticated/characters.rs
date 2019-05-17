@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/backstory?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Backstory {
     pub backstory: Vec<String>,
 }
@@ -18,7 +18,7 @@ pub fn get_backstory(
     Backstory::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Race {
     Asura,
     Charr,
@@ -27,13 +27,13 @@ pub enum Race {
     Sylvari,
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Gender {
     Male,
     Female,
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Profession {
     Elementalist,
     Engineer,
@@ -47,7 +47,7 @@ pub enum Profession {
 }
 
 #[rest("https://api.guildwars2.com/v2/characters/{}/core?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Core {
     pub name: String,
     pub race: Race,
@@ -65,7 +65,7 @@ pub fn get_core(character_name: &str, api_key: &str) -> Result<Box<Core>, Box<st
     Core::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Discipline {
     Armorsmith,
     Artificer,
@@ -78,7 +78,7 @@ pub enum Discipline {
     Weaponsmith,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Craft {
     pub discipline: Discipline,
     pub rating: u16,
@@ -88,7 +88,7 @@ pub struct Craft {
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/crafting?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Crafting {
     pub crafting: Vec<Craft>,
 }
@@ -100,7 +100,7 @@ pub fn get_crafting(
     Crafting::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Slot {
     HelmAquatic,
     Backpack,
@@ -126,7 +126,7 @@ pub enum Slot {
     Pick,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Attributes {
     pub power: Option<u16>,
@@ -139,19 +139,19 @@ pub struct Attributes {
     pub boon_duration: Option<u16>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Stats {
     pub id: u64,
     pub attributes: Attributes,
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Binding {
     Character,
     Account,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Equip {
     pub id: u64,
     pub slot: Slot,
@@ -168,7 +168,7 @@ pub struct Equip {
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/equipment?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Equipment {
     pub equipment: Vec<Equip>,
 }
@@ -180,7 +180,7 @@ pub fn get_equipment(
     Equipment::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct InventoryItem {
     pub id: u64,
     pub count: u8,
@@ -192,7 +192,7 @@ pub struct InventoryItem {
     pub bound_to: Option<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct InventoryBag {
     pub id: u64,
     pub size: u8,
@@ -202,7 +202,7 @@ pub struct InventoryBag {
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/inventory?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Inventory {
     pub bags: Vec<Option<InventoryBag>>,
 }
@@ -216,7 +216,7 @@ pub fn get_inventory(
 
 pub type Utilities = (Option<u64>, Option<u64>, Option<u64>);
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Skillset {
     pub heal: Option<u64>,
     pub utilities: Utilities,
@@ -224,7 +224,7 @@ pub struct Skillset {
     pub legends: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SkillDataSet {
     pub pve: Skillset,
     pub pvp: Skillset,
@@ -232,7 +232,7 @@ pub struct SkillDataSet {
 }
 
 #[rest("https://api.guildwars2.com/v2/characters/{}/skills?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Skills {
     pub skills: SkillDataSet,
 }
@@ -246,7 +246,7 @@ pub fn get_skills(
 
 pub type TraitSet = (Option<u64>, Option<u64>, Option<u64>);
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TraitLine {
     pub id: u64,
     pub traits: TraitSet,
@@ -254,7 +254,7 @@ pub struct TraitLine {
 
 pub type Specialization = (Option<TraitLine>, Option<TraitLine>, Option<TraitLine>);
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SpecializationSet {
     pub pve: Specialization,
     pub pvp: Specialization,
@@ -262,7 +262,7 @@ pub struct SpecializationSet {
 }
 
 #[rest("https://api.guildwars2.com/v2/characters/{}/specializations?access_token={}&v=2019-04-22T00:00:00Z")]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Specializations {
     pub specializations: SpecializationSet,
 }
@@ -274,7 +274,7 @@ pub fn get_specializations(
     Specializations::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TrainingSet {
     pub id: u64,
     pub spent: u16,
@@ -284,7 +284,7 @@ pub struct TrainingSet {
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/training?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Training {
     pub training: Vec<TrainingSet>,
 }
@@ -299,7 +299,7 @@ pub fn get_training(
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/recipes?access_token={}&v=2019-04-22T00:00:00Z"
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Recipes {
     pub recipes: Vec<u64>,
 }
@@ -311,20 +311,20 @@ pub fn get_recipes(
     Recipes::get(vec![character_name, api_key])
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct WvwAbility {
     pub id: u64,
     pub rank: u8,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct EquipmentPvp {
     pub amulet: Option<u64>,
     pub rune: Option<u64>,
     pub sigils: (Option<u64>, Option<u64>, Option<u64>, Option<u64>),
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Flags {
     Beta,
 }
@@ -334,7 +334,7 @@ pub enum Flags {
     "https://api.guildwars2.com/v2/characters?access_token={}&v=2019-04-22T00:00:00Z&page=0",
     vec
 )]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Character {
     #[serde(flatten)]
     pub backstory: Backstory,
