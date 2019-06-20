@@ -1,5 +1,4 @@
-use std::fmt::{self, Debug, Display};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Language {
@@ -9,9 +8,9 @@ pub enum Language {
     Es,
 }
 
-impl Display for Language {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Debug::fmt(self, f)
+impl std::fmt::Display for Language {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, f)
     }
 }
 
@@ -23,3 +22,29 @@ pub fn format_ids(item_ids: impl IntoIterator<Item = impl std::fmt::Display>) ->
         .fold(String::new(), |acc, x| format!("{},{}", acc, x));
     (&items[1..]).to_owned()
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ApiResult<T> {
+    Ok(T),
+    Err(ApiError),
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ApiError {
+    text: String,
+}
+
+impl std::fmt::Display for ApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.text)
+    }
+}
+
+impl std::fmt::Debug for ApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.text)
+    }
+}
+
+impl std::error::Error for ApiError {}

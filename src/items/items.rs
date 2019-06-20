@@ -436,10 +436,14 @@ pub enum Details {
     Weapon(WeaponDetails),
 }
 
-#[rest("https://api.guildwars2.com/v2/items/{}?lang={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/items/{}?lang={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[rest(
     "https://api.guildwars2.com/v2/items?ids={}&lang={}&v=2019-04-22T00:00:00Z",
-    vec
+    vec,
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Item {
@@ -460,30 +464,42 @@ pub struct Item {
     pub details: Option<Details>,
 }
 
+/// ```
+/// use gw2api::items::items::*;
+/// use gw2api::utils::*;
+///
+/// get_item(19723, Language::En).unwrap();
+/// ```
 pub fn get_item(
     item_id: impl std::fmt::Display,
     lang: Language,
-) -> Result<Box<Item>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Item>>, Box<std::error::Error>> {
     Item::get(vec![item_id.to_string(), lang.to_string()])
 }
 
+/// ```
+/// use gw2api::items::items::*;
+/// use gw2api::utils::*;
+///
+/// get_items(
+///     vec![
+///         19723, 80248, 77474, 85371, 19993, 20316, 69478, 38506, 48879, 67027, 77958, 24691,
+///         30699,
+///     ],
+///     Language::En,
+/// )
+/// .unwrap();
+/// ```
 pub fn get_items(
     item_ids: impl IntoIterator<Item = impl std::fmt::Display>,
     lang: Language,
-) -> Result<Vec<Box<Item>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Item>>>, Box<std::error::Error>> {
     let item_ids = format_ids(item_ids);
-    Item::gets(vec![item_ids, lang.to_string()])
+    Item::get(vec![item_ids, lang.to_string()])
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_item() {
-        get_item(19723, Language::En).unwrap();
-    }
 
     #[allow(unused_must_use)]
     #[test]
@@ -555,18 +571,5 @@ mod tests {
     #[test]
     fn test_get_item_weapon() {
         get_item(30699, Language::En).unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_items() {
-        get_items(
-            vec![
-                19723, 80248, 77474, 85371, 19993, 20316, 69478, 38506, 48879, 67027, 77958, 24691,
-                30699,
-            ],
-            Language::En,
-        )
-        .unwrap();
     }
 }

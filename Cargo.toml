@@ -5,11 +5,11 @@ authors = ["Greaka <mrgreaka@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-"rest-client" = "0.1"
-reqwest = "0.9"
+reqwest = "0.9.18"
+rest-client = "0.2.0"
 
 [dependencies.serde]
-version = "1.0"
+version = "1.0.92"
 features = [
     "derive"
 ]

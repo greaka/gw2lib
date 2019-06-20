@@ -1,14 +1,22 @@
 use crate::utils::*;
 use rest_client::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[rest("https://api.guildwars2.com/v2/build?v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/build?v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Build {
     pub id: u64,
 }
 
-pub fn get_build() -> Result<Box<Build>, Box<std::error::Error>> {
+/// ```
+/// use gw2api::misc::*;
+///
+/// get_build().unwrap();
+/// ```
+pub fn get_build() -> Result<ApiResult<Box<Build>>, Box<std::error::Error>> {
     Build::get(Vec::<bool>::new())
 }
 
@@ -52,7 +60,10 @@ pub enum Rarity {
     Exclusive,
 }
 
-#[rest("https://api.guildwars2.com/v2/colors/{}?lang={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/colors/{}?lang={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Color {
     pub id: u64,
@@ -66,11 +77,20 @@ pub struct Color {
     pub categories: (Hue, Material, Rarity),
 }
 
-pub fn get_color(id: u64, lang: Language) -> Result<Box<Color>, Box<std::error::Error>> {
+/// ```
+/// use gw2api::misc::*;
+/// use gw2api::utils::*;
+///
+/// get_color(10, Language::En).unwrap();
+/// ```
+pub fn get_color(id: u64, lang: Language) -> Result<ApiResult<Box<Color>>, Box<std::error::Error>> {
     Color::get(vec![id.to_string(), lang.to_string()])
 }
 
-#[rest("https://api.guildwars2.com/v2/currencies/{}?lang={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/currencies/{}?lang={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Currency {
     pub id: u64,
@@ -80,29 +100,15 @@ pub struct Currency {
     pub order: u8,
 }
 
-pub fn get_currency(id: u64, lang: Language) -> Result<Box<Currency>, Box<std::error::Error>> {
+/// ```
+/// use gw2api::misc::*;
+/// use gw2api::utils::*;
+///
+/// get_currency(1, Language::En).unwrap();
+/// ```
+pub fn get_currency(
+    id: u64,
+    lang: Language,
+) -> Result<ApiResult<Box<Currency>>, Box<std::error::Error>> {
     Currency::get(vec![id.to_string(), lang.to_string()])
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_build() {
-        get_build().unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_color() {
-        get_color(10, Language::En).unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_currency() {
-        get_currency(1, Language::En).unwrap();
-    }
 }

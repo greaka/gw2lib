@@ -1,20 +1,30 @@
-use crate::utils;
+use crate::utils::*;
 
 use rest_client::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/backstory?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/backstory?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Backstory {
     pub backstory: Vec<String>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_backstory(
+/// "Eff Testing Ele",
+/// "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_backstory(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Backstory>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Backstory>>, Box<std::error::Error>> {
     Backstory::get(vec![character_name, api_key])
 }
 
@@ -46,7 +56,10 @@ pub enum Profession {
     Warrior,
 }
 
-#[rest("https://api.guildwars2.com/v2/characters/{}/core?access_token={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/characters/{}/core?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Core {
     pub name: String,
@@ -56,12 +69,24 @@ pub struct Core {
     pub level: u8,
     pub guild: Option<String>,
     pub age: u64,
-    pub created: utils::TimeStamp,
+    pub created: TimeStamp,
     pub deaths: u64,
     pub title: Option<u64>,
 }
 
-pub fn get_core(character_name: &str, api_key: &str) -> Result<Box<Core>, Box<std::error::Error>> {
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_core(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
+pub fn get_core(
+    character_name: &str,
+    api_key: &str,
+) -> Result<ApiResult<Box<Core>>, Box<std::error::Error>> {
     Core::get(vec![character_name, api_key])
 }
 
@@ -86,17 +111,27 @@ pub struct Craft {
 }
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/crafting?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/crafting?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Crafting {
     pub crafting: Vec<Craft>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_crafting(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_crafting(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Crafting>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Crafting>>, Box<std::error::Error>> {
     Crafting::get(vec![character_name, api_key])
 }
 
@@ -166,17 +201,27 @@ pub struct Equip {
 }
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/equipment?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/equipment?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Equipment {
     pub equipment: Vec<Equip>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_equipment(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_equipment(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Equipment>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Equipment>>, Box<std::error::Error>> {
     Equipment::get(vec![character_name, api_key])
 }
 
@@ -200,17 +245,27 @@ pub struct InventoryBag {
 }
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/inventory?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/inventory?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Inventory {
     pub bags: Vec<Option<InventoryBag>>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_inventory(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_inventory(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Inventory>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Inventory>>, Box<std::error::Error>> {
     Inventory::get(vec![character_name, api_key])
 }
 
@@ -231,16 +286,28 @@ pub struct SkillDataSet {
     pub wvw: Skillset,
 }
 
-#[rest("https://api.guildwars2.com/v2/characters/{}/skills?access_token={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/characters/{}/skills?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Skills {
     pub skills: SkillDataSet,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_skills(
+/// "Eff Testing Ele",
+/// "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_skills(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Skills>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Skills>>, Box<std::error::Error>> {
     Skills::get(vec![character_name, api_key])
 }
 
@@ -261,16 +328,25 @@ pub struct SpecializationSet {
     pub wvw: Specialization,
 }
 
-#[rest("https://api.guildwars2.com/v2/characters/{}/specializations?access_token={}&v=2019-04-22T00:00:00Z")]
+#[rest("https://api.guildwars2.com/v2/characters/{}/specializations?access_token={}&v=2019-04-22T00:00:00Z", wrapper = "ApiResult")]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Specializations {
     pub specializations: SpecializationSet,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_specializations(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_specializations(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Specializations>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Specializations>>, Box<std::error::Error>> {
     Specializations::get(vec![character_name, api_key])
 }
 
@@ -282,32 +358,52 @@ pub struct TrainingSet {
 }
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/training?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/training?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Training {
     pub training: Vec<TrainingSet>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_training(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_training(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Training>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Training>>, Box<std::error::Error>> {
     Training::get(vec![character_name, api_key])
 }
 
 #[rest(
-    "https://api.guildwars2.com/v2/characters/{}/recipes?access_token={}&v=2019-04-22T00:00:00Z"
+    "https://api.guildwars2.com/v2/characters/{}/recipes?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Recipes {
     pub recipes: Vec<u64>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_recipes(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_recipes(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Recipes>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Recipes>>, Box<std::error::Error>> {
     Recipes::get(vec![character_name, api_key])
 }
 
@@ -329,10 +425,14 @@ pub enum Flags {
     Beta,
 }
 
-#[rest("https://api.guildwars2.com/v2/characters/{}?access_token={}&v=2019-04-22T00:00:00Z")]
+#[rest(
+    "https://api.guildwars2.com/v2/characters/{}?access_token={}&v=2019-04-22T00:00:00Z",
+    wrapper = "ApiResult"
+)]
 #[rest(
     "https://api.guildwars2.com/v2/characters?access_token={}&v=2019-04-22T00:00:00Z&page=0",
-    vec
+    vec,
+    wrapper = "ApiResult"
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Character {
@@ -360,117 +460,32 @@ pub struct Character {
     pub flags: Vec<Flags>,
 }
 
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_character(
+///     "Eff Testing Ele",
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
 pub fn get_character(
     character_name: &str,
     api_key: &str,
-) -> Result<Box<Character>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Character>>, Box<std::error::Error>> {
     Character::get(vec![character_name, api_key])
 }
 
-pub fn get_all_characters(api_key: &str) -> Result<Vec<Box<Character>>, Box<std::error::Error>> {
-    Character::gets(vec![api_key])
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_backstory() {
-        get_backstory(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_core() {
-        get_core(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_crafting() {
-        get_crafting(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_equipment() {
-        get_equipment(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_skills() {
-        get_skills(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_specializations() {
-        get_specializations(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_training() {
-        get_training(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_recipes() {
-        get_recipes(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_character() {
-        get_character(
-            "Eff Testing Ele",
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
-
-    #[allow(unused_must_use)]
-    #[test]
-    fn test_get_all_characters() {
-        get_all_characters(
-            "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
-        )
-        .unwrap();
-    }
+/// ```
+/// use gw2api::authenticated::characters::*;
+///
+/// get_all_characters(
+///     "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015",
+/// )
+/// .unwrap();
+/// ```
+pub fn get_all_characters(
+    api_key: &str,
+) -> Result<ApiResult<Vec<Box<Character>>>, Box<std::error::Error>> {
+    Character::get(vec![api_key])
 }
