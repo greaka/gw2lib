@@ -16,7 +16,7 @@ pub struct Build {
 ///
 /// get_build().unwrap();
 /// ```
-pub fn get_build() -> Result<ApiResult<Box<Build>>, Box<std::error::Error>> {
+pub fn get_build() -> Result<ApiResult<Box<Build>>, Box<dyn std::error::Error>> {
     Build::get(Vec::<bool>::new())
 }
 
@@ -83,7 +83,10 @@ pub struct Color {
 ///
 /// get_color(10, Language::En).unwrap();
 /// ```
-pub fn get_color(id: u64, lang: Language) -> Result<ApiResult<Box<Color>>, Box<std::error::Error>> {
+pub fn get_color(
+    id: u64,
+    lang: Language,
+) -> Result<ApiResult<Box<Color>>, Box<dyn std::error::Error>> {
     Color::get(vec![id.to_string(), lang.to_string()])
 }
 
@@ -109,6 +112,6 @@ pub struct Currency {
 pub fn get_currency(
     id: u64,
     lang: Language,
-) -> Result<ApiResult<Box<Currency>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Currency>>, Box<dyn std::error::Error>> {
     Currency::get(vec![id.to_string(), lang.to_string()])
 }

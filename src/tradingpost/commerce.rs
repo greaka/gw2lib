@@ -33,7 +33,7 @@ pub struct Listings {
 /// ```
 pub fn get_listings(
     item_id: impl Display,
-) -> Result<ApiResult<Box<Listings>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Listings>>, Box<dyn std::error::Error>> {
     Listings::get(vec![item_id])
 }
 
@@ -44,7 +44,7 @@ pub fn get_listings(
 /// ```
 pub fn get_multiple_listings(
     item_ids: impl IntoIterator<Item = impl Display>,
-) -> Result<ApiResult<Vec<Box<Listings>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Listings>>>, Box<dyn std::error::Error>> {
     let item_ids = format_ids(item_ids);
     Listings::get(vec![item_ids])
 }
@@ -77,7 +77,9 @@ pub struct Prices {
 ///
 /// get_prices(19723).unwrap();
 /// ```
-pub fn get_prices(item_id: impl Display) -> Result<ApiResult<Box<Prices>>, Box<std::error::Error>> {
+pub fn get_prices(
+    item_id: impl Display,
+) -> Result<ApiResult<Box<Prices>>, Box<dyn std::error::Error>> {
     Prices::get(vec![item_id])
 }
 
@@ -88,7 +90,7 @@ pub fn get_prices(item_id: impl Display) -> Result<ApiResult<Box<Prices>>, Box<s
 /// ```
 pub fn get_multiple_prices(
     item_ids: impl IntoIterator<Item = impl Display>,
-) -> Result<ApiResult<Vec<Box<Prices>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Prices>>>, Box<dyn std::error::Error>> {
     let item_ids = format_ids(item_ids);
     Prices::get(vec![item_ids])
 }
@@ -98,7 +100,7 @@ pub fn get_multiple_prices(
 ///
 /// get_all_items().unwrap();
 /// ```
-pub fn get_all_items() -> Result<ApiResult<Vec<u64>>, Box<std::error::Error>> {
+pub fn get_all_items() -> Result<ApiResult<Vec<u64>>, Box<dyn std::error::Error>> {
     let new_self = reqwest::get("https://api.guildwars2.com/v2/commerce/prices")?.json()?;
     Ok(new_self)
 }

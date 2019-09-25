@@ -24,7 +24,7 @@ pub struct Backstory {
 pub fn get_backstory(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Backstory>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Backstory>>, Box<dyn std::error::Error>> {
     Backstory::get(vec![character_name, api_key])
 }
 
@@ -86,7 +86,7 @@ pub struct Core {
 pub fn get_core(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Core>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Core>>, Box<dyn std::error::Error>> {
     Core::get(vec![character_name, api_key])
 }
 
@@ -131,7 +131,7 @@ pub struct Crafting {
 pub fn get_crafting(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Crafting>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Crafting>>, Box<dyn std::error::Error>> {
     Crafting::get(vec![character_name, api_key])
 }
 
@@ -221,7 +221,7 @@ pub struct Equipment {
 pub fn get_equipment(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Equipment>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Equipment>>, Box<dyn std::error::Error>> {
     Equipment::get(vec![character_name, api_key])
 }
 
@@ -265,7 +265,7 @@ pub struct Inventory {
 pub fn get_inventory(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Inventory>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Inventory>>, Box<dyn std::error::Error>> {
     Inventory::get(vec![character_name, api_key])
 }
 
@@ -307,7 +307,7 @@ pub struct Skills {
 pub fn get_skills(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Skills>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Skills>>, Box<dyn std::error::Error>> {
     Skills::get(vec![character_name, api_key])
 }
 
@@ -346,7 +346,7 @@ pub struct Specializations {
 pub fn get_specializations(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Specializations>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Specializations>>, Box<dyn std::error::Error>> {
     Specializations::get(vec![character_name, api_key])
 }
 
@@ -378,7 +378,7 @@ pub struct Training {
 pub fn get_training(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Training>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Training>>, Box<dyn std::error::Error>> {
     Training::get(vec![character_name, api_key])
 }
 
@@ -403,7 +403,7 @@ pub struct Recipes {
 pub fn get_recipes(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Recipes>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Recipes>>, Box<dyn std::error::Error>> {
     Recipes::get(vec![character_name, api_key])
 }
 
@@ -472,7 +472,7 @@ pub struct Character {
 pub fn get_character(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Character>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Character>>, Box<dyn std::error::Error>> {
     Character::get(vec![character_name, api_key])
 }
 
@@ -486,6 +486,6 @@ pub fn get_character(
 /// ```
 pub fn get_all_characters(
     api_key: &str,
-) -> Result<ApiResult<Vec<Box<Character>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Character>>>, Box<dyn std::error::Error>> {
     Character::get(vec![api_key])
 }

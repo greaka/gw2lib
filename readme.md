@@ -106,7 +106,7 @@ Last update: 22.4.19
   - [ ] materials
   - pvp
     - [ ] amulets
-  - [ ] recipes
+  - [x] recipes
     - [ ] search
   - [ ] skins
 - map information

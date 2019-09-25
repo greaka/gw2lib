@@ -473,7 +473,7 @@ pub struct Item {
 pub fn get_item(
     item_id: impl std::fmt::Display,
     lang: Language,
-) -> Result<ApiResult<Box<Item>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Item>>, Box<dyn std::error::Error>> {
     Item::get(vec![item_id.to_string(), lang.to_string()])
 }
 
@@ -493,7 +493,7 @@ pub fn get_item(
 pub fn get_items(
     item_ids: impl IntoIterator<Item = impl std::fmt::Display>,
     lang: Language,
-) -> Result<ApiResult<Vec<Box<Item>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Item>>>, Box<dyn std::error::Error>> {
     let item_ids = format_ids(item_ids);
     Item::get(vec![item_ids, lang.to_string()])
 }
