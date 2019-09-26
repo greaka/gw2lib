@@ -476,7 +476,7 @@ pub struct Item {
 }
 
 /// ```
-/// use gw2api::items::items::*;
+/// use gw2api::items::*;
 /// use gw2api::utils::*;
 ///
 /// get_item(19723, Language::En).unwrap();
@@ -489,7 +489,7 @@ pub fn get_item(
 }
 
 /// ```
-/// use gw2api::items::items::*;
+/// use gw2api::items::*;
 /// use gw2api::utils::*;
 ///
 /// get_items(
@@ -510,7 +510,7 @@ pub fn get_items(
 }
 
 /// ```
-/// use gw2api::items::items::*;
+/// use gw2api::items::*;
 ///
 /// get_all_items().unwrap();
 /// ```

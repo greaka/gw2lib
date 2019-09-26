@@ -61,7 +61,7 @@ pub struct Color {
 }
 
 /// ```
-/// use gw2api::misc::*;
+/// use gw2api::misc::colors::*;
 /// use gw2api::utils::*;
 ///
 /// get_color(10, Language::En).unwrap();

@@ -27,7 +27,7 @@ pub struct Listings {
 }
 
 /// ```
-/// use gw2api::tradingpost::commerce::*;
+/// use gw2api::tradingpost::*;
 ///
 /// get_listings(19723).unwrap();
 /// ```
@@ -38,7 +38,7 @@ pub fn get_listings(
 }
 
 /// ```
-/// use gw2api::tradingpost::commerce::*;
+/// use gw2api::tradingpost::*;
 ///
 /// get_multiple_listings(vec![19723, 30699]).unwrap();
 /// ```
@@ -73,7 +73,7 @@ pub struct Prices {
 }
 
 /// ```
-/// use gw2api::tradingpost::commerce::*;
+/// use gw2api::tradingpost::*;
 ///
 /// get_prices(19723).unwrap();
 /// ```
@@ -84,7 +84,7 @@ pub fn get_prices(
 }
 
 /// ```
-/// use gw2api::tradingpost::commerce::*;
+/// use gw2api::tradingpost::*;
 ///
 /// get_multiple_prices(vec![19723, 30699]).unwrap();
 /// ```
@@ -96,7 +96,7 @@ pub fn get_multiple_prices(
 }
 
 /// ```
-/// use gw2api::tradingpost::commerce::*;
+/// use gw2api::tradingpost::*;
 ///
 /// get_all_items().unwrap();
 /// ```

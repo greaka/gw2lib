@@ -16,7 +16,7 @@ pub struct Currency {
 }
 
 /// ```
-/// use gw2api::misc::*;
+/// use gw2api::misc::currencies::*;
 /// use gw2api::utils::*;
 ///
 /// get_currency(1, Language::En).unwrap();

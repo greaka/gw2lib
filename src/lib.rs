@@ -11,3 +11,4 @@ pub mod pvp;
 pub mod tradingpost;
 pub mod utils;
 pub mod wvw;
+//pub mod client;

@@ -12,7 +12,7 @@ pub struct Build {
 }
 
 /// ```
-/// use gw2api::misc::*;
+/// use gw2api::misc::build::*;
 ///
 /// get_build().unwrap();
 /// ```
