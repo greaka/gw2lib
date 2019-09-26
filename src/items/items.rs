@@ -19,6 +19,7 @@ pub enum ItemType {
     Trophy,
     UpgradeComponent,
     Weapon,
+    Key,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -79,6 +80,7 @@ pub enum Restrictions {
     Ranger,
     Thief,
     Warrior,
+    Female,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -135,7 +137,7 @@ pub struct Attribute {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Buff {
     pub skill_id: u64,
-    pub description: String,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -276,6 +278,7 @@ pub struct GizmoDetails {
     #[serde(rename = "type")]
     pub _type: GizmoType,
     pub guild_upgrade_id: Option<u64>,
+    pub vendor_ids: Option<Vec<u64>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -450,7 +453,7 @@ pub struct Item {
     pub id: u64,
     pub chat_link: String,
     pub name: String,
-    pub icon: String,
+    pub icon: Option<String>,
     pub description: Option<String>,
     #[serde(rename = "type")]
     pub _type: ItemType,
