@@ -2,6 +2,13 @@ use crate::utils::*;
 use rest_client::*;
 use serde::{Deserialize, Serialize};
 
+use crate::game_mechanics::skills::SkillId;
+use crate::items::itemstats::StatsId;
+use crate::misc::colors::ColorId;
+use crate::items::recipes::RecipeId;
+
+pub type ItemId = u32;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum ItemType {
     Armor,
@@ -109,7 +116,7 @@ pub enum InfusionType {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InfusionSlot {
     pub flags: Vec<InfusionType>,
-    pub item_id: Option<u64>,
+    pub item_id: Option<ItemId>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -134,13 +141,13 @@ pub struct Attribute {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Buff {
-    pub skill_id: u64,
+    pub skill_id: SkillId,
     pub description: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InfixUpgrade {
-    pub id: u64,
+    pub id: StatsId,
     pub attributes: Vec<Attribute>,
     pub buff: Option<Buff>,
 }
@@ -149,9 +156,9 @@ pub struct InfixUpgrade {
 pub struct Upgrades {
     pub infusion_slots: Vec<InfusionSlot>,
     pub infix_upgrade: Option<InfixUpgrade>,
-    pub suffix_item_id: Option<u64>,
+    pub suffix_item_id: Option<ItemId>,
     pub secondary_suffix_item_id: String,
-    pub stat_choices: Option<Vec<u64>>,
+    pub stat_choices: Option<Vec<StatsId>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -223,9 +230,9 @@ pub struct ConsumableDetails {
     pub description: Option<String>,
     pub duration_ms: Option<u64>,
     pub unlock_type: Option<UnlockType>,
-    pub color_id: Option<u64>,
-    pub recipe_id: Option<u64>,
-    pub extra_recipe_ids: Option<Vec<u64>>,
+    pub color_id: Option<ColorId>,
+    pub recipe_id: Option<RecipeId>,
+    pub extra_recipe_ids: Option<Vec<RecipeId>>,
     pub guild_upgrade_id: Option<u64>,
     pub apply_count: Option<u8>,
     pub name: Option<String>,
@@ -395,6 +402,7 @@ pub enum WeaponType {
     SmallBundle,
     Toy,
     ToyTwoHanded,
+    None,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -473,7 +481,7 @@ pub struct Item {
 pub fn get_item(
     item_id: impl std::fmt::Display,
     lang: Language,
-) -> Result<ApiResult<Box<Item>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Item>>, Box<dyn std::error::Error>> {
     Item::get(vec![item_id.to_string(), lang.to_string()])
 }
 
@@ -493,7 +501,7 @@ pub fn get_item(
 pub fn get_items(
     item_ids: impl IntoIterator<Item = impl std::fmt::Display>,
     lang: Language,
-) -> Result<ApiResult<Vec<Box<Item>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Item>>>, Box<dyn std::error::Error>> {
     let item_ids = format_ids(item_ids);
     Item::get(vec![item_ids, lang.to_string()])
 }

@@ -2,6 +2,8 @@ use crate::utils::*;
 use rest_client::*;
 use serde::{Deserialize, Serialize};
 
+pub use crate::misc::worlds::WorldId;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Access {
     None,
@@ -20,7 +22,7 @@ pub struct Account {
     pub id: String,
     pub age: u64,
     pub name: String,
-    pub world: u16,
+    pub world: WorldId,
     pub guilds: Vec<String>,
     pub guild_leader: Option<Vec<String>>,
     pub created: TimeStamp,
@@ -39,6 +41,6 @@ pub struct Account {
 /// get_account("564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015")
 ///     .unwrap();
 /// ```
-pub fn get_account(api_key: &str) -> Result<ApiResult<Box<Account>>, Box<std::error::Error>> {
+pub fn get_account(api_key: &str) -> Result<ApiResult<Box<Account>>, Box<dyn std::error::Error>> {
     Account::get(vec![api_key])
 }

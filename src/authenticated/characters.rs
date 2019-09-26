@@ -1,7 +1,20 @@
 use crate::utils::*;
+use crate::misc::titles::TitleId;
+use crate::items::itemstats::StatsId;
 
 use rest_client::*;
 use serde::{Deserialize, Serialize};
+use crate::items::ItemId;
+use crate::items::skins::SkinId;
+use crate::misc::colors::ColorId;
+use crate::game_mechanics::skills::SkillId;
+use crate::game_mechanics::traits::TraitId;
+use crate::game_mechanics::specializations::SpecializationId;
+use crate::items::recipes::RecipeId;
+use crate::wvw::abilities::AbilityId;
+use crate::pvp::amulets::AmuletId;
+
+pub type Age = u64;
 
 #[rest(
     "https://api.guildwars2.com/v2/characters/{}/backstory?access_token={}&v=2019-04-22T00:00:00Z",
@@ -24,7 +37,7 @@ pub struct Backstory {
 pub fn get_backstory(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Backstory>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Backstory>>, Box<dyn std::error::Error>> {
     Backstory::get(vec![character_name, api_key])
 }
 
@@ -68,10 +81,10 @@ pub struct Core {
     pub profession: Profession,
     pub level: u8,
     pub guild: Option<String>,
-    pub age: u64,
+    pub age: Age,
     pub created: TimeStamp,
-    pub deaths: u64,
-    pub title: Option<u64>,
+    pub deaths: u32,
+    pub title: Option<TitleId>,
 }
 
 /// ```
@@ -86,7 +99,7 @@ pub struct Core {
 pub fn get_core(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Core>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Core>>, Box<dyn std::error::Error>> {
     Core::get(vec![character_name, api_key])
 }
 
@@ -131,7 +144,7 @@ pub struct Crafting {
 pub fn get_crafting(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Crafting>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Crafting>>, Box<dyn std::error::Error>> {
     Crafting::get(vec![character_name, api_key])
 }
 
@@ -176,7 +189,7 @@ pub struct Attributes {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Stats {
-    pub id: u64,
+    pub id: StatsId,
     pub attributes: Attributes,
 }
 
@@ -188,16 +201,16 @@ pub enum Binding {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Equip {
-    pub id: u64,
+    pub id: ItemId,
     pub slot: Slot,
-    pub infusions: Option<Vec<u64>>,
-    pub upgrades: Option<Vec<u64>>,
-    pub skin: Option<u64>,
+    pub infusions: Option<Vec<ItemId>>,
+    pub upgrades: Option<Vec<ItemId>>,
+    pub skin: Option<SkinId>,
     pub stats: Option<Stats>,
     pub binding: Option<Binding>,
     pub charges: Option<u16>,
     pub bound_to: Option<String>,
-    pub dyes: Option<Vec<Option<u64>>>,
+    pub dyes: Option<Vec<Option<ColorId>>>,
 }
 
 #[rest(
@@ -221,17 +234,17 @@ pub struct Equipment {
 pub fn get_equipment(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Equipment>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Equipment>>, Box<dyn std::error::Error>> {
     Equipment::get(vec![character_name, api_key])
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InventoryItem {
-    pub id: u64,
+    pub id: ItemId,
     pub count: u8,
-    pub infusions: Option<Vec<u64>>,
-    pub upgrades: Option<Vec<u64>>,
-    pub skin: Option<u64>,
+    pub infusions: Option<Vec<ItemId>>,
+    pub upgrades: Option<Vec<ItemId>>,
+    pub skin: Option<SkinId>,
     pub stats: Option<Stats>,
     pub binding: Option<Binding>,
     pub bound_to: Option<String>,
@@ -239,7 +252,7 @@ pub struct InventoryItem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InventoryBag {
-    pub id: u64,
+    pub id: ItemId,
     pub size: u8,
     pub inventory: Vec<Option<InventoryItem>>,
 }
@@ -265,17 +278,18 @@ pub struct Inventory {
 pub fn get_inventory(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Inventory>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Inventory>>, Box<dyn std::error::Error>> {
     Inventory::get(vec![character_name, api_key])
 }
 
-pub type Utilities = (Option<u64>, Option<u64>, Option<u64>);
+pub type Utilities = (Option<SkillId>, Option<SkillId>, Option<SkillId>);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Skillset {
-    pub heal: Option<u64>,
+    pub heal: Option<SkillId>,
     pub utilities: Utilities,
-    pub elite: Option<u64>,
+    pub elite: Option<SkillId>,
+    // TODO: legends enum
     pub legends: Option<Vec<String>>,
 }
 
@@ -307,15 +321,15 @@ pub struct Skills {
 pub fn get_skills(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Skills>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Skills>>, Box<dyn std::error::Error>> {
     Skills::get(vec![character_name, api_key])
 }
 
-pub type TraitSet = (Option<u64>, Option<u64>, Option<u64>);
+pub type TraitSet = (Option<TraitId>, Option<TraitId>, Option<TraitId>);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TraitLine {
-    pub id: u64,
+    pub id: SpecializationId,
     pub traits: TraitSet,
 }
 
@@ -346,12 +360,13 @@ pub struct Specializations {
 pub fn get_specializations(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Specializations>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Specializations>>, Box<dyn std::error::Error>> {
     Specializations::get(vec![character_name, api_key])
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TrainingSet {
+    // TODO: training id
     pub id: u64,
     pub spent: u16,
     pub done: bool,
@@ -378,7 +393,7 @@ pub struct Training {
 pub fn get_training(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Training>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Training>>, Box<dyn std::error::Error>> {
     Training::get(vec![character_name, api_key])
 }
 
@@ -388,7 +403,7 @@ pub fn get_training(
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Recipes {
-    pub recipes: Vec<u64>,
+    pub recipes: Vec<RecipeId>,
 }
 
 /// ```
@@ -403,21 +418,21 @@ pub struct Recipes {
 pub fn get_recipes(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Recipes>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Recipes>>, Box<dyn std::error::Error>> {
     Recipes::get(vec![character_name, api_key])
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WvwAbility {
-    pub id: u64,
+    pub id: AbilityId,
     pub rank: u8,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EquipmentPvp {
-    pub amulet: Option<u64>,
-    pub rune: Option<u64>,
-    pub sigils: (Option<u64>, Option<u64>, Option<u64>, Option<u64>),
+    pub amulet: Option<AmuletId>,
+    pub rune: Option<ItemId>,
+    pub sigils: (Option<ItemId>, Option<ItemId>, Option<ItemId>, Option<ItemId>),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -472,7 +487,7 @@ pub struct Character {
 pub fn get_character(
     character_name: &str,
     api_key: &str,
-) -> Result<ApiResult<Box<Character>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Box<Character>>, Box<dyn std::error::Error>> {
     Character::get(vec![character_name, api_key])
 }
 
@@ -486,6 +501,6 @@ pub fn get_character(
 /// ```
 pub fn get_all_characters(
     api_key: &str,
-) -> Result<ApiResult<Vec<Box<Character>>>, Box<std::error::Error>> {
+) -> Result<ApiResult<Vec<Box<Character>>>, Box<dyn std::error::Error>> {
     Character::get(vec![api_key])
 }

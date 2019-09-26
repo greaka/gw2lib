@@ -38,6 +38,8 @@ pub struct Tokeninfo {
 /// get_tokeninfo("564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015")
 ///     .unwrap();
 /// ```
-pub fn get_tokeninfo(api_key: &str) -> Result<ApiResult<Box<Tokeninfo>>, Box<std::error::Error>> {
+pub fn get_tokeninfo(
+    api_key: &str,
+) -> Result<ApiResult<Box<Tokeninfo>>, Box<dyn std::error::Error>> {
     Tokeninfo::get(vec![api_key])
 }

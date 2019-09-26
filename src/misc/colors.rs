@@ -2,25 +2,8 @@ use crate::utils::*;
 use rest_client::*;
 use serde::{Deserialize, Serialize};
 
-#[rest(
-    "https://api.guildwars2.com/v2/build?v=2019-04-22T00:00:00Z",
-    wrapper = "ApiResult"
-)]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Build {
-    pub id: u64,
-}
-
-/// ```
-/// use gw2api::misc::*;
-///
-/// get_build().unwrap();
-/// ```
-pub fn get_build() -> Result<ApiResult<Box<Build>>, Box<std::error::Error>> {
-    Build::get(Vec::<bool>::new())
-}
-
 pub type RGB = (u8, u8, u8);
+pub type ColorId = u16;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MaterialDetails {
@@ -66,7 +49,7 @@ pub enum Rarity {
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Color {
-    pub id: u64,
+    pub id: ColorId,
     pub name: String,
     pub base_rgb: RGB,
     pub cloth: MaterialDetails,
@@ -83,32 +66,9 @@ pub struct Color {
 ///
 /// get_color(10, Language::En).unwrap();
 /// ```
-pub fn get_color(id: u64, lang: Language) -> Result<ApiResult<Box<Color>>, Box<std::error::Error>> {
-    Color::get(vec![id.to_string(), lang.to_string()])
-}
-
-#[rest(
-    "https://api.guildwars2.com/v2/currencies/{}?lang={}&v=2019-04-22T00:00:00Z",
-    wrapper = "ApiResult"
-)]
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Currency {
-    pub id: u64,
-    pub name: String,
-    pub description: String,
-    pub icon: String,
-    pub order: u8,
-}
-
-/// ```
-/// use gw2api::misc::*;
-/// use gw2api::utils::*;
-///
-/// get_currency(1, Language::En).unwrap();
-/// ```
-pub fn get_currency(
+pub fn get_color(
     id: u64,
     lang: Language,
-) -> Result<ApiResult<Box<Currency>>, Box<std::error::Error>> {
-    Currency::get(vec![id.to_string(), lang.to_string()])
+) -> Result<ApiResult<Box<Color>>, Box<dyn std::error::Error>> {
+    Color::get(vec![id.to_string(), lang.to_string()])
 }
