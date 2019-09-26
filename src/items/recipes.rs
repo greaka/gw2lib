@@ -143,6 +143,6 @@ pub fn get_recipes(
 /// get_all_recipes().unwrap();
 /// ```
 pub fn get_all_recipes() -> Result<ApiResult<Vec<u64>>, Box<dyn std::error::Error>> {
-    let new_self = reqwest::get("https://api.guildwars2.com/v2/items")?.json()?;
+    let new_self = reqwest::get("https://api.guildwars2.com/v2/recipes")?.json()?;
     Ok(new_self)
 }
