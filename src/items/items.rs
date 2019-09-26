@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::game_mechanics::skills::SkillId;
 use crate::items::itemstats::StatsId;
-use crate::misc::colors::ColorId;
 use crate::items::recipes::RecipeId;
+use crate::misc::colors::ColorId;
 
 pub type ItemId = u32;
 
@@ -26,6 +26,7 @@ pub enum ItemType {
     Trophy,
     UpgradeComponent,
     Weapon,
+    Key,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -86,6 +87,7 @@ pub enum Restrictions {
     Ranger,
     Thief,
     Warrior,
+    Female,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -142,7 +144,7 @@ pub struct Attribute {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Buff {
     pub skill_id: SkillId,
-    pub description: String,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -283,6 +285,7 @@ pub struct GizmoDetails {
     #[serde(rename = "type")]
     pub _type: GizmoType,
     pub guild_upgrade_id: Option<u64>,
+    pub vendor_ids: Option<Vec<u64>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -458,7 +461,7 @@ pub struct Item {
     pub id: u64,
     pub chat_link: String,
     pub name: String,
-    pub icon: String,
+    pub icon: Option<String>,
     pub description: Option<String>,
     #[serde(rename = "type")]
     pub _type: ItemType,
@@ -505,6 +508,17 @@ pub fn get_items(
     let item_ids = format_ids(item_ids);
     Item::get(vec![item_ids, lang.to_string()])
 }
+
+/// ```
+/// use gw2api::items::items::*;
+///
+/// get_all_items().unwrap();
+/// ```
+pub fn get_all_items() -> Result<ApiResult<Vec<u64>>, Box<dyn std::error::Error>> {
+    let new_self = reqwest::get("https://api.guildwars2.com/v2/items")?.json()?;
+    Ok(new_self)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
