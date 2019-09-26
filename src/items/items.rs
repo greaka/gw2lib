@@ -497,6 +497,17 @@ pub fn get_items(
     let item_ids = format_ids(item_ids);
     Item::get(vec![item_ids, lang.to_string()])
 }
+
+/// ```
+/// use gw2api::items::items::*;
+///
+/// get_all_items().unwrap();
+/// ```
+pub fn get_all_items() -> Result<ApiResult<Vec<u64>>, Box<dyn std::error::Error>> {
+    let new_self = reqwest::get("https://api.guildwars2.com/v2/items")?.json()?;
+    Ok(new_self)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

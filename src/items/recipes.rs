@@ -89,7 +89,7 @@ pub struct GuildIngredient {
 )]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Recipe {
-    id: u32,
+    id: u64,
     #[serde(rename = "type")]
     _type: RecipeType,
     output_item_id: u32,
@@ -135,4 +135,14 @@ pub fn get_recipes(
 ) -> Result<ApiResult<Vec<Box<Recipe>>>, Box<dyn std::error::Error>> {
     let item_ids = format_ids(item_ids);
     Recipe::get(&[item_ids, lang.to_string()])
+}
+
+/// ```
+/// use gw2api::items::recipes::*;
+///
+/// get_all_recipes().unwrap();
+/// ```
+pub fn get_all_recipes() -> Result<ApiResult<Vec<u64>>, Box<dyn std::error::Error>> {
+    let new_self = reqwest::get("https://api.guildwars2.com/v2/items")?.json()?;
+    Ok(new_self)
 }
