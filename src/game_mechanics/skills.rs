@@ -3,8 +3,8 @@ use rest_client::*;
 use serde::{Deserialize, Serialize};
 
 pub use crate::authenticated::characters::Profession;
-pub use crate::items::WeaponType;
 use crate::game_mechanics::traits::TraitId;
+pub use crate::items::WeaponType;
 
 pub type SkillId = u32;
 

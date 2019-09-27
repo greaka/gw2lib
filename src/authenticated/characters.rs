@@ -1,18 +1,18 @@
-use crate::utils::*;
-use crate::misc::titles::TitleId;
 use crate::items::itemstats::StatsId;
+use crate::misc::titles::TitleId;
+use crate::utils::*;
 
+use crate::game_mechanics::skills::SkillId;
+use crate::game_mechanics::specializations::SpecializationId;
+use crate::game_mechanics::traits::TraitId;
+use crate::items::recipes::RecipeId;
+use crate::items::skins::SkinId;
+use crate::items::ItemId;
+use crate::misc::colors::ColorId;
+use crate::pvp::amulets::AmuletId;
+use crate::wvw::abilities::AbilityId;
 use rest_client::*;
 use serde::{Deserialize, Serialize};
-use crate::items::ItemId;
-use crate::items::skins::SkinId;
-use crate::misc::colors::ColorId;
-use crate::game_mechanics::skills::SkillId;
-use crate::game_mechanics::traits::TraitId;
-use crate::game_mechanics::specializations::SpecializationId;
-use crate::items::recipes::RecipeId;
-use crate::wvw::abilities::AbilityId;
-use crate::pvp::amulets::AmuletId;
 
 pub type Age = u64;
 
@@ -432,7 +432,12 @@ pub struct WvwAbility {
 pub struct EquipmentPvp {
     pub amulet: Option<AmuletId>,
     pub rune: Option<ItemId>,
-    pub sigils: (Option<ItemId>, Option<ItemId>, Option<ItemId>, Option<ItemId>),
+    pub sigils: (
+        Option<ItemId>,
+        Option<ItemId>,
+        Option<ItemId>,
+        Option<ItemId>,
+    ),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]

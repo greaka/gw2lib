@@ -30,6 +30,24 @@ pub enum ApiResult<T> {
     Err(ApiError),
 }
 
+impl<T> Into<Result<T, ApiError>> for ApiResult<T> {
+    fn into(self) -> Result<T, ApiError> {
+        match self {
+            ApiResult::Ok(data) => Ok(data),
+            ApiResult::Err(err) => Err(err),
+        }
+    }
+}
+
+impl<T> Into<Result<T, Box<dyn std::error::Error>>> for ApiResult<T> {
+    fn into(self) -> Result<T, Box<dyn std::error::Error>> {
+        match self {
+            ApiResult::Ok(data) => Ok(data),
+            ApiResult::Err(err) => Err(Box::new(err)),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct ApiError {
     text: String,
