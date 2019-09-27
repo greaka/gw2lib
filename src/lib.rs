@@ -4,7 +4,7 @@ extern crate reqwest;
 extern crate rest_client;
 
 pub mod authenticated;
-pub mod client;
+//pub mod client;
 pub mod game_mechanics;
 pub mod items;
 pub mod misc;
