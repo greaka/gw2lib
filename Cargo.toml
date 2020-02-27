@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 reqwest = "0.10.3"
-rest-client = "0.2.0"
+rest-client = "0.3.0"
 
 [dependencies.serde]
 version = "1.0.92"
