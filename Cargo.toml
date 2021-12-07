@@ -1,15 +1,9 @@
-[package]
-name = "gw2api"
-version = "0.1.0"
-authors = ["Greaka <mrgreaka@gmail.com>"]
-edition = "2018"
+[workspace]
 
-[dependencies]
-reqwest = "0.10.3"
-rest-client = "0.2.0"
-
-[dependencies.serde]
-version = "1.0.92"
-features = [
-    "derive"
+members = [
+    "model",
 ]
+
+[profile.release]
+lto = true
+codegen-units = 1
