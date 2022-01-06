@@ -1,6 +1,6 @@
 # Endpoints
 
-Last update: 22.4.19
+Last update: 21/01/06
 
 - achievements
   - [ ] achievements
@@ -113,7 +113,7 @@ Last update: 22.4.19
   - [ ] continents
   - [ ] maps
 - Miscellaneous
-  - [x] Build
+  - [x] build
   - [x] colors
   - [x] currencies
   - [ ] dungeons

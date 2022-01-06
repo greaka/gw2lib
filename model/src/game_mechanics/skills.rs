@@ -1,10 +1,7 @@
-use crate::utils::*;
-use rest_client::*;
 use serde::{Deserialize, Serialize};
 
-pub use crate::authenticated::characters::Profession;
 use crate::game_mechanics::traits::TraitId;
-pub use crate::items::WeaponType;
+pub use crate::{authenticated::characters::Profession, items::WeaponType};
 
 pub type SkillId = u32;
 
@@ -64,8 +61,8 @@ pub enum FactsType {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Fact {
-    pub text: String,
-    pub icon: Option<String>,
+    pub text:  String,
+    pub icon:  Option<String>,
     pub _type: FactsType,
 }
 
@@ -73,8 +70,8 @@ pub struct Fact {
 #[serde(deny_unknown_fields)]
 pub struct TraitedFact {
     #[serde(flatten)]
-    pub fact: Fact,
+    pub fact:           Fact,
     pub requires_trait: TraitId,
     /// array index of Fact
-    pub overrides: Option<u8>,
+    pub overrides:      Option<u8>,
 }
