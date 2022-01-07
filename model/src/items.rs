@@ -8,6 +8,7 @@ use crate::{
     game_mechanics::skills::SkillId,
     items::{itemstats::StatsId, recipes::RecipeId},
     misc::colors::ColorId,
+    BulkEndpoint, Endpoint,
 };
 
 pub type ItemId = u32;
@@ -468,6 +469,20 @@ pub struct Item {
     pub restrictions: Vec<Restrictions>,
     pub details:      Option<Details>,
 }
+
+impl Endpoint for Item {
+    fn url() -> &'static str {
+        "v2/items"
+    }
+}
+
+impl BulkEndpoint for Item {
+    type IdType = ItemId;
+
+    const ALL: bool = false;
+    const PAGING: bool = true;
+}
+
 /*
 #[cfg(test)]
 mod tests {

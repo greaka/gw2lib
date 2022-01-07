@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::TimeStamp;
+use crate::{Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 
@@ -42,3 +42,11 @@ pub struct Tokeninfo {
     #[serde(flatten)]
     details:         Option<SubtokenDetails>,
 }
+
+impl Endpoint for Tokeninfo {
+    fn url() -> &'static str {
+        "v2/tokeninfo"
+    }
+}
+
+impl FixedEndpoint for Tokeninfo {}

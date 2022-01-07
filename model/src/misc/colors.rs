@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::{BulkEndpoint, Endpoint};
+
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
 
@@ -52,4 +54,17 @@ pub struct Color {
     pub fur:        Option<MaterialDetails>,
     pub item:       u64,
     pub categories: (Hue, Material, Rarity),
+}
+
+impl Endpoint for Color {
+    fn url() -> &'static str {
+        "v2/colors"
+    }
+}
+
+impl BulkEndpoint for Color {
+    type IdType = ColorId;
+
+    const ALL: bool = true;
+    const PAGING: bool = true;
 }

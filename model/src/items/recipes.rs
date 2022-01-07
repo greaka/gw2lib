@@ -1,6 +1,7 @@
 pub type RecipeId = u32;
+
 pub use crate::authenticated::characters::Discipline;
-use crate::items::ItemId;
+use crate::{items::ItemId, BulkEndpoint, Endpoint};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -93,4 +94,17 @@ pub struct Recipe {
     guild_ingredients: Option<Vec<GuildIngredient>>,
     output_upgrade_id: Option<u32>,
     chat_link:         String,
+}
+
+impl Endpoint for Recipe {
+    fn url() -> &'static str {
+        "v2/recipes"
+    }
+}
+
+impl BulkEndpoint for Recipe {
+    type IdType = RecipeId;
+
+    const ALL: bool = false;
+    const PAGING: bool = true;
 }

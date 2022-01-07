@@ -31,3 +31,11 @@ pub struct Account {
     pub wvw_rank:      Option<u16>,
     pub last_modified: String,
 }
+
+impl Endpoint for Account {
+    fn url() -> &'static str {
+        "v2/account"
+    }
+}
+
+impl FixedEndpoint for Account {}

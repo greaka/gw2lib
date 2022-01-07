@@ -1,13 +1,12 @@
-#![allow(dead_code)]
-
 pub mod authenticated;
-//pub mod client;
 pub mod game_mechanics;
 pub mod items;
 pub mod misc;
 pub mod pvp;
 pub mod tradingpost;
 pub mod wvw;
+
+use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +18,7 @@ pub enum Language {
     Es,
 }
 
-impl std::fmt::Display for Language {
+impl Display for Language {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         std::fmt::Debug::fmt(self, f)
     }
@@ -27,18 +26,18 @@ impl std::fmt::Display for Language {
 
 pub type TimeStamp = String;
 
-pub fn format_ids(item_ids: impl IntoIterator<Item = impl std::fmt::Display>) -> String {
-    let items = item_ids
-        .into_iter()
-        .fold(String::new(), |acc, x| format!("{},{}", acc, x));
-    (&items[1..]).to_owned()
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(untagged)]
+#[must_use]
 pub enum ApiResult<T> {
     Ok(T),
     Err(ApiError),
+}
+
+impl<T> ApiResult<T> {
+    pub fn to_result(self) -> Result<T, ApiError> {
+        Result::<T, ApiError>::from(self)
+    }
 }
 
 impl<T> From<ApiResult<T>> for Result<T, ApiError> {
@@ -64,7 +63,7 @@ pub struct ApiError {
     text: String,
 }
 
-impl std::fmt::Display for ApiError {
+impl Display for ApiError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         write!(f, "{}", self.text)
     }
@@ -72,8 +71,25 @@ impl std::fmt::Display for ApiError {
 
 impl std::fmt::Debug for ApiError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.text)
+        Display::fmt(&self, f)
     }
 }
 
 impl std::error::Error for ApiError {}
+
+pub trait Endpoint: Sized {
+    /// endpoint url in the format `v2/account`
+    fn url() -> &'static str;
+}
+
+pub trait FixedEndpoint: Endpoint {}
+
+pub trait BulkEndpoint: Endpoint {
+    /// denominates the type of the ids of this endpoint
+    type IdType;
+
+    /// whether this endpoint supports pagination à la `page=1&page_size=200`
+    const PAGING: bool;
+    /// whether this endpoint supports `ids=all`
+    const ALL: bool;
+}
