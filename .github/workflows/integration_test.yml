@@ -36,7 +36,7 @@ jobs:
       - name: "start proxy and test"
         run: |
           pushd proxy
-          cargo run --release
+          cargo run --release &
           prox=$!
           popd
           cargo test -- --ignored || cargo test -- --ignored || cargo test -- --ignored
