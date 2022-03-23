@@ -12,14 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Generate Cargo.lock
+        uses: actions-rs/cargo@v1
+        with:
+          command: generate-lockfile
       - uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: 'cargo-registry-${{ hashFiles(''**/Cargo.lock'') }}'
+          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v1
         with:
           path: ~/.cargo/git
-          key: 'cargo-index-${{ hashFiles(''**/Cargo.lock'') }}'
+          key: cargo-index-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v1
         with:
           path: target
