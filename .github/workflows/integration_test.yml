@@ -1,0 +1,43 @@
+'on':
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '30 5 * * *'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: 'cargo-registry-${{ hashFiles(''**/Cargo.lock'') }}'
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: 'cargo-index-${{ hashFiles(''**/Cargo.lock'') }}'
+      - uses: actions/cache@v1
+        with:
+          path: target
+          key: cargo-build-target-${{ hashFiles('Cargo.lock') }}
+      - uses: actions/cache@v1
+        with:
+          path: proxy/target
+          key: cargo-build-target-${{ hashFiles('proxy/Cargo.lock') }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: "start proxy and test"
+        run: |
+          pushd proxy
+          cargo run --release
+          prox=$!
+          popd
+          cargo test -- --ignored || cargo test -- --ignored || cargo test -- --ignored
+          kill -9 $prox
