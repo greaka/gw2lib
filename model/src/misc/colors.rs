@@ -1,21 +1,23 @@
+use either::Either;
 use serde::{Deserialize, Serialize};
 
 use crate::{BulkEndpoint, Endpoint};
+use crate::items::ItemId;
 
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MaterialDetails {
-    pub brightness: u8,
+    pub brightness: i8,
     pub contrast:   f32,
-    pub hue:        u8,
+    pub hue:        u16,
     pub saturation: f32,
     pub lightness:  f32,
     pub rgb:        RGB,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Hue {
     Gray,
     Brown,
@@ -27,14 +29,14 @@ pub enum Hue {
     Purple,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Material {
     Vibrant,
     Leather,
     Metal,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Rarity {
     Starter,
     Common,
@@ -43,7 +45,7 @@ pub enum Rarity {
     Exclusive,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Color {
     pub id:         ColorId,
     pub name:       String,
@@ -52,19 +54,22 @@ pub struct Color {
     pub leather:    MaterialDetails,
     pub metal:      MaterialDetails,
     pub fur:        Option<MaterialDetails>,
-    pub item:       u64,
-    pub categories: (Hue, Material, Rarity),
+    /// is only None for Dye Remover
+    pub item:       Option<ItemId>,
+    /// is only `Right` for Dye Remover
+    #[serde(with = "either::serde_untagged")]
+    pub categories: Either<(Hue, Material, Rarity), [();0]>,
 }
 
+impl_id!(Color, ColorId);
 impl Endpoint for Color {
-    fn url() -> &'static str {
-        "v2/colors"
-    }
+    const AUTHENTICATED: bool = false;
+    const LOCALE: bool = true;
+    const URL: &'static str = "v2/colors";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Color {
-    type IdType = ColorId;
-
     const ALL: bool = true;
     const PAGING: bool = true;
 }

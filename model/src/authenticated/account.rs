@@ -1,9 +1,9 @@
-use crate::*;
 use serde::{Deserialize, Serialize};
 
 pub use crate::misc::worlds::WorldId;
+use crate::*;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[non_exhaustive]
 pub enum Access {
     None,
@@ -14,7 +14,7 @@ pub enum Access {
     EndOfDragons,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Account {
     pub id:            String,
     pub age:           u64,
@@ -33,9 +33,10 @@ pub struct Account {
 }
 
 impl Endpoint for Account {
-    fn url() -> &'static str {
-        "v2/account"
-    }
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/account";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl FixedEndpoint for Account {}

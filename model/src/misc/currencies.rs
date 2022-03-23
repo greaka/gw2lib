@@ -4,7 +4,7 @@ use crate::{BulkEndpoint, Endpoint};
 
 pub type CurrencyId = u64;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Currency {
     pub id:          CurrencyId,
     pub name:        String,
@@ -13,15 +13,15 @@ pub struct Currency {
     pub order:       u8,
 }
 
+impl_id!(Currency, CurrencyId);
 impl Endpoint for Currency {
-    fn url() -> &'static str {
-        "v2/currencies"
-    }
+    const AUTHENTICATED: bool = false;
+    const LOCALE: bool = true;
+    const URL: &'static str = "v2/currencies";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Currency {
-    type IdType = CurrencyId;
-
     const ALL: bool = true;
     const PAGING: bool = true;
 }

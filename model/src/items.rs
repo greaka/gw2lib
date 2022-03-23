@@ -11,10 +11,11 @@ use crate::{
     misc::{colors::ColorId, minis::MiniPetId},
     BulkEndpoint, Endpoint,
 };
+use crate::items::skins::SkinId;
 
 pub type ItemId = u32;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum ItemType {
     Armor,
     Back,
@@ -32,9 +33,11 @@ pub enum ItemType {
     UpgradeComponent,
     Weapon,
     Key,
+    Qux,
+    Quux,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Rarity {
     Junk,
     Basic,
@@ -46,7 +49,7 @@ pub enum Rarity {
     Legendary,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Flags {
     AccountBindOnUse,
     AccountBound,
@@ -67,7 +70,7 @@ pub enum Flags {
     Unique,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum GameTypes {
     Activity,
     Dungeon,
@@ -77,7 +80,7 @@ pub enum GameTypes {
     Wvw,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum Restrictions {
     Asura,
     Charr,
@@ -95,7 +98,7 @@ pub enum Restrictions {
     Female,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum ArmorSlot {
     Boots,
     Coat,
@@ -106,7 +109,7 @@ pub enum ArmorSlot {
     Shoulders,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum WeightClass {
     Heavy,
     Medium,
@@ -114,19 +117,19 @@ pub enum WeightClass {
     Clothing,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum InfusionType {
     Enrichment,
     Infusion,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct InfusionSlot {
     pub flags:   Vec<InfusionType>,
     pub item_id: Option<ItemId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum AttributeType {
     AgonyResistance,
     BoonDuration,
@@ -140,35 +143,36 @@ pub enum AttributeType {
     Vitality,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Attribute {
     pub attribute: AttributeType,
     pub modifier:  u16,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Buff {
     pub skill_id:    SkillId,
     pub description: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct InfixUpgrade {
     pub id:         StatsId,
     pub attributes: Vec<Attribute>,
     pub buff:       Option<Buff>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Upgrades {
+    pub attribute_adjustment:     f32,
     pub infusion_slots:           Vec<InfusionSlot>,
     pub infix_upgrade:            Option<InfixUpgrade>,
     pub suffix_item_id:           Option<ItemId>,
-    pub secondary_suffix_item_id: String,
+    pub secondary_suffix_item_id: Option<ItemId>,
     pub stat_choices:             Option<Vec<StatsId>>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ArmorDetails {
     #[serde(rename = "type")]
@@ -179,21 +183,21 @@ pub struct ArmorDetails {
     pub upgrades:     Upgrades,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BackItemDetails {
     #[serde(flatten)]
     pub upgrades: Upgrades,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BagDetails {
     pub size:            u8,
     pub no_sell_or_sort: bool,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum ConsumableType {
     AppearanceChange,
     Booze,
@@ -212,7 +216,7 @@ pub enum ConsumableType {
     TeleportToFriend,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum UnlockType {
     BagSlot,
     BankTab,
@@ -222,6 +226,9 @@ pub enum UnlockType {
     CraftingRecipe,
     Dye,
     GliderSkin,
+    GearLoadoutTab,
+    BuildLibrarySlot,
+    BuildLoadoutTab,
     Minipet,
     Ms,
     Outfit,
@@ -229,7 +236,7 @@ pub enum UnlockType {
     SharedSlot,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ConsumableDetails {
     #[serde(rename = "type")]
@@ -247,7 +254,7 @@ pub struct ConsumableDetails {
     pub skins:            Option<Vec<u64>>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum ContainerType {
     Default,
     GiftBox,
@@ -255,28 +262,29 @@ pub enum ContainerType {
     OpenUI,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ContainerDetails {
     #[serde(rename = "type")]
     pub _type: ContainerType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum GatheringToolsType {
     Foraging,
     Logging,
     Mining,
+    Foo,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GatheringToolsDetails {
     #[serde(rename = "type")]
     pub _type: GatheringToolsType,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum GizmoType {
     Default,
     ContainerKey,
@@ -284,7 +292,7 @@ pub enum GizmoType {
     UnlimitedConsumable,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GizmoDetails {
     #[serde(rename = "type")]
@@ -293,18 +301,18 @@ pub struct GizmoDetails {
     pub vendor_ids:       Option<Vec<u64>>, // TODO: figure out if this is resolvable
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct MiniatureDetails {
     pub minipet_id: MiniPetId,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum SalvageKitType {
     Salvage,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SalvageKitDetails {
     #[serde(rename = "type")]
@@ -312,14 +320,14 @@ pub struct SalvageKitDetails {
     pub charges: u8,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum TrinketType {
     Accessory,
     Amulet,
     Ring,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TrinketDetails {
     #[serde(rename = "type")]
@@ -328,7 +336,7 @@ pub struct TrinketDetails {
     pub upgrades: Upgrades,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum UpgradeComponentType {
     Default,
     Gem,
@@ -336,7 +344,7 @@ pub enum UpgradeComponentType {
     Sigil,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum UpgradeComponentFlags {
     Axe,
     Dagger,
@@ -363,7 +371,7 @@ pub enum UpgradeComponentFlags {
     Trinket,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum InfusionUpgradeFlags {
     Enrichment,
     Infusion,
@@ -373,7 +381,7 @@ pub enum InfusionUpgradeFlags {
     Agony,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct UpgradeComponentDetails {
     #[serde(rename = "type")]
@@ -381,11 +389,12 @@ pub struct UpgradeComponentDetails {
     pub flags:                  Vec<UpgradeComponentFlags>,
     pub infusion_upgrade_flags: Vec<InfusionUpgradeFlags>,
     pub suffix:                 String,
+    pub attribute_adjustment:   f32,
     pub infix_upgrade:          InfixUpgrade,
     pub bonuses:                Option<Vec<String>>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum WeaponType {
     Axe,
     Dagger,
@@ -413,7 +422,7 @@ pub enum WeaponType {
     None,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub enum DamageType {
     Fire,
     Ice,
@@ -422,7 +431,7 @@ pub enum DamageType {
     Choking,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WeaponDetails {
     #[serde(rename = "type")]
@@ -435,8 +444,8 @@ pub struct WeaponDetails {
     pub upgrades:    Upgrades,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(untagged)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
+#[serde(tag = "type", content = "details")]
 pub enum Details {
     Armor(ArmorDetails),
     Back(BackItemDetails),
@@ -450,25 +459,55 @@ pub enum Details {
     Trinket(TrinketDetails),
     UpgradeComponent(UpgradeComponentDetails),
     Weapon(WeaponDetails),
+    CraftingMaterial,
+    //Trait,
+    Trophy,
+    Key,
+    Qux,
+    Quux,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+impl From<Details> for ItemType {
+    fn from(d: Details) -> Self {
+        match d {
+            Details::Armor(_) => ItemType::Armor,
+            Details::Back(_) => ItemType::Back,
+            Details::Bag(_) => ItemType::Bag,
+            Details::Consumable(_) => ItemType::Consumable,
+            Details::Container(_) => ItemType::Container,
+            Details::Gathering(_) => ItemType::Gathering,
+            Details::Gizmo(_) => ItemType::Gizmo,
+            Details::MiniPet(_) => ItemType::MiniPet,
+            Details::Tool(_) => ItemType::Tool,
+            Details::Trinket(_) => ItemType::Trinket,
+            Details::UpgradeComponent(_) => ItemType::UpgradeComponent,
+            Details::Weapon(_) => ItemType::Weapon,
+            Details::CraftingMaterial => ItemType::CraftingMaterial,
+            //Details::Trait => ItemType::Trait,
+            Details::Trophy => ItemType::Trophy,
+            Details::Key => ItemType::Key,
+            Details::Qux => ItemType::Qux,
+            Details::Quux => ItemType::Quux,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Item {
     pub id:           ItemId,
     pub chat_link:    String,
     pub name:         String,
     pub icon:         Option<String>,
     pub description:  Option<String>,
-    #[serde(rename = "type")]
-    pub _type:        ItemType,
     pub rarity:       Rarity,
     pub level:        u8,
     pub vendor_value: u64,
-    pub default_skin: Option<u64>,
+    pub default_skin: Option<SkinId>,
     pub flags:        Vec<Flags>,
     pub game_types:   Vec<GameTypes>,
     pub restrictions: Vec<Restrictions>,
-    pub details:      Option<Details>,
+    #[serde(flatten)]
+    pub details:      Details,
 }
 
 impl_id!(Item, ItemId);
@@ -476,7 +515,7 @@ impl Endpoint for Item {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/items";
-    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
+    const VERSION: &'static str = "2021-03-21T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Item {

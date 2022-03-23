@@ -1,22 +1,22 @@
-use crate::{items::itemstats::StatsId, misc::titles::TitleId, TimeStamp};
+use serde::{Deserialize, Serialize};
 
 use crate::{
     game_mechanics::{skills::SkillId, specializations::SpecializationId, traits::TraitId},
-    items::{recipes::RecipeId, skins::SkinId, ItemId},
-    misc::colors::ColorId,
+    items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, ItemId},
+    misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,
     wvw::abilities::AbilityId,
+    TimeStamp,
 };
-use serde::{Deserialize, Serialize};
 
 pub type Age = u64;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Backstory {
     pub backstory: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Race {
     Asura,
     Charr,
@@ -25,13 +25,13 @@ pub enum Race {
     Sylvari,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Gender {
     Male,
     Female,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Profession {
     Elementalist,
     Engineer,
@@ -44,7 +44,7 @@ pub enum Profession {
     Warrior,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Core {
     pub name:       String,
     pub race:       Race,
@@ -58,7 +58,7 @@ pub struct Core {
     pub title:      Option<TitleId>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Discipline {
     Armorsmith,
     Artificer,
@@ -71,19 +71,19 @@ pub enum Discipline {
     Weaponsmith,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Craft {
     pub discipline: Discipline,
     pub rating:     u16,
     pub active:     bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Crafting {
     pub crafting: Vec<Craft>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Slot {
     HelmAquatic,
     Backpack,
@@ -109,7 +109,7 @@ pub enum Slot {
     Pick,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Attributes {
     pub power:              Option<u16>,
@@ -122,19 +122,19 @@ pub struct Attributes {
     pub boon_duration:      Option<u16>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Stats {
     pub id:         StatsId,
     pub attributes: Attributes,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Binding {
     Character,
     Account,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Equip {
     pub id:        ItemId,
     pub slot:      Slot,
@@ -148,12 +148,12 @@ pub struct Equip {
     pub dyes:      Option<Vec<Option<ColorId>>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Equipment {
     pub equipment: Vec<Equip>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct InventoryItem {
     pub id:        ItemId,
     pub count:     u8,
@@ -165,21 +165,21 @@ pub struct InventoryItem {
     pub bound_to:  Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct InventoryBag {
     pub id:        ItemId,
     pub size:      u8,
     pub inventory: Vec<Option<InventoryItem>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Inventory {
     pub bags: Vec<Option<InventoryBag>>,
 }
 
 pub type Utilities = (Option<SkillId>, Option<SkillId>, Option<SkillId>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Skillset {
     pub heal:      Option<SkillId>,
     pub utilities: Utilities,
@@ -188,21 +188,21 @@ pub struct Skillset {
     pub legends:   Option<Vec<String>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SkillDataSet {
     pub pve: Skillset,
     pub pvp: Skillset,
     pub wvw: Skillset,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Skills {
     pub skills: SkillDataSet,
 }
 
 pub type TraitSet = (Option<TraitId>, Option<TraitId>, Option<TraitId>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TraitLine {
     pub id:     SpecializationId,
     pub traits: TraitSet,
@@ -210,19 +210,19 @@ pub struct TraitLine {
 
 pub type Specialization = (Option<TraitLine>, Option<TraitLine>, Option<TraitLine>);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SpecializationSet {
     pub pve: Specialization,
     pub pvp: Specialization,
     pub wvw: Specialization,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Specializations {
     pub specializations: SpecializationSet,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TrainingSet {
     // TODO: training id
     pub id:    u64,
@@ -230,23 +230,23 @@ pub struct TrainingSet {
     pub done:  bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Training {
     pub training: Vec<TrainingSet>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Recipes {
     pub recipes: Vec<RecipeId>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WvwAbility {
     pub id:   AbilityId,
     pub rank: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EquipmentPvp {
     pub amulet: Option<AmuletId>,
     pub rune:   Option<ItemId>,
@@ -258,12 +258,12 @@ pub struct EquipmentPvp {
     ),
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum Flags {
     Beta,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Character {
     #[serde(flatten)]
     pub backstory:       Backstory,

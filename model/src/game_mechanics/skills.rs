@@ -5,7 +5,7 @@ pub use crate::{authenticated::characters::Profession, items::WeaponType};
 
 pub type SkillId = u32;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum SkillType {
     Bundle,
     Elite,
@@ -15,7 +15,7 @@ pub enum SkillType {
     Weapon,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum Slot {
     Downed_1,
@@ -36,7 +36,7 @@ pub enum Slot {
     Weapon_5,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum FactsType {
     AttributeAdjust,
     Buff,
@@ -58,7 +58,7 @@ pub enum FactsType {
     Unblockable,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Fact {
     pub text:  String,
@@ -66,7 +66,7 @@ pub struct Fact {
     pub _type: FactsType,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TraitedFact {
     #[serde(flatten)]

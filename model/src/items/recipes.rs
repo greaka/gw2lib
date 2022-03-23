@@ -1,10 +1,11 @@
 pub type RecipeId = u32;
 
-pub use crate::authenticated::characters::Discipline;
-use crate::{items::ItemId, BulkEndpoint, Endpoint};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub use crate::authenticated::characters::Discipline;
+use crate::{items::ItemId, BulkEndpoint, Endpoint};
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum RecipeType {
     Axe,
     Dagger,
@@ -61,25 +62,25 @@ pub enum RecipeType {
     UpgradeComponent,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum RecipeFlag {
     AutoLearned,
     LearnedFromItem,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Ingredient {
     pub item_id: ItemId,
     pub count:   u16,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GuildIngredient {
     pub upgrade_id: u32,
     pub count:      u16,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Recipe {
     id:                RecipeId,
     #[serde(rename = "type")]
@@ -96,15 +97,15 @@ pub struct Recipe {
     chat_link:         String,
 }
 
+impl_id!(Recipe, RecipeId);
 impl Endpoint for Recipe {
-    fn url() -> &'static str {
-        "v2/recipes"
-    }
+    const AUTHENTICATED: bool = false;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/recipes";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Recipe {
-    type IdType = RecipeId;
-
     const ALL: bool = false;
     const PAGING: bool = true;
 }

@@ -2,40 +2,40 @@ use serde::{Deserialize, Serialize};
 
 use crate::{items::ItemId, BulkEndpoint, Endpoint};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ListingDetails {
     pub listings:   u64,
     pub unit_price: u64,
     pub quantity:   u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Listings {
     pub id:    ItemId,
     pub buys:  Vec<ListingDetails>,
     pub sells: Vec<ListingDetails>,
 }
 
+impl_id!(Listings, ItemId);
 impl Endpoint for Listings {
-    fn url() -> &'static str {
-        "v2/commerce/listings"
-    }
+    const AUTHENTICATED: bool = false;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/commerce/listings";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Listings {
-    type IdType = ItemId;
-
     const ALL: bool = false;
     const PAGING: bool = true;
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PriceDetails {
     pub unit_price: u64,
     pub quantity:   u64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Prices {
     pub id:          ItemId,
     pub whitelisted: bool,
@@ -43,15 +43,15 @@ pub struct Prices {
     pub sells:       PriceDetails,
 }
 
+impl_id!(Prices, ItemId);
 impl Endpoint for Prices {
-    fn url() -> &'static str {
-        "v2/commerce/prices"
-    }
+    const AUTHENTICATED: bool = false;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/commerce/prices";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Prices {
-    type IdType = ItemId;
-
     const ALL: bool = false;
     const PAGING: bool = true;
 }

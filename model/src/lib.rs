@@ -1,14 +1,26 @@
+use std::fmt::Display;
+
+use serde::{Deserialize, Serialize};
+
+#[macro_export]
+macro_rules! impl_id {
+    ($endpoint:ty, $id:ty) => {
+        impl crate::EndpointWithId<$id> for $endpoint {
+            fn id(&self) -> &$id {
+                &self.id
+            }
+        }
+    };
+}
+
 pub mod authenticated;
 pub mod game_mechanics;
+pub mod guild;
 pub mod items;
 pub mod misc;
 pub mod pvp;
 pub mod tradingpost;
 pub mod wvw;
-
-use std::fmt::Display;
-
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Language {
@@ -16,11 +28,37 @@ pub enum Language {
     Fr,
     De,
     Es,
+    Zh,
 }
 
 impl Display for Language {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         std::fmt::Debug::fmt(self, f)
+    }
+}
+
+impl Language {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Language::En => "en",
+            Language::Fr => "fr",
+            Language::De => "de",
+            Language::Es => "es",
+            Language::Zh => "zh",
+        }
+    }
+}
+
+impl From<&str> for Language {
+    fn from(v: &str) -> Self {
+        match v {
+            "en" => Language::En,
+            "fr" => Language::Fr,
+            "de" => Language::De,
+            "es" => Language::Es,
+            "zh" => Language::Zh,
+            _ => Language::En,
+        }
     }
 }
 
@@ -78,18 +116,31 @@ impl std::fmt::Debug for ApiError {
 impl std::error::Error for ApiError {}
 
 pub trait Endpoint: Sized {
+    /// whether this endpoint requires authentication
+    const AUTHENTICATED: bool;
+
+    /// whether this endpoint supports the language parameter
+    const LOCALE: bool;
+
     /// endpoint url in the format `v2/account`
-    fn url() -> &'static str;
+    const URL: &'static str;
+
+    /// version of the endpoint to request
+    const VERSION: &'static str;
 }
 
-pub trait FixedEndpoint: Endpoint {}
+pub trait EndpointWithId<IdType>: Endpoint {
+    fn id(&self) -> &IdType;
+}
+
+pub trait FixedEndpoint: Endpoint {
+    /// whether this endpoint requires an id
+    const ID: bool = false;
+}
 
 pub trait BulkEndpoint: Endpoint {
-    /// denominates the type of the ids of this endpoint
-    type IdType;
-
-    /// whether this endpoint supports pagination à la `page=1&page_size=200`
-    const PAGING: bool;
     /// whether this endpoint supports `ids=all`
     const ALL: bool;
+    /// whether this endpoint supports pagination à la `page=1&page_size=200`
+    const PAGING: bool;
 }

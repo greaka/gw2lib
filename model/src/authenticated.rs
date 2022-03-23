@@ -4,7 +4,7 @@ use crate::{Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
     Account,
@@ -19,20 +19,20 @@ pub enum Permissions {
     Wallet,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum TokenType {
     APIKey,
     Subtoken,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SubtokenDetails {
     pub expires_at: TimeStamp,
     pub issued_at:  TimeStamp,
     pub urls:       Option<Vec<String>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tokeninfo {
     pub id:          String,
     pub name:        String,
@@ -44,9 +44,10 @@ pub struct Tokeninfo {
 }
 
 impl Endpoint for Tokeninfo {
-    fn url() -> &'static str {
-        "v2/tokeninfo"
-    }
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/tokeninfo";
+    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
 }
 
 impl FixedEndpoint for Tokeninfo {}
