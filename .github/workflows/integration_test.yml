@@ -12,6 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set Current Date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1.1.0
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: cargo-index-${{ steps.date.outputs.week_of_year }}
       - name: Generate Cargo.lock
         uses: actions-rs/cargo@v1
         with:
@@ -20,10 +27,6 @@ jobs:
         with:
           path: ~/.cargo/registry
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: cargo-index-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v1
         with:
           path: target
@@ -37,6 +40,10 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-nextest
       - name: "start proxy and test"
         run: |
           pushd proxy
@@ -44,5 +51,5 @@ jobs:
           cargo run --release &
           prox=$!
           popd
-          cargo test -- --include-ignored || cargo test -- --include-ignored || cargo test -- --include-ignored
+          cargo nextest run --run-ignored all
           kill -9 $prox
