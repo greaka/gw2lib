@@ -17,7 +17,7 @@ jobs:
         uses: Kaven-Universe/github-action-current-date-time@v1.1.0
       - uses: actions/cache@v1
         with:
-          path: ~/.cargo/git
+          path: ~/.cargo/registry/index
           key: cargo-index-${{ steps.date.outputs.week_of_year }}
       - name: Generate Cargo.lock
         uses: actions-rs/cargo@v1
@@ -25,7 +25,9 @@ jobs:
           command: generate-lockfile
       - uses: actions/cache@v1
         with:
-          path: ~/.cargo/registry
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions/cache@v1
         with:
