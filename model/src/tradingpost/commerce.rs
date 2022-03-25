@@ -4,15 +4,15 @@ use crate::{items::ItemId, BulkEndpoint, Endpoint};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ListingDetails {
-    pub listings:   u64,
+    pub listings: u64,
     pub unit_price: u64,
-    pub quantity:   u64,
+    pub quantity: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Listings {
-    pub id:    ItemId,
-    pub buys:  Vec<ListingDetails>,
+    pub id: ItemId,
+    pub buys: Vec<ListingDetails>,
     pub sells: Vec<ListingDetails>,
 }
 
@@ -32,15 +32,15 @@ impl BulkEndpoint for Listings {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PriceDetails {
     pub unit_price: u64,
-    pub quantity:   u64,
+    pub quantity: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Prices {
-    pub id:          ItemId,
+    pub id: ItemId,
     pub whitelisted: bool,
-    pub buys:        PriceDetails,
-    pub sells:       PriceDetails,
+    pub buys: PriceDetails,
+    pub sells: PriceDetails,
 }
 
 impl_id!(Prices, ItemId);

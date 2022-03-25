@@ -71,30 +71,30 @@ pub enum RecipeFlag {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Ingredient {
     pub item_id: ItemId,
-    pub count:   u16,
+    pub count: u16,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GuildIngredient {
     pub upgrade_id: u32,
-    pub count:      u16,
+    pub count: u16,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Recipe {
-    id:                RecipeId,
+    id: RecipeId,
     #[serde(rename = "type")]
-    _type:             RecipeType,
-    output_item_id:    ItemId,
+    _type: RecipeType,
+    output_item_id: ItemId,
     output_item_count: u16,
-    time_to_craft_ms:  u16,
-    disciplines:       Vec<Discipline>,
-    min_rating:        u16,
-    flags:             Vec<RecipeFlag>,
-    ingredients:       Vec<Ingredient>,
+    time_to_craft_ms: u16,
+    disciplines: Vec<Discipline>,
+    min_rating: u16,
+    flags: Vec<RecipeFlag>,
+    ingredients: Vec<Ingredient>,
     guild_ingredients: Option<Vec<GuildIngredient>>,
     output_upgrade_id: Option<u32>,
-    chat_link:         String,
+    chat_link: String,
 }
 
 impl_id!(Recipe, RecipeId);

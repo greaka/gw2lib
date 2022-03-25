@@ -28,19 +28,19 @@ pub enum TokenType {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SubtokenDetails {
     pub expires_at: TimeStamp,
-    pub issued_at:  TimeStamp,
-    pub urls:       Option<Vec<String>>,
+    pub issued_at: TimeStamp,
+    pub urls: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tokeninfo {
-    pub id:          String,
-    pub name:        String,
+    pub id: String,
+    pub name: String,
     pub permissions: Vec<Permissions>,
     #[serde(rename = "type")]
-    pub _type:       TokenType,
+    pub _type: TokenType,
     #[serde(flatten)]
-    details:         Option<SubtokenDetails>,
+    details: Option<SubtokenDetails>,
 }
 
 impl Endpoint for Tokeninfo {

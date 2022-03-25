@@ -6,11 +6,11 @@ pub type CurrencyId = u64;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Currency {
-    pub id:          CurrencyId,
-    pub name:        String,
+    pub id: CurrencyId,
+    pub name: String,
     pub description: String,
-    pub icon:        String,
-    pub order:       u8,
+    pub icon: String,
+    pub order: u8,
 }
 
 impl_id!(Currency, CurrencyId);

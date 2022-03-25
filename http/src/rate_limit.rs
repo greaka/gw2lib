@@ -13,10 +13,10 @@ pub trait RateLimiter: Send {
 
 pub struct BucketRateLimiter {
     /// maximum number of requests in burst
-    burst:  usize,
+    burst: usize,
     /// requests per minute
     refill: usize,
-    time:   NaiveDateTime,
+    time: NaiveDateTime,
 }
 
 impl BucketRateLimiter {

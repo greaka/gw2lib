@@ -36,9 +36,9 @@ pub trait Requester: Sized {
         &self,
     ) -> CachedRequest<Self::Caching, Self::RateLimiting, Self::Authenticated, Forced> {
         CachedRequest {
-            client:         self.client(),
+            client: self.client(),
             cache_duration: Duration::zero(),
-            forced:         PhantomData,
+            forced: PhantomData,
         }
     }
 

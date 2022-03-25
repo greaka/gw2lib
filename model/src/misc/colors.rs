@@ -9,11 +9,11 @@ pub type ColorId = u16;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MaterialDetails {
     pub brightness: i8,
-    pub contrast:   f32,
-    pub hue:        u16,
+    pub contrast: f32,
+    pub hue: u16,
     pub saturation: f32,
-    pub lightness:  f32,
-    pub rgb:        RGB,
+    pub lightness: f32,
+    pub rgb: RGB,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -46,15 +46,15 @@ pub enum Rarity {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Color {
-    pub id:         ColorId,
-    pub name:       String,
-    pub base_rgb:   RGB,
-    pub cloth:      MaterialDetails,
-    pub leather:    MaterialDetails,
-    pub metal:      MaterialDetails,
-    pub fur:        Option<MaterialDetails>,
+    pub id: ColorId,
+    pub name: String,
+    pub base_rgb: RGB,
+    pub cloth: MaterialDetails,
+    pub leather: MaterialDetails,
+    pub metal: MaterialDetails,
+    pub fur: Option<MaterialDetails>,
     /// is only None for Dye Remover
-    pub item:       Option<ItemId>,
+    pub item: Option<ItemId>,
     /// is only `Right` for Dye Remover
     #[serde(with = "either::serde_untagged")]
     pub categories: Either<(Hue, Material, Rarity), [(); 0]>,

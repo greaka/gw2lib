@@ -12,13 +12,13 @@ use crate::{
 };
 
 pub struct Client<C: Cache, R: RateLimiter, A: Auth> {
-    pub host:      String,
-    pub language:  Language,
-    agent:         Agent,
-    api_key:       Option<String>,
-    cache:         Mutex<C>,
+    pub host: String,
+    pub language: Language,
+    agent: Agent,
+    api_key: Option<String>,
+    cache: Mutex<C>,
     authenticated: PhantomData<A>,
-    rate_limiter:  PhantomData<R>,
+    rate_limiter: PhantomData<R>,
 }
 
 impl Client<NoopCache, NoopRateLimiter, NotAuthenticated> {
@@ -72,25 +72,25 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
     pub fn api_key(self, key: impl Into<String>) -> Client<C, R, Authenticated> {
         self.cache.lock().unwrap().wipe();
         Client {
-            host:          self.host,
-            language:      self.language,
-            agent:         self.agent,
-            api_key:       Some(key.into()),
-            cache:         self.cache,
+            host: self.host,
+            language: self.language,
+            agent: self.agent,
+            api_key: Some(key.into()),
+            cache: self.cache,
             authenticated: PhantomData,
-            rate_limiter:  PhantomData,
+            rate_limiter: PhantomData,
         }
     }
 
     pub fn cache<NC: Cache>(self, cache: NC) -> Client<NC, R, A> {
         Client {
-            host:          self.host,
-            language:      self.language,
-            agent:         self.agent,
-            api_key:       self.api_key,
-            cache:         Mutex::new(cache),
+            host: self.host,
+            language: self.language,
+            agent: self.agent,
+            api_key: self.api_key,
+            cache: Mutex::new(cache),
             authenticated: PhantomData,
-            rate_limiter:  PhantomData,
+            rate_limiter: PhantomData,
         }
     }
 
@@ -125,9 +125,9 @@ impl<C: Cache, R: RateLimiter, A: Auth> Requester for Client<C, R, A> {
 }
 
 pub struct CachedRequest<'client, C: Cache, R: RateLimiter, A: Auth, F: Force> {
-    client:         &'client Client<C, R, A>,
+    client: &'client Client<C, R, A>,
     cache_duration: Duration,
-    forced:         PhantomData<F>,
+    forced: PhantomData<F>,
 }
 
 impl<C: Cache, R: RateLimiter, A: Auth, F: Force> Requester for CachedRequest<'_, C, R, A, F> {
