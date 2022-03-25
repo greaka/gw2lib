@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{Endpoint, FixedEndpoint};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Build {
     pub id: u64,
 }

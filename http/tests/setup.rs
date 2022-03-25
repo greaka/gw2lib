@@ -1,8 +1,6 @@
 use std::net::TcpStream;
-use gw2api_http;
-use gw2api_http::cache::InMemoryCache;
-use gw2api_http::{Authenticated, Client};
-use gw2api_http::rate_limit::NoopRateLimiter;
+
+use gw2api_http::{self, cache::InMemoryCache, rate_limit::NoopRateLimiter, Authenticated, Client};
 
 const API_KEY: &str = "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015";
 const HOST: &str = "localhost:52321";

@@ -1,8 +1,7 @@
 use either::Either;
 use serde::{Deserialize, Serialize};
 
-use crate::{BulkEndpoint, Endpoint};
-use crate::items::ItemId;
+use crate::{items::ItemId, BulkEndpoint, Endpoint};
 
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
@@ -58,7 +57,7 @@ pub struct Color {
     pub item:       Option<ItemId>,
     /// is only `Right` for Dye Remover
     #[serde(with = "either::serde_untagged")]
-    pub categories: Either<(Hue, Material, Rarity), [();0]>,
+    pub categories: Either<(Hue, Material, Rarity), [(); 0]>,
 }
 
 impl_id!(Color, ColorId);

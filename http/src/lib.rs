@@ -3,7 +3,7 @@ mod client;
 pub mod rate_limit;
 use std::fmt::Display;
 
-pub use client::Client;
+pub use client::*;
 pub use gw2api_model;
 
 use crate::{
@@ -23,6 +23,20 @@ impl Auth for NotAuthenticated {
 
 impl Auth for Authenticated {
     const AUTHENTICATED: bool = true;
+}
+
+pub struct NotForced;
+pub struct Forced;
+pub trait Force {
+    const FORCED: bool;
+}
+
+impl Force for NotForced {
+    const FORCED: bool = false;
+}
+
+impl Force for Forced {
+    const FORCED: bool = true;
 }
 
 struct ErrorUnsupportedEndpointQuery;

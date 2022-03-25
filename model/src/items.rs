@@ -7,11 +7,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
     game_mechanics::skills::SkillId,
     guild::upgrades::GuildUpgradeId,
-    items::{itemstats::StatsId, recipes::RecipeId},
+    items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId},
     misc::{colors::ColorId, minis::MiniPetId},
     BulkEndpoint, Endpoint,
 };
-use crate::items::skins::SkinId;
 
 pub type ItemId = u32;
 
