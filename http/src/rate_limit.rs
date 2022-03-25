@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 use chrono::{Duration, NaiveDateTime, Utc};
 use ureq::{Error, Middleware, MiddlewareNext, Request, Response};
@@ -82,11 +82,11 @@ impl RateLimiter for NoopRateLimiter {
     fn penalize(&mut self) {}
 }
 
-pub(crate) struct UreqRateLimit<T: RateLimiter + 'static>(Mutex<T>);
+pub(crate) struct UreqRateLimit<T: RateLimiter + 'static>(Arc<Mutex<T>>);
 
 impl<T: RateLimiter + 'static> UreqRateLimit<T> {
-    pub fn new(r: T) -> Self {
-        Self(Mutex::new(r))
+    pub fn new(r: Arc<Mutex<T>>) -> Self {
+        Self(r)
     }
 }
 

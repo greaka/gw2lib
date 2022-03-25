@@ -6,7 +6,7 @@ use crate::{items::ItemId, BulkEndpoint, Endpoint};
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MaterialDetails {
     pub brightness: i8,
     pub contrast: f32,
@@ -44,7 +44,7 @@ pub enum Rarity {
     Exclusive,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Color {
     pub id: ColorId,
     pub name: String,

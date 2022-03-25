@@ -1,4 +1,3 @@
-use chrono::Duration;
 use gw2api_http::Requester;
 use gw2api_model::items::Item;
 
@@ -28,7 +27,7 @@ macro_rules! check_type {
 #[ignore]
 fn parse_all() {
     let client = crate::setup::setup();
-    let _: Vec<Item> = client.cached(Duration::days(5)).all().unwrap();
+    let _: Vec<Item> = client.all().unwrap();
 }
 
 mod single {

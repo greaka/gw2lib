@@ -13,13 +13,30 @@ use crate::{
 pub trait Requester: Sized {
     type Authenticated: Auth;
     type Caching: Cache;
-    type RateLimiting: RateLimiter;
     type ForceRefresh: Force;
+    type RateLimiting: RateLimiter;
 
+    #[doc(hidden)]
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Authenticated>;
 
+    #[doc(hidden)]
     fn cache_duration(&self) -> Duration;
 
+    /// overwrites the cache duration for all requests returned from this
+    /// function ## Example
+    /// ```
+    /// use chrono::Duration;
+    /// use gw2api_http::{Client, Requester};
+    /// use gw2api_http::gw2api_model::items::Item;
+    /// use gw2api_http::gw2api_model::misc::build::Build;
+    ///
+    /// let client = Client::default();
+    /// let cache_client = client.cached(Duration::seconds(5));
+    /// // these requests get cached for 5s
+    /// let build_id: Build = cache_client.get().unwrap();
+    /// let item: Item = cache_client.single(19993).unwrap();
+    /// // normal caching
+    /// let other_item: Item = client.single(19721).unwrap();
     fn cached(
         &self,
         cache_duration: Duration,
@@ -32,6 +49,18 @@ pub trait Requester: Sized {
         }
     }
 
+    /// forces a fresh copy from the api
+    /// ## Example
+    /// ```
+    /// use gw2api_http::{Client, Requester};
+    /// use gw2api_http::gw2api_model::misc::build::Build;
+    ///
+    /// let client = Client::default();
+    /// let build_id: Build = client.get().unwrap();
+    /// // this is cached and won't hit the api
+    /// let build_id: Build = client.get().unwrap();
+    /// // this will not check the cache and ask the api directly
+    /// let build_id: Build = client.forced().get().unwrap();
     fn forced(
         &self,
     ) -> CachedRequest<Self::Caching, Self::RateLimiting, Self::Authenticated, Forced> {
@@ -57,7 +86,7 @@ pub trait Requester: Sized {
     ) -> EndpointResult<T> {
         if !Self::ForceRefresh::FORCED {
             let mut cache: MutexGuard<Self::Caching> = self.client().cache.lock().unwrap();
-            if let Some(cached) = cache.get(&id) {
+            if let Some(cached) = cache.get::<T, I, T>(&id, self.client().language) {
                 return Ok(cached);
             }
         }
@@ -67,7 +96,7 @@ pub trait Requester: Sized {
         let request = set_common_headers_and_rate_limit::<T, Self>(self, request)?;
 
         let response = request.call()?;
-        let result = cache_response(self, &id, response)?;
+        let result = cache_response::<I, T, T, Self>(self, &id, response)?;
 
         Ok(result)
     }
@@ -239,7 +268,7 @@ fn get_or_ids<
 ) -> EndpointResult<K> {
     if !Req::ForceRefresh::FORCED {
         let mut cache = req.client().cache.lock().unwrap();
-        if let Some(cached) = cache.get(&()) {
+        if let Some(cached) = cache.get::<K, (), T>(&(), req.client().language) {
             return Ok(cached);
         }
     }
@@ -249,7 +278,7 @@ fn get_or_ids<
     let request = set_common_headers_and_rate_limit::<T, Req>(req, request)?;
 
     let response = request.call()?;
-    let result = cache_response(req, &(), response)?;
+    let result = cache_response::<(), K, T, Req>(req, &(), response)?;
 
     Ok(result)
 }
@@ -276,7 +305,11 @@ fn set_common_headers_and_rate_limit<T: Endpoint, R: Requester>(
 }
 
 /// returns the remaining ids not found in cache
-fn extract_many_from_cache<I: Hash + 'static, K: Clone + 'static, Req: Requester>(
+fn extract_many_from_cache<
+    I: Hash + 'static,
+    K: EndpointWithId<I> + Clone + 'static,
+    Req: Requester,
+>(
     req: &Req,
     ids: Vec<I>,
     result: &mut Vec<K>,
@@ -284,7 +317,7 @@ fn extract_many_from_cache<I: Hash + 'static, K: Clone + 'static, Req: Requester
     let mut cache = req.client().cache.lock().unwrap();
     ids.into_iter()
         .filter(|i| {
-            if let Some(cached) = cache.get(i) {
+            if let Some(cached) = cache.get::<K, I, K>(i, req.client().language) {
                 result.push(cached);
                 false
             } else {
@@ -294,7 +327,12 @@ fn extract_many_from_cache<I: Hash + 'static, K: Clone + 'static, Req: Requester
         .collect()
 }
 
-fn cache_response<I: Hash + 'static, K: DeserializeOwned + Clone + 'static, Req: Requester>(
+fn cache_response<
+    I: Hash + 'static,
+    K: DeserializeOwned + Clone + 'static,
+    T: Endpoint,
+    Req: Requester,
+>(
     req: &Req,
     id: &I,
     response: Response,
@@ -304,7 +342,7 @@ fn cache_response<I: Hash + 'static, K: DeserializeOwned + Clone + 'static, Req:
     let res = result.clone();
     {
         let mut cache = req.client().cache.lock().unwrap();
-        cache.insert(id, res, expires);
+        cache.insert::<K, I, T>(id, res, expires, req.client().language);
     }
     Ok(result)
 }
@@ -323,7 +361,7 @@ fn cache_response_many<
     {
         let mut cache = req.client().cache.lock().unwrap();
         for t in res {
-            cache.insert(t.id(), t.clone(), expires);
+            cache.insert::<K, I, K>(t.id(), t.clone(), expires, req.client().language);
             result.push(t);
         }
     }
