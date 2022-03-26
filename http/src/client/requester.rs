@@ -251,10 +251,10 @@ pub trait Requester: Sized {
 
     /// requests all items using the most efficient method available
     /// ### Remarks
-    /// for most endpoints this means using [`Self::get_all_by_paging`].
-    /// You might not want this for endpoints that change rapidly (like
-    /// requesting listings on the tp). In that case, fall back to
-    /// [`Self::get_all_by_requesting_ids`] or simply call [`Self::many`].
+    /// for most endpoints this means using [`Self::get_all_by_requesting_ids`].
+    /// Compared to [`Self::get_all_by_paging`]
+    /// this needs to perform an additional request to get all ids, but is much
+    /// more cache friendly, being able to utilize the cache and inflight mechanisms.
     fn all<
         T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
@@ -263,8 +263,9 @@ pub trait Requester: Sized {
     ) -> EndpointResult<Vec<T>> {
         if T::ALL {
             self.get_all_by_ids_all()
-        } else if T::PAGING {
-            self.get_all_by_paging()
+        // paging cannot utilize the cache, so we won't use it by default
+        // } else if T::PAGING {
+        //     self.get_all_by_paging()
         } else {
             self.get_all_by_requesting_ids()
         }
