@@ -134,7 +134,7 @@ pub trait Requester: Sized {
     /// let from_cache: Option<Item> = client.try_get(&19721);
     /// ```
     fn try_get<
-        T: DeserializeOwned + Clone + EndpointWithId<I> + Send + Sync + 'static,
+        T: DeserializeOwned + Clone + Endpoint + Send + Sync + 'static,
         I: DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -340,7 +340,7 @@ pub trait Requester: Sized {
 }
 
 struct SenderGuard<'client, T> {
-    sender: Arc<Mutex<Bus<T>>>,
+    sender: Arc<Mutex<Sender<T>>>,
     inflight: &'client Inflight,
     hash: (TypeId, u64),
 }
@@ -377,7 +377,7 @@ fn check_inflight<'client, H: Send + 'static, I: 'static + Hash, T: Endpoint + S
             Either::Left(r.add_rx())
         }
         Entry::Vacant(e) => {
-            let tx = Arc::new(Mutex::new(Bus::new(1)));
+            let tx = Arc::new(Mutex::new(Sender::new(1)));
             e.insert(Box::new(Arc::downgrade(&tx)));
             let tx = SenderGuard {
                 sender: tx,
