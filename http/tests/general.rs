@@ -24,7 +24,7 @@ fn inflight() {
     let join = join.join().unwrap();
     let diff = (main - join).num_nanoseconds().unwrap().abs();
     dbg!(diff);
-    assert!(diff < 10_000);
+    assert!(diff < 100_000);
 }
 
 mod cache {
