@@ -15,13 +15,13 @@ use gw2api_model::{Endpoint, Language};
 pub trait Cache {
     fn insert<T, I, E>(&mut self, id: &I, endpoint: T, expiring: NaiveDateTime, lang: Language)
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint;
 
     fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint;
 
@@ -39,14 +39,14 @@ pub trait Cache {
 
 #[derive(Default)]
 pub struct InMemoryCache {
-    statics: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any>)>,
-    authenticated: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any>)>,
+    statics: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send>)>,
+    authenticated: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send>)>,
 }
 
 impl Cache for InMemoryCache {
     fn insert<T, I, E>(&mut self, id: &I, endpoint: T, expiring: NaiveDateTime, lang: Language)
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint,
     {
@@ -61,7 +61,7 @@ impl Cache for InMemoryCache {
 
     fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint,
     {
@@ -103,7 +103,7 @@ impl Cache for InMemoryCache {
 }
 
 #[inline]
-fn hash<T: 'static, I: 'static + Hash>(id: &I, lang: Option<Language>) -> (TypeId, u64) {
+pub(crate) fn hash<T: 'static, I: 'static + Hash>(id: &I, lang: Option<Language>) -> (TypeId, u64) {
     let type_id = TypeId::of::<T>();
     let hash = {
         let mut hasher = FxHasher::default();
@@ -119,7 +119,7 @@ pub struct NoopCache;
 impl Cache for NoopCache {
     fn insert<T, I, E>(&mut self, _id: &I, _endpoint: T, _expiring: NaiveDateTime, _lang: Language)
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint,
     {
@@ -127,7 +127,7 @@ impl Cache for NoopCache {
 
     fn get<T, I, E>(&mut self, _id: &I, _lang: Language) -> Option<T>
     where
-        T: Clone + 'static,
+        T: Clone + Send + 'static,
         I: Hash + 'static,
         E: Endpoint,
     {

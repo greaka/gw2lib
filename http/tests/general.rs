@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use gw2api_http::Requester;
 use gw2api_model::misc::{build::Build, colors::ColorId};
 
@@ -7,6 +9,22 @@ pub mod setup;
 fn get() {
     let client = setup::setup();
     let _: Build = client.get().unwrap();
+}
+
+#[test]
+fn inflight() {
+    let client = Arc::new(setup::setup());
+    let tclient = client.clone();
+    let join = std::thread::spawn(move || {
+        let _: Build = tclient.get().unwrap();
+        chrono::Utc::now()
+    });
+    let _: Build = client.get().unwrap();
+    let main = chrono::Utc::now();
+    let join = join.join().unwrap();
+    let diff = (main - join).num_nanoseconds().unwrap().abs();
+    dbg!(diff);
+    assert!(diff < 10_000);
 }
 
 mod cache {

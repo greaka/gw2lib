@@ -1,13 +1,24 @@
-use std::{fmt::Display, hash::Hash, marker::PhantomData, sync::MutexGuard};
+use std::{
+    any::TypeId,
+    collections::hash_map::Entry,
+    fmt::Display,
+    hash::Hash,
+    marker::PhantomData,
+    ops::Deref,
+    sync::{Arc, Mutex, Weak},
+};
 
+use bus::{Bus as Sender, BusReader as Receiver};
 use chrono::{Duration, NaiveDateTime, Utc};
-use gw2api_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
+use either::Either;
+use fxhash::FxHashMap;
+use gw2api_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language};
 use serde::de::DeserializeOwned;
 use ureq::{Request, Response};
 
 use crate::{
-    Auth, Cache, CachedRequest, Client, EndpointResult, ErrorNotAuthenticated,
-    ErrorUnsupportedEndpointQuery, Force, Forced, RateLimiter,
+    cache::hash, Auth, Cache, CachedRequest, Client, EndpointResult, ErrorNotAuthenticated,
+    ErrorUnsupportedEndpointQuery, Force, Forced, Inflight, RateLimiter,
 };
 
 pub trait Requester: Sized {
@@ -72,39 +83,70 @@ pub trait Requester: Sized {
     }
 
     /// call the fixed endpoint
-    fn get<T: DeserializeOwned + Clone + FixedEndpoint + 'static>(&self) -> EndpointResult<T> {
+    fn get<T: DeserializeOwned + Clone + Send + Sync + FixedEndpoint + 'static>(
+        &self,
+    ) -> EndpointResult<T> {
         get_or_ids::<T, T, Self>(self)
     }
 
     /// request a single item
     fn single<
-        T: DeserializeOwned + Clone + EndpointWithId<I> + 'static,
+        T: DeserializeOwned + Clone + Send + Sync + EndpointWithId<I> + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
         id: I,
     ) -> EndpointResult<T> {
-        if !Self::ForceRefresh::FORCED {
-            let mut cache: MutexGuard<Self::Caching> = self.client().cache.lock().unwrap();
-            if let Some(cached) = cache.get::<T, I, T>(&id, self.client().language) {
-                return Ok(cached);
-            }
+        let lang = self.client().language;
+        if let Some(c) = self.try_get(&id) {
+            return Ok(c);
         }
+
+        let tx = loop {
+            let either = check_inflight::<T, I, T>(&self.client().inflight, &id, lang);
+            match either {
+                Some(Either::Left(mut rx)) => return Ok(rx.recv()?),
+                Some(Either::Right(tx)) => break tx,
+                None => {
+                    if let Some(c) = self.try_get(&id) {
+                        return Ok(c);
+                    }
+                }
+            }
+        };
 
         let url = format!("{}/{}/{}", self.client().host, T::URL, id);
         let request = self.client().agent.get(&url);
-        let request = set_common_headers_and_rate_limit::<T, Self>(self, request)?;
+        let request = set_common_headers::<T, Self>(self, request)?;
 
         let response = request.call()?;
         let result = cache_response::<I, T, T, Self>(self, &id, response)?;
+        tx.lock().unwrap().broadcast(result.clone());
 
         Ok(result)
     }
 
+    /// retrieves an item from cache
+    /// ```
+    /// use gw2api_http::{gw2api_model::items::Item, Client, Requester};
+    ///
+    /// let client = Client::default();
+    /// let from_cache: Option<Item> = client.try_get(&19721);
+    /// ```
+    fn try_get<
+        T: DeserializeOwned + Clone + EndpointWithId<I> + Send + Sync + 'static,
+        I: DeserializeOwned + Hash + Clone + 'static,
+    >(
+        &self,
+        id: &I,
+    ) -> Option<T> {
+        check_cache::<T, I, T, Self>(self, id)
+    }
+
     /// request all available ids
     fn ids<
-        T: DeserializeOwned + EndpointWithId<I> + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<I>> {
@@ -113,8 +155,8 @@ pub trait Requester: Sized {
 
     /// request multiple ids at once
     fn many<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Hash + Clone + Eq + 'static,
     >(
         &self,
         mut ids: Vec<I>,
@@ -127,14 +169,51 @@ pub trait Requester: Sized {
             }
         }
 
+        let mut txs = FxHashMap::with_capacity_and_hasher(ids.len(), Default::default());
+        let mut rxs = Vec::with_capacity(ids.len());
+        ids = ids
+            .into_iter()
+            .filter(|id| loop {
+                let either =
+                    check_inflight::<T, I, T>(&self.client().inflight, id, self.client().language);
+                match either {
+                    Some(Either::Left(rx)) => {
+                        rxs.push(rx);
+                        break false;
+                    }
+                    Some(Either::Right(tx)) => {
+                        txs.insert(id.clone(), tx);
+                        break true;
+                    }
+                    None => {
+                        if let Some(c) = check_cache::<T, I, T, Self>(self, id) {
+                            result.push(c);
+                            break false;
+                        }
+                    }
+                }
+            })
+            .collect();
+
         let url = format!("{}/{}", self.client().host, T::URL);
         let chunks = join_ids(&ids)?;
         for rest in chunks {
             let request = self.client().agent.get(&url).query("ids", &rest);
-            let request = set_common_headers_and_rate_limit::<T, Self>(self, request)?;
+            let request = set_common_headers::<T, Self>(self, request)?;
 
             let response = request.call()?;
+            let index = result.len();
             cache_response_many(self, response, &mut result)?;
+            for x in result.iter().skip(index) {
+                let tx = txs
+                    .remove(x.id())
+                    .expect("received unexpected entry from api");
+                tx.lock().unwrap().broadcast(x.clone());
+            }
+        }
+
+        for mut rx in rxs {
+            result.push(rx.recv()?);
         }
 
         Ok(result)
@@ -143,7 +222,7 @@ pub trait Requester: Sized {
     /// requests a page of items and returns the number of total items across
     /// all pages
     fn page<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -158,7 +237,7 @@ pub trait Requester: Sized {
             .get(&url)
             .query("page", page.to_string().as_str())
             .query("page_size", page_size.to_string().as_str());
-        let request = set_common_headers_and_rate_limit::<T, Self>(self, request)?;
+        let request = set_common_headers::<T, Self>(self, request)?;
 
         let response = request.call()?;
         let count = response
@@ -177,8 +256,8 @@ pub trait Requester: Sized {
     /// requesting listings on the tp). In that case, fall back to
     /// [`Self::get_all_by_requesting_ids`] or simply call [`Self::many`].
     fn all<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
@@ -195,7 +274,7 @@ pub trait Requester: Sized {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_ids_all<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -206,7 +285,7 @@ pub trait Requester: Sized {
 
         let url = format!("{}/{}", self.client().host, T::URL);
         let request = self.client().agent.get(&url).query("ids", "all");
-        let request = set_common_headers_and_rate_limit::<T, Self>(self, request)?;
+        let request = set_common_headers::<T, Self>(self, request)?;
 
         let response = request.call()?;
         let count = response
@@ -223,7 +302,7 @@ pub trait Requester: Sized {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_paging<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -249,8 +328,8 @@ pub trait Requester: Sized {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_requesting_ids<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + 'static,
+        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
@@ -259,31 +338,105 @@ pub trait Requester: Sized {
     }
 }
 
+struct SenderGuard<'client, T> {
+    sender: Arc<Mutex<Bus<T>>>,
+    inflight: &'client Inflight,
+    hash: (TypeId, u64),
+}
+
+impl<T> Deref for SenderGuard<'_, T> {
+    type Target = Mutex<Sender<T>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.sender
+    }
+}
+
+impl<T> Drop for SenderGuard<'_, T> {
+    fn drop(&mut self) {
+        self.inflight.lock().unwrap().remove(&self.hash);
+    }
+}
+
+fn check_inflight<'client, H: Send + 'static, I: 'static + Hash, T: Endpoint + Send + 'static>(
+    inflight: &'client Inflight,
+    id: &I,
+    lang: Language,
+) -> Option<Either<Receiver<H>, SenderGuard<'client, H>>> {
+    let hash = hash::<H, I>(id, T::LOCALE.then(|| lang));
+    let mut locked = inflight.lock().unwrap();
+    Some(match locked.entry(hash) {
+        Entry::Occupied(mut e) => {
+            let r = e
+                .get_mut()
+                .downcast_mut::<Weak<Mutex<Sender<H>>>>()
+                .unwrap();
+            let r = r.upgrade()?;
+            let mut r = r.lock().unwrap();
+            Either::Left(r.add_rx())
+        }
+        Entry::Vacant(e) => {
+            let tx = Arc::new(Mutex::new(Bus::new(1)));
+            e.insert(Box::new(Arc::downgrade(&tx)));
+            let tx = SenderGuard {
+                sender: tx,
+                inflight,
+                hash,
+            };
+            Either::Right(tx)
+        }
+    })
+}
+
+fn check_cache<T: Clone + Send + 'static, I: Hash + 'static, E: Endpoint, Req: Requester>(
+    req: &Req,
+    id: &I,
+) -> Option<T> {
+    if !Req::ForceRefresh::FORCED {
+        let mut cache = req.client().cache.lock().unwrap();
+        cache.get::<T, I, E>(id, req.client().language)
+    } else {
+        None
+    }
+}
+
 fn get_or_ids<
-    T: DeserializeOwned + Endpoint + 'static,
-    K: DeserializeOwned + Clone + 'static,
+    T: DeserializeOwned + Endpoint + Clone + Send + Sync + 'static,
+    K: DeserializeOwned + Clone + Send + Sync + 'static,
     Req: Requester,
 >(
     req: &Req,
 ) -> EndpointResult<K> {
-    if !Req::ForceRefresh::FORCED {
-        let mut cache = req.client().cache.lock().unwrap();
-        if let Some(cached) = cache.get::<K, (), T>(&(), req.client().language) {
-            return Ok(cached);
-        }
+    let lang = req.client().language;
+    if let Some(c) = check_cache::<K, (), T, Req>(req, &()) {
+        return Ok(c);
     }
+
+    let tx = loop {
+        let either = check_inflight::<K, (), T>(&req.client().inflight, &(), lang);
+        match either {
+            Some(Either::Left(mut rx)) => return Ok(rx.recv()?),
+            Some(Either::Right(tx)) => break tx,
+            None => {
+                if let Some(c) = check_cache::<K, (), T, Req>(req, &()) {
+                    return Ok(c);
+                }
+            }
+        }
+    };
 
     let url = format!("{}/{}", req.client().host, T::URL);
     let request = req.client().agent.get(&url);
-    let request = set_common_headers_and_rate_limit::<T, Req>(req, request)?;
+    let request = set_common_headers::<T, Req>(req, request)?;
 
     let response = request.call()?;
     let result = cache_response::<(), K, T, Req>(req, &(), response)?;
+    tx.lock().unwrap().broadcast(result.clone());
 
     Ok(result)
 }
 
-fn set_common_headers_and_rate_limit<T: Endpoint, R: Requester>(
+fn set_common_headers<T: Endpoint, R: Requester>(
     req: &R,
     mut request: Request,
 ) -> EndpointResult<Request> {
@@ -307,7 +460,7 @@ fn set_common_headers_and_rate_limit<T: Endpoint, R: Requester>(
 /// returns the remaining ids not found in cache
 fn extract_many_from_cache<
     I: Hash + 'static,
-    K: EndpointWithId<I> + Clone + 'static,
+    K: EndpointWithId<I> + Clone + Send + 'static,
     Req: Requester,
 >(
     req: &Req,
@@ -329,7 +482,7 @@ fn extract_many_from_cache<
 
 fn cache_response<
     I: Hash + 'static,
-    K: DeserializeOwned + Clone + 'static,
+    K: DeserializeOwned + Clone + Send + 'static,
     T: Endpoint,
     Req: Requester,
 >(
@@ -349,7 +502,7 @@ fn cache_response<
 
 fn cache_response_many<
     I: Hash + 'static,
-    K: DeserializeOwned + EndpointWithId<I> + Clone + 'static,
+    K: DeserializeOwned + EndpointWithId<I> + Clone + Send + 'static,
     Req: Requester,
 >(
     req: &Req,

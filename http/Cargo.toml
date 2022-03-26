@@ -8,6 +8,8 @@ workspace = "../"
 chrono = "0.4.19"
 fxhash = "0.2.1"
 serde = "1.0.136"
+bus = "2.2.3"
+either = "1.6.1"
 
 [dependencies.ureq]
 version = "2.4.0"

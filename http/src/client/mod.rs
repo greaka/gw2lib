@@ -1,10 +1,13 @@
 mod requester;
+use core::default::Default;
 use std::{
+    any::{Any, TypeId},
     marker::PhantomData,
     sync::{Arc, Mutex},
 };
 
 use chrono::Duration;
+use fxhash::FxHashMap;
 use gw2api_model::Language;
 pub use requester::Requester;
 use ureq::Agent;
@@ -14,12 +17,15 @@ use crate::{
     NoopCache, NoopRateLimiter, NotAuthenticated, NotForced, RateLimiter,
 };
 
+pub(crate) type Inflight = Mutex<FxHashMap<(TypeId, u64), Box<dyn Any + Send>>>;
+
 pub struct Client<C: Cache, R: RateLimiter, A: Auth> {
     pub host: String,
     pub language: Language,
     agent: Agent,
     api_key: Option<String>,
     cache: Mutex<C>,
+    inflight: Inflight,
     authenticated: PhantomData<A>,
     rate_limiter: PhantomData<R>,
 }
@@ -40,6 +46,7 @@ impl Client<NoopCache, NoopRateLimiter, NotAuthenticated> {
             agent,
             api_key: None,
             cache: Mutex::new(NoopCache {}),
+            inflight: Default::default(),
             authenticated: PhantomData,
             rate_limiter: PhantomData,
         }
@@ -56,6 +63,7 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, NotAuthenticated> {
             agent,
             api_key: None,
             cache: Mutex::new(InMemoryCache::default()),
+            inflight: Default::default(),
             authenticated: PhantomData,
             rate_limiter: PhantomData,
         }
@@ -93,6 +101,7 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
             agent: self.agent,
             api_key: Some(key.into()),
             cache: self.cache,
+            inflight: self.inflight,
             authenticated: PhantomData,
             rate_limiter: PhantomData,
         }
@@ -112,6 +121,7 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
             agent: self.agent,
             api_key: self.api_key,
             cache: Mutex::new(cache),
+            inflight: self.inflight,
             authenticated: PhantomData,
             rate_limiter: PhantomData,
         }
@@ -141,6 +151,7 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
             agent,
             api_key: self.api_key,
             cache: self.cache,
+            inflight: self.inflight,
             authenticated: PhantomData,
             rate_limiter: PhantomData,
         }
