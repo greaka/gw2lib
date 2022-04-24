@@ -1,6 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use chrono::{Duration, NaiveDateTime, Utc};
+use parking_lot::Mutex;
 use ureq::{Error, Middleware, MiddlewareNext, Request, Response};
 
 pub trait RateLimiter: Send {
@@ -67,9 +68,13 @@ impl RateLimiter for BucketRateLimiter {
 
     fn penalize(&mut self) {
         let ratio = 60 * 1000 / self.refill as i64;
+        let now = Utc::now().naive_utc();
+        if self.time < now {
+            self.time = now;
+        }
         // the api penalizes us for half a request worth of time when we hit it while
         // rate limited
-        self.time = Utc::now().naive_utc() + Duration::milliseconds(ratio / 2);
+        self.time += Duration::milliseconds(ratio / 2);
     }
 }
 
@@ -92,7 +97,7 @@ impl<T: RateLimiter + 'static> UreqRateLimit<T> {
 
 impl<T: RateLimiter + 'static> Middleware for UreqRateLimit<T> {
     fn handle(&self, request: Request, next: MiddlewareNext) -> Result<Response, Error> {
-        let sleep = { self.0.lock().unwrap().take(1) };
+        let sleep = { self.0.lock().take(1) };
         if sleep > 0 {
             std::thread::sleep(std::time::Duration::from_secs(sleep));
         }
@@ -100,7 +105,7 @@ impl<T: RateLimiter + 'static> Middleware for UreqRateLimit<T> {
         let res = next.handle(request);
 
         if let Err(ureq::Error::Status(429, _)) = res {
-            self.0.lock().unwrap().penalize();
+            self.0.lock().penalize();
         }
 
         res

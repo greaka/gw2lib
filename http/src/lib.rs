@@ -1,10 +1,9 @@
 pub mod cache;
 mod client;
 pub mod rate_limit;
-use std::fmt::Display;
-
 pub use client::*;
 pub use gw2api_model;
+use thiserror::Error;
 
 use crate::{
     cache::{Cache, InMemoryCache, NoopCache},
@@ -39,36 +38,18 @@ impl Force for Forced {
     const FORCED: bool = true;
 }
 
-struct ErrorUnsupportedEndpointQuery;
-
-impl Display for ErrorUnsupportedEndpointQuery {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "This endpoint does not support this operation")
-    }
+#[derive(Error, Debug)]
+pub enum EndpointError {
+    #[error("unsupported query type for this endpoint")]
+    UnsupportedEndpointQuery,
+    #[error("endpoint requires authentication")]
+    NotAuthenticated,
+    #[error("connection to gw2 api failed: {0}")]
+    RequestFailed(ureq::Error),
+    #[error("failed to retrieve item from already running request: {0}")]
+    InflightReceiveFailed(std::sync::mpsc::RecvError),
+    #[error("invalid json response: {0}")]
+    InvalidJsonResponse(std::io::Error),
 }
 
-impl std::fmt::Debug for ErrorUnsupportedEndpointQuery {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        Display::fmt(&self, f)
-    }
-}
-
-impl std::error::Error for ErrorUnsupportedEndpointQuery {}
-
-struct ErrorNotAuthenticated;
-
-impl Display for ErrorNotAuthenticated {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "This endpoint requires you to be authenticated")
-    }
-}
-
-impl std::fmt::Debug for ErrorNotAuthenticated {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        Display::fmt(&self, f)
-    }
-}
-
-impl std::error::Error for ErrorNotAuthenticated {}
-
-type EndpointResult<T> = Result<T, Box<dyn std::error::Error>>;
+type EndpointResult<T> = Result<T, EndpointError>;

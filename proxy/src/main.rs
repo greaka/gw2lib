@@ -40,6 +40,7 @@ async fn index(req: HttpRequest) -> impl Responder {
         .unwrap();
     let dur = { rate.lock().unwrap().take(1) };
     tokio::time::sleep(Duration::from_secs(dur)).await;
+    println!("{} - {:?}", spoof.url(), spoof.headers());
     let res = reqwest::Client::default().execute(spoof).await;
     match res {
         Ok(r) => {

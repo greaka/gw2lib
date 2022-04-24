@@ -5,7 +5,7 @@ use std::{
     hash::Hash,
     marker::PhantomData,
     ops::Deref,
-    sync::{Arc, Mutex, Weak},
+    sync::{Arc, Weak},
 };
 
 use bus::{Bus as Sender, BusReader as Receiver};
@@ -13,19 +13,21 @@ use chrono::{Duration, NaiveDateTime, Utc};
 use either::Either;
 use fxhash::FxHashMap;
 use gw2api_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language};
+use parking_lot::Mutex;
+use rayon::prelude::*;
 use serde::de::DeserializeOwned;
 use ureq::{Request, Response};
 
 use crate::{
-    cache::hash, Auth, Cache, CachedRequest, Client, EndpointResult, ErrorNotAuthenticated,
-    ErrorUnsupportedEndpointQuery, Force, Forced, Inflight, RateLimiter,
+    cache::hash, Auth, Cache, CachedRequest, Client, EndpointError, EndpointResult, Force, Forced,
+    Inflight, RateLimiter,
 };
 
-pub trait Requester: Sized {
+pub trait Requester: Sized + Sync {
     type Authenticated: Auth;
-    type Caching: Cache;
-    type ForceRefresh: Force;
-    type RateLimiting: RateLimiter;
+    type Caching: Cache + Send;
+    type ForceRefresh: Force + Sync;
+    type RateLimiting: RateLimiter + Sync;
 
     #[doc(hidden)]
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Authenticated>;
@@ -105,7 +107,9 @@ pub trait Requester: Sized {
         let tx = loop {
             let either = check_inflight::<T, I, T>(&self.client().inflight, &id, lang);
             match either {
-                Some(Either::Left(mut rx)) => return Ok(rx.recv()?),
+                Some(Either::Left(mut rx)) => {
+                    return rx.recv().map_err(EndpointError::InflightReceiveFailed)
+                }
                 Some(Either::Right(tx)) => break tx,
                 None => {
                     if let Some(c) = self.try_get(&id) {
@@ -119,9 +123,9 @@ pub trait Requester: Sized {
         let request = self.client().agent.get(&url);
         let request = set_common_headers::<T, Self>(self, request)?;
 
-        let response = request.call()?;
+        let response = request.call().map_err(EndpointError::RequestFailed)?;
         let result = cache_response::<I, T, T, Self>(self, &id, response)?;
-        tx.lock().unwrap().broadcast(result.clone());
+        tx.lock().broadcast(result.clone());
 
         Ok(result)
     }
@@ -156,7 +160,7 @@ pub trait Requester: Sized {
     /// request multiple ids at once
     fn many<
         T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Eq + 'static,
+        I: Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
     >(
         &self,
         mut ids: Vec<I>,
@@ -195,25 +199,35 @@ pub trait Requester: Sized {
             })
             .collect();
 
+        let result = Mutex::new(result);
+        let txs = Mutex::new(txs);
         let url = format!("{}/{}", self.client().host, T::URL);
-        let chunks = join_ids(&ids)?;
-        for rest in chunks {
-            let request = self.client().agent.get(&url).query("ids", &rest);
-            let request = set_common_headers::<T, Self>(self, request)?;
+        let chunks = join_ids(&ids);
+        chunks
+            .into_par_iter()
+            .map(|rest| {
+                let request = self.client().agent.get(&url).query("ids", &rest);
+                let request = set_common_headers::<T, Self>(self, request)?;
 
-            let response = request.call()?;
-            let index = result.len();
-            cache_response_many(self, response, &mut result)?;
-            for x in result.iter().skip(index) {
-                let tx = txs
-                    .remove(x.id())
-                    .expect("received unexpected entry from api");
-                tx.lock().unwrap().broadcast(x.clone());
-            }
-        }
+                let response = request.call().map_err(EndpointError::RequestFailed)?;
+                let mut result = result.lock();
+                let index = result.len();
+                cache_response_many(self, response, &mut result)?;
 
+                let mut txs = txs.lock();
+                for x in result.iter().skip(index) {
+                    let tx = txs
+                        .remove(x.id())
+                        .expect("received unexpected entry from api");
+                    tx.lock().broadcast(x.clone());
+                }
+                Ok(())
+            })
+            .collect::<EndpointResult<()>>()?;
+
+        let mut result = result.into_inner();
         for mut rx in rxs {
-            result.push(rx.recv()?);
+            result.push(rx.recv().map_err(EndpointError::InflightReceiveFailed)?);
         }
 
         Ok(result)
@@ -239,7 +253,7 @@ pub trait Requester: Sized {
             .query("page_size", page_size.to_string().as_str());
         let request = set_common_headers::<T, Self>(self, request)?;
 
-        let response = request.call()?;
+        let response = request.call().map_err(EndpointError::RequestFailed)?;
         let count = response
             .header("x-result-total")
             .and_then(|x| x.parse().ok())
@@ -254,7 +268,8 @@ pub trait Requester: Sized {
     /// for most endpoints this means using [`Self::get_all_by_requesting_ids`].
     /// Compared to [`Self::get_all_by_paging`]
     /// this needs to perform an additional request to get all ids, but is much
-    /// more cache friendly, being able to utilize the cache and inflight mechanisms.
+    /// more cache friendly, being able to utilize the cache and inflight
+    /// mechanisms.
     fn all<
         T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
@@ -281,14 +296,14 @@ pub trait Requester: Sized {
         &self,
     ) -> EndpointResult<Vec<T>> {
         if !T::ALL {
-            return Err(Box::new(ErrorUnsupportedEndpointQuery));
+            return Err(EndpointError::UnsupportedEndpointQuery);
         }
 
         let url = format!("{}/{}", self.client().host, T::URL);
         let request = self.client().agent.get(&url).query("ids", "all");
         let request = set_common_headers::<T, Self>(self, request)?;
 
-        let response = request.call()?;
+        let response = request.call().map_err(EndpointError::RequestFailed)?;
         let count = response
             .header("x-result-total")
             .and_then(|x| x.parse().ok())
@@ -309,7 +324,7 @@ pub trait Requester: Sized {
         &self,
     ) -> EndpointResult<Vec<T>> {
         if !T::PAGING {
-            return Err(Box::new(ErrorUnsupportedEndpointQuery));
+            return Err(EndpointError::UnsupportedEndpointQuery);
         }
 
         let mut result = Vec::with_capacity(200);
@@ -355,7 +370,7 @@ impl<T> Deref for SenderGuard<'_, T> {
 
 impl<T> Drop for SenderGuard<'_, T> {
     fn drop(&mut self) {
-        self.inflight.lock().unwrap().remove(&self.hash);
+        self.inflight.lock().remove(&self.hash);
     }
 }
 
@@ -365,7 +380,7 @@ fn check_inflight<'client, H: Send + 'static, I: 'static + Hash, T: Endpoint + S
     lang: Language,
 ) -> Option<Either<Receiver<H>, SenderGuard<'client, H>>> {
     let hash = hash::<H, I>(id, T::LOCALE.then(|| lang));
-    let mut locked = inflight.lock().unwrap();
+    let mut locked = inflight.lock();
     Some(match locked.entry(hash) {
         Entry::Occupied(mut e) => {
             let r = e
@@ -373,7 +388,7 @@ fn check_inflight<'client, H: Send + 'static, I: 'static + Hash, T: Endpoint + S
                 .downcast_mut::<Weak<Mutex<Sender<H>>>>()
                 .unwrap();
             let r = r.upgrade()?;
-            let mut r = r.lock().unwrap();
+            let mut r = r.lock();
             Either::Left(r.add_rx())
         }
         Entry::Vacant(e) => {
@@ -394,7 +409,7 @@ fn check_cache<T: Clone + Send + 'static, I: Hash + 'static, E: Endpoint, Req: R
     id: &I,
 ) -> Option<T> {
     if !Req::ForceRefresh::FORCED {
-        let mut cache = req.client().cache.lock().unwrap();
+        let mut cache = req.client().cache.lock();
         cache.get::<T, I, E>(id, req.client().language)
     } else {
         None
@@ -416,7 +431,9 @@ fn get_or_ids<
     let tx = loop {
         let either = check_inflight::<K, (), T>(&req.client().inflight, &(), lang);
         match either {
-            Some(Either::Left(mut rx)) => return Ok(rx.recv()?),
+            Some(Either::Left(mut rx)) => {
+                return rx.recv().map_err(EndpointError::InflightReceiveFailed)
+            }
             Some(Either::Right(tx)) => break tx,
             None => {
                 if let Some(c) = check_cache::<K, (), T, Req>(req, &()) {
@@ -430,9 +447,9 @@ fn get_or_ids<
     let request = req.client().agent.get(&url);
     let request = set_common_headers::<T, Req>(req, request)?;
 
-    let response = request.call()?;
+    let response = request.call().map_err(EndpointError::RequestFailed)?;
     let result = cache_response::<(), K, T, Req>(req, &(), response)?;
-    tx.lock().unwrap().broadcast(result.clone());
+    tx.lock().broadcast(result.clone());
 
     Ok(result)
 }
@@ -440,9 +457,9 @@ fn get_or_ids<
 fn set_common_headers<T: Endpoint, R: Requester>(
     req: &R,
     mut request: Request,
-) -> EndpointResult<Request> {
+) -> Result<Request, EndpointError> {
     if T::AUTHENTICATED && !R::Authenticated::AUTHENTICATED {
-        return Err(Box::new(ErrorNotAuthenticated));
+        return Err(EndpointError::NotAuthenticated);
     }
     request = request.set("X-Schema-Version", T::VERSION);
     if T::AUTHENTICATED {
@@ -468,7 +485,7 @@ fn extract_many_from_cache<
     ids: Vec<I>,
     result: &mut Vec<K>,
 ) -> Vec<I> {
-    let mut cache = req.client().cache.lock().unwrap();
+    let mut cache = req.client().cache.lock();
     ids.into_iter()
         .filter(|i| {
             if let Some(cached) = cache.get::<K, I, K>(i, req.client().language) {
@@ -490,12 +507,14 @@ fn cache_response<
     req: &Req,
     id: &I,
     response: Response,
-) -> Result<K, std::io::Error> {
+) -> Result<K, EndpointError> {
     let expires = get_cache_expiry(req, &response);
-    let result: K = response.into_json()?;
+    let result: K = response
+        .into_json()
+        .map_err(EndpointError::InvalidJsonResponse)?;
     let res = result.clone();
     {
-        let mut cache = req.client().cache.lock().unwrap();
+        let mut cache = req.client().cache.lock();
         cache.insert::<K, I, T>(id, res, expires, req.client().language);
     }
     Ok(result)
@@ -509,11 +528,13 @@ fn cache_response_many<
     req: &Req,
     response: Response,
     result: &mut Vec<K>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), EndpointError> {
     let expires = get_cache_expiry(req, &response);
-    let res: Vec<K> = response.into_json()?;
+    let res: Vec<K> = response
+        .into_json()
+        .map_err(EndpointError::InvalidJsonResponse)?;
     {
-        let mut cache = req.client().cache.lock().unwrap();
+        let mut cache = req.client().cache.lock();
         for t in res {
             cache.insert::<K, I, K>(t.id(), t.clone(), expires, req.client().language);
             result.push(t);
@@ -536,20 +557,20 @@ fn get_cache_expiry<Req: Requester>(req: &Req, response: &Response) -> NaiveDate
 /// chunked in 200 per batch
 ///
 /// panics when `ids.len() == 0`
-fn join_ids<I: Display + 'static>(ids: &[I]) -> Result<Vec<String>, std::fmt::Error> {
+fn join_ids<I: Display + 'static>(ids: &[I]) -> Vec<String> {
     use std::fmt::Write;
     let modulo = ids.len() % 200 != 0;
     let ceil = ids.len() / 200 + (modulo as usize);
     let mut result = Vec::with_capacity(ceil);
     for ids in ids.chunks(200) {
         let mut query_string = String::with_capacity(6 * ids.len()); // arbitrary. most ids are 5 digits + comma
-        write!(&mut query_string, "{}", ids[0])?;
+        write!(&mut query_string, "{}", ids[0]).expect("failed to concatenate ids");
         for i in ids.iter().skip(1) {
-            write!(&mut query_string, ",{}", i)?;
+            write!(&mut query_string, ",{}", i).expect("failed to concatenate ids");
         }
         result.push(query_string);
     }
-    Ok(result)
+    result
 }
 
 fn get_expire_from_header(response: &Response) -> Duration {

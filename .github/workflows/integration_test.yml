@@ -53,6 +53,5 @@ jobs:
           cargo run --release &
           prox=$!
           popd
-          cargo nextest run
-          cargo nextest run --run-ignored ignored-only
+          cargo nextest run --run-ignored all
           kill -9 $prox

@@ -3,12 +3,13 @@ use core::default::Default;
 use std::{
     any::{Any, TypeId},
     marker::PhantomData,
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 use chrono::Duration;
 use fxhash::FxHashMap;
 use gw2api_model::Language;
+use parking_lot::Mutex;
 pub use requester::Requester;
 use ureq::Agent;
 
@@ -74,7 +75,7 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, NotAuthenticated> {
 impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
     /// evicts all expired items in the cache
     pub fn cleanup_cache(&self) {
-        self.cache.lock().unwrap().cleanup();
+        self.cache.lock().cleanup();
     }
 
     /// sets the host name
@@ -94,7 +95,7 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
     /// this wipes the cache for all authenticated endpoints to prevent leaking
     /// account specific information
     pub fn api_key(self, key: impl Into<String>) -> Client<C, R, Authenticated> {
-        self.cache.lock().unwrap().wipe_authenticated();
+        self.cache.lock().wipe_authenticated();
         Client {
             host: self.host,
             language: self.language,
@@ -158,7 +159,7 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
     }
 }
 
-impl<C: Cache, R: RateLimiter, A: Auth> Requester for Client<C, R, A> {
+impl<C: Cache + Send, R: RateLimiter + Sync, A: Auth + Sync> Requester for Client<C, R, A> {
     type Authenticated = A;
     type Caching = C;
     type ForceRefresh = NotForced;
@@ -173,13 +174,15 @@ impl<C: Cache, R: RateLimiter, A: Auth> Requester for Client<C, R, A> {
     }
 }
 
-pub struct CachedRequest<'client, C: Cache, R: RateLimiter, A: Auth, F: Force> {
+pub struct CachedRequest<'client, C: Cache, R: RateLimiter, A: Auth, F: Force + Sync> {
     client: &'client Client<C, R, A>,
     cache_duration: Duration,
     forced: PhantomData<F>,
 }
 
-impl<C: Cache, R: RateLimiter, A: Auth, F: Force> Requester for CachedRequest<'_, C, R, A, F> {
+impl<C: Cache + Send, R: RateLimiter + Sync, A: Auth + Sync, F: Force + Sync> Requester
+    for CachedRequest<'_, C, R, A, F>
+{
     type Authenticated = A;
     type Caching = C;
     type ForceRefresh = F;
