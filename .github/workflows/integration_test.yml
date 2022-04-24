@@ -9,7 +9,7 @@
     - cron: '30 5 * * *'
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: Set Current Date
@@ -53,5 +53,6 @@ jobs:
           cargo run --release &
           prox=$!
           popd
-          cargo nextest run --run-ignored all
+          cargo nextest run
+          cargo nextest run --run-ignored ignored-only
           kill -9 $prox
