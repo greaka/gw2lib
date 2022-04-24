@@ -28,17 +28,17 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: generate-lockfile
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: target
           key: cargo-build-target-${{ hashFiles('Cargo.lock') }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: proxy/target
           key: cargo-build-target-${{ hashFiles('proxy/Cargo.lock') }}

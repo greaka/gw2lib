@@ -7,7 +7,10 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.0.1"
-reqwest = "0.11.10"
+[dependencies.reqwest]
+version = "0.11.10"
+default-features = false
+features = ["rustls-tls"]
 
 [dependencies.tokio]
 version = "1.17.0"
