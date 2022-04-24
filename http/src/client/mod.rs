@@ -131,7 +131,8 @@ impl<C: Cache, R: RateLimiter, A: Auth> Client<C, R, A> {
     /// allows you to set the rate limiter, for example for sharing it between
     /// multiple clients ## Example
     /// ```
-    /// use std::sync::{Arc, Mutex};
+    /// use std::sync::Arc;
+    /// use parking_lot::Mutex;
     /// use gw2api_http::cache::InMemoryCache;
     /// use gw2api_http::Client;
     /// use gw2api_http::rate_limit::BucketRateLimiter;
