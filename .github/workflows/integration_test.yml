@@ -50,9 +50,10 @@ jobs:
         run: |
           pushd proxy
           cargo build --release
-          cargo run --release &
+          cargo run --release > /dev/null &
           prox=$!
           popd
           cargo nextest run
+          sleep 5
           cargo nextest run --run-ignored ignored-only
           kill -9 $prox
