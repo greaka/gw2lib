@@ -19,11 +19,11 @@ jobs:
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ steps.date.outputs.week_of_year }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+#      - uses: actions-rs/toolchain@v1
+#        with:
+#          profile: minimal
+#          toolchain: stable
+#          override: true
       - name: Generate Cargo.lock
         uses: actions-rs/cargo@v1
         with:
