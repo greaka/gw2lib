@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 workspace = "../"
 
+[lib]
+name = "gw2api_http"
+path = "src/lib.rs"
+
 [dependencies]
 chrono = "0.4.19"
 fxhash = "0.2.1"

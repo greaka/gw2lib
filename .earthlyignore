@@ -1,0 +1,8 @@
+.git/
+target/
+.rustfmt.toml
+Cargo.lock
+.idea/
+.github/
+readme.md
+.gitignore
