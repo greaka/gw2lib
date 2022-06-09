@@ -1,0 +1,6 @@
+version: "3"
+services:
+  proxy:
+    image: gw2api-proxy
+    ports:
+      - 52321:52321

@@ -7,52 +7,24 @@
       - master
   schedule:
     - cron: '30 5 * * *'
+
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: 1
     steps:
-      - uses: actions/checkout@v3
-      - name: Set Current Date
-        id: date
-        uses: Kaven-Universe/github-action-current-date-time@v1.1.0
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry/index
-          key: cargo-index-${{ steps.date.outputs.week_of_year }}
-#      - uses: actions-rs/toolchain@v1
-#        with:
-#          profile: minimal
-#          toolchain: stable
-#          override: true
-      - name: Generate Cargo.lock
-        uses: actions-rs/cargo@v1
-        with:
-          command: generate-lockfile
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v3
-        with:
-          path: target
-          key: cargo-build-target-${{ hashFiles('Cargo.lock') }}
-      - uses: actions/cache@v3
-        with:
-          path: proxy/target
-          key: cargo-build-target-${{ hashFiles('proxy/Cargo.lock') }}
-      - name: Install cargo-nextest
-        uses: baptiste0928/cargo-install@v1
-        with:
-          crate: cargo-nextest
-      - name: "start proxy and test"
-        run: |
-          pushd proxy
-          cargo build --release
-          cargo run --release > /dev/null &
-          prox=$!
-          popd
-          cargo nextest run
-          cargo nextest run --run-ignored ignored-only
-          kill -9 $prox
+    - uses: actions/checkout@v3
+    - name: Put back the git branch into git (Earthly uses it for tagging)
+      run: |
+        branch=""
+        if [ -n "$GITHUB_HEAD_REF" ]; then
+          branch="$GITHUB_HEAD_REF"
+        else
+          branch="${GITHUB_REF##*/}"
+        fi
+        git checkout -b "$branch" || true
+    - name: download latest earthly
+      run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+    - name: build and run test
+      run: earthly --ci -P +test-all
