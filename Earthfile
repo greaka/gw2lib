@@ -25,7 +25,7 @@ build-proxy:
   FROM +prefetch-proxy
 
   COPY --dir proxy ./
-  COPY --dir http ./
+  COPY --dir http/src ./http/
   COPY --dir model ./
   RUN cd proxy && cargo build --release
 
