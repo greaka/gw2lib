@@ -6,7 +6,7 @@ use crate::{
     misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,
     wvw::abilities::AbilityId,
-    BulkEndpoint, Endpoint, TimeStamp,
+    BulkEndpoint, Endpoint, EndpointWithId, TimeStamp,
 };
 
 pub type Age = u64;
@@ -385,7 +385,7 @@ pub struct Character {
     pub flags: Vec<Flags>,
 }
 
-impl crate::EndpointWithId<CharacterId> for Character {
+impl EndpointWithId<CharacterId> for Character {
     fn id(&self) -> &CharacterId {
         &self.core.name
     }
@@ -395,10 +395,27 @@ impl Endpoint for Character {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
-    const VERSION: &'static str = "latest";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Character {
     const ALL: bool = true;
     const PAGING: bool = true;
+}
+
+impl EndpointWithId<CharacterId> for Core {
+    fn id(&self) -> &CharacterId {
+        &self.name
+    }
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/core", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Core {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
 }
