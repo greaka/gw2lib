@@ -1,5 +1,7 @@
 use gw2api_http::Requester;
-use gw2api_model::authenticated::characters::{Character, CharacterId, Core};
+use gw2api_model::authenticated::characters::{
+    Backstory, Character, CharacterId, Core, Crafting, Equipment, Inventory, Recipes, Training,
+};
 
 pub mod setup;
 
@@ -25,4 +27,40 @@ fn ids() {
 fn core() {
     let client = setup::setup();
     let _: Core = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn backstory() {
+    let client = setup::setup();
+    let _: Backstory = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn crafting() {
+    let client = setup::setup();
+    let _: Crafting = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn equipment() {
+    let client = setup::setup();
+    let _: Equipment = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn inventory() {
+    let client = setup::setup();
+    let _: Inventory = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn recipes() {
+    let client = setup::setup();
+    let _: Recipes = client.single("Eff Testing Ele".to_string()).unwrap();
+}
+
+#[test]
+fn training() {
+    let client = setup::setup();
+    let _: Training = client.single("Eff Testing Ele".to_string()).unwrap();
 }

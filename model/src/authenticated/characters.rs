@@ -228,12 +228,6 @@ pub struct SkillDataSet {
     pub wvw: Skillset,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Skills {
-    pub skills: SkillDataSet,
-}
-
 pub type TraitSet = [Option<TraitId>; 3];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -251,12 +245,6 @@ pub struct SpecializationSet {
     pub pve: Specialization,
     pub pvp: Specialization,
     pub wvw: Specialization,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Specializations {
-    pub specializations: SpecializationSet,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -414,6 +402,96 @@ impl EndpointWithId for Core {
 }
 
 impl Endpoint for Core {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Backstory {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/backstory", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Backstory {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Crafting {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/crafting", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Crafting {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Equipment {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/equipment", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Equipment {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Inventory {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/inventory", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Inventory {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Recipes {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/recipes", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Recipes {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+impl EndpointWithId for Training {
+    type IdType = CharacterId;
+
+    fn format_url(host: &str, id: &CharacterId) -> String {
+        format!("{}/{}/{}/training", host, Self::URL, id)
+    }
+}
+
+impl Endpoint for Training {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
