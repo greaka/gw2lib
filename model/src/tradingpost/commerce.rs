@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, BulkEndpoint, Endpoint};
+use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ListingDetails {
@@ -16,7 +16,9 @@ pub struct Listings {
     pub sells: Vec<ListingDetails>,
 }
 
-impl_id!(Listings, ItemId);
+impl EndpointWithId for Listings {
+    type IdType = ItemId;
+}
 impl Endpoint for Listings {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = false;
@@ -27,6 +29,10 @@ impl Endpoint for Listings {
 impl BulkEndpoint for Listings {
     const ALL: bool = false;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -43,7 +49,9 @@ pub struct Prices {
     pub sells: PriceDetails,
 }
 
-impl_id!(Prices, ItemId);
+impl EndpointWithId for Prices {
+    type IdType = ItemId;
+}
 impl Endpoint for Prices {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = false;
@@ -54,4 +62,8 @@ impl Endpoint for Prices {
 impl BulkEndpoint for Prices {
     const ALL: bool = false;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }

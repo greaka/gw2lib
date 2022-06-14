@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BulkEndpoint, Endpoint};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type CurrencyId = u64;
 
@@ -13,7 +13,9 @@ pub struct Currency {
     pub order: u8,
 }
 
-impl_id!(Currency, CurrencyId);
+impl EndpointWithId for Currency {
+    type IdType = CurrencyId;
+}
 impl Endpoint for Currency {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
@@ -24,4 +26,8 @@ impl Endpoint for Currency {
 impl BulkEndpoint for Currency {
     const ALL: bool = true;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }

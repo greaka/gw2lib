@@ -93,7 +93,7 @@ pub trait Requester: Sized + Sync {
 
     /// request a single item
     fn single<
-        T: DeserializeOwned + Clone + Send + Sync + EndpointWithId<I> + 'static,
+        T: DeserializeOwned + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -149,7 +149,7 @@ pub trait Requester: Sized + Sync {
 
     /// request all available ids
     fn ids<
-        T: DeserializeOwned + EndpointWithId<I> + Clone + Send + Sync + 'static,
+        T: DeserializeOwned + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Send + Sync + 'static,
     >(
         &self,
@@ -159,7 +159,13 @@ pub trait Requester: Sized + Sync {
 
     /// request multiple ids at once
     fn many<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + EndpointWithId<IdType = I>
+            + BulkEndpoint
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
     >(
         &self,
@@ -236,7 +242,7 @@ pub trait Requester: Sized + Sync {
     /// requests a page of items and returns the number of total items across
     /// all pages
     fn page<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
+        T: DeserializeOwned + EndpointWithId<IdType = I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -271,7 +277,13 @@ pub trait Requester: Sized + Sync {
     /// more cache friendly, being able to utilize the cache and inflight
     /// mechanisms.
     fn all<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + EndpointWithId<IdType = I>
+            + BulkEndpoint
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
@@ -290,7 +302,7 @@ pub trait Requester: Sized + Sync {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_ids_all<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
+        T: DeserializeOwned + EndpointWithId<IdType = I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -318,7 +330,7 @@ pub trait Requester: Sized + Sync {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_paging<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + 'static,
+        T: DeserializeOwned + EndpointWithId<IdType = I> + BulkEndpoint + Clone + Send + 'static,
         I: Display + DeserializeOwned + Hash + Clone + 'static,
     >(
         &self,
@@ -344,7 +356,13 @@ pub trait Requester: Sized + Sync {
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_requesting_ids<
-        T: DeserializeOwned + EndpointWithId<I> + BulkEndpoint + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + EndpointWithId<IdType = I>
+            + BulkEndpoint
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
@@ -478,7 +496,7 @@ fn set_common_headers<T: Endpoint, R: Requester>(
 /// returns the remaining ids not found in cache
 fn extract_many_from_cache<
     I: Display + Hash + 'static,
-    K: EndpointWithId<I> + Clone + Send + 'static,
+    K: EndpointWithId<IdType = I> + Clone + Send + 'static,
     Req: Requester,
 >(
     req: &Req,
@@ -522,7 +540,7 @@ fn cache_response<
 
 fn cache_response_many<
     I: Display + Hash + 'static,
-    K: DeserializeOwned + EndpointWithId<I> + Clone + Send + 'static,
+    K: DeserializeOwned + BulkEndpoint + EndpointWithId<IdType = I> + Clone + Send + 'static,
     Req: Requester,
 >(
     req: &Req,

@@ -385,10 +385,8 @@ pub struct Character {
     pub flags: Vec<Flags>,
 }
 
-impl EndpointWithId<CharacterId> for Character {
-    fn id(&self) -> &CharacterId {
-        &self.core.name
-    }
+impl EndpointWithId for Character {
+    type IdType = CharacterId;
 }
 
 impl Endpoint for Character {
@@ -401,12 +399,14 @@ impl Endpoint for Character {
 impl BulkEndpoint for Character {
     const ALL: bool = true;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.core.name
+    }
 }
 
-impl EndpointWithId<CharacterId> for Core {
-    fn id(&self) -> &CharacterId {
-        &self.name
-    }
+impl EndpointWithId for Core {
+    type IdType = CharacterId;
 
     fn format_url(host: &str, id: &CharacterId) -> String {
         format!("{}/{}/{}/core", host, Self::URL, id)

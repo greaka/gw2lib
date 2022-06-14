@@ -9,7 +9,7 @@ use crate::{
     guild::upgrades::GuildUpgradeId,
     items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId},
     misc::{colors::ColorId, minis::MiniPetId},
-    BulkEndpoint, Endpoint,
+    BulkEndpoint, Endpoint, EndpointWithId,
 };
 
 pub type ItemId = u32;
@@ -509,7 +509,10 @@ pub struct Item {
     pub details: Details,
 }
 
-impl_id!(Item, ItemId);
+impl EndpointWithId for Item {
+    type IdType = ItemId;
+}
+
 impl Endpoint for Item {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
@@ -520,4 +523,8 @@ impl Endpoint for Item {
 impl BulkEndpoint for Item {
     const ALL: bool = false;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }

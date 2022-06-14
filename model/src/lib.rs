@@ -2,17 +2,6 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
-#[macro_export]
-macro_rules! impl_id {
-    ($endpoint:ty, $id:ty) => {
-        impl crate::EndpointWithId<$id> for $endpoint {
-            fn id(&self) -> &$id {
-                &self.id
-            }
-        }
-    };
-}
-
 pub mod authenticated;
 pub mod game_mechanics;
 pub mod guild;
@@ -134,20 +123,19 @@ pub trait Endpoint: Sized {
     const VERSION: &'static str;
 }
 
-pub trait EndpointWithId<IdType>: Endpoint
-where
-    IdType: Display,
-{
-    fn id(&self) -> &IdType;
+pub trait EndpointWithId: Endpoint {
+    type IdType: Display;
 
-    fn format_url(host: &str, id: &IdType) -> String {
+    fn format_url(host: &str, id: &Self::IdType) -> String {
         format!("{}/{}/{}", host, Self::URL, id)
     }
 }
 
 pub trait FixedEndpoint: Endpoint {}
 
-pub trait BulkEndpoint: Endpoint {
+pub trait BulkEndpoint: EndpointWithId {
+    fn id(&self) -> &Self::IdType;
+
     /// whether this endpoint supports `ids=all`
     const ALL: bool;
     /// whether this endpoint supports pagination à la `page=1&page_size=200`

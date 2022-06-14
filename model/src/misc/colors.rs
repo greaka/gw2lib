@@ -1,7 +1,7 @@
 use either::Either;
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, BulkEndpoint, Endpoint};
+use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
@@ -60,7 +60,9 @@ pub struct Color {
     pub categories: Either<(Hue, Material, Rarity), [(); 0]>,
 }
 
-impl_id!(Color, ColorId);
+impl EndpointWithId for Color {
+    type IdType = ColorId;
+}
 impl Endpoint for Color {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
@@ -71,4 +73,8 @@ impl Endpoint for Color {
 impl BulkEndpoint for Color {
     const ALL: bool = true;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }

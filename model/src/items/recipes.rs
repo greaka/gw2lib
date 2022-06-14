@@ -3,7 +3,7 @@ pub type RecipeId = u32;
 use serde::{Deserialize, Serialize};
 
 pub use crate::authenticated::characters::Discipline;
-use crate::{items::ItemId, BulkEndpoint, Endpoint};
+use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub enum RecipeType {
@@ -97,7 +97,9 @@ pub struct Recipe {
     chat_link: String,
 }
 
-impl_id!(Recipe, RecipeId);
+impl EndpointWithId for Recipe {
+    type IdType = RecipeId;
+}
 impl Endpoint for Recipe {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = false;
@@ -108,4 +110,8 @@ impl Endpoint for Recipe {
 impl BulkEndpoint for Recipe {
     const ALL: bool = false;
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
 }
