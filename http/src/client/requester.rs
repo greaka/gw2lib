@@ -119,7 +119,7 @@ pub trait Requester: Sized + Sync {
             }
         };
 
-        let url = format!("{}/{}/{}", self.client().host, T::URL, id);
+        let url = T::format_url(&self.client().host, &id);
         let request = self.client().agent.get(&url);
         let request = set_common_headers::<T, Self>(self, request)?;
 
@@ -477,7 +477,7 @@ fn set_common_headers<T: Endpoint, R: Requester>(
 
 /// returns the remaining ids not found in cache
 fn extract_many_from_cache<
-    I: Hash + 'static,
+    I: Display + Hash + 'static,
     K: EndpointWithId<I> + Clone + Send + 'static,
     Req: Requester,
 >(
@@ -521,7 +521,7 @@ fn cache_response<
 }
 
 fn cache_response_many<
-    I: Hash + 'static,
+    I: Display + Hash + 'static,
     K: DeserializeOwned + EndpointWithId<I> + Clone + Send + 'static,
     Req: Requester,
 >(

@@ -123,20 +123,29 @@ pub trait Endpoint: Sized {
     const LOCALE: bool;
 
     /// endpoint url in the format `v2/account`
+    /// ### Remarks
+    /// Among other things, this URL is used to fetch ids.
+    /// `v2/characters/My Character/core` still requires `v2/characters` to be
+    /// set here. For special cases like characters, override the fetch url
+    /// of single items here: [EndpointWithId::format_url]
     const URL: &'static str;
 
     /// version of the endpoint to request
     const VERSION: &'static str;
 }
 
-pub trait EndpointWithId<IdType>: Endpoint {
+pub trait EndpointWithId<IdType>: Endpoint
+where
+    IdType: Display,
+{
     fn id(&self) -> &IdType;
+
+    fn format_url(host: &str, id: &IdType) -> String {
+        format!("{}/{}/{}", host, Self::URL, id)
+    }
 }
 
-pub trait FixedEndpoint: Endpoint {
-    /// whether this endpoint requires an id
-    const ID: bool = false;
-}
+pub trait FixedEndpoint: Endpoint {}
 
 pub trait BulkEndpoint: Endpoint {
     /// whether this endpoint supports `ids=all`
