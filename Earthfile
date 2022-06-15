@@ -24,12 +24,15 @@ prefetch-proxy:
 build-proxy:
   FROM +prefetch-proxy
 
-  COPY --dir proxy ./
+  COPY --dir proxy/src ./proxy/
   COPY --dir http/src ./http/
-  COPY --dir model ./
-  RUN cd proxy && cargo build --release
+  COPY --dir model/src ./model/
+  RUN --mount=type=cache,target=proxy/target \
+    cd proxy && \
+    cargo build --release && \
+    mv target/release/proxy ../artifact
 
-  SAVE ARTIFACT proxy/target/release/proxy /proxy
+  SAVE ARTIFACT artifact /proxy
 
 prefetch:
   FROM +tools
@@ -46,7 +49,8 @@ build-tests:
   
   DO +COPY_SRC
   
-  RUN cargo nextest archive --archive-file tests.tar.zst
+  RUN --mount=type=cache,target=target \
+    cargo nextest archive --archive-file tests.tar.zst
 
   SAVE ARTIFACT tests.tar.zst /tests.tar.zst
 
