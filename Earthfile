@@ -8,7 +8,7 @@ tools:
   ENV PATH="/root/.cargo/bin:${PATH}"
   RUN cargo install cargo-nextest
 
-  SAVE IMAGE tools
+  SAVE IMAGE --cache-hint tools
 
 prefetch-proxy:
   FROM +tools
@@ -61,7 +61,7 @@ docker-proxy:
   
   CMD ["/proxy"]
 
-  SAVE IMAGE gw2api-proxy
+  SAVE IMAGE --cache-hint gw2api-proxy
 
 test:
   FROM +tools
