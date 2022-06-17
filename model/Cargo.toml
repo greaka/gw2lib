@@ -7,14 +7,14 @@ workspace = "../"
 
 [lib]
 name = "gw2api_model"
-path = "src/lib.rs"  
+path = "src/lib.rs"
 
 [dependencies.either]
 version = "1.6.1"
 features = ["serde"]
 
 [dependencies.serde]
-version = "1.0.136"
+version = "1.0.137"
 features = [
     "derive"
 ]

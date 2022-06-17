@@ -2,6 +2,7 @@
 
 members = [
     "http",
+    "http-async",
     "model",
 ]
 

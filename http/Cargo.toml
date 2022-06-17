@@ -11,12 +11,12 @@ path = "src/lib.rs"
 [dependencies]
 chrono = "0.4.19"
 fxhash = "0.2.1"
-serde = "1.0.136"
+serde = "1.0.137"
 bus = "2.2.3"
 either = "1.6.1"
-rayon = "1.5.2"
-parking_lot = "0.12.0"
-thiserror = "1.0.30"
+rayon = "1.5.3"
+parking_lot = "0.12.1"
+thiserror = "1.0.31"
 
 [dependencies.ureq]
 version = "2.4.0"
