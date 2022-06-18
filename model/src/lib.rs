@@ -126,8 +126,8 @@ pub trait Endpoint: Sized {
 pub trait EndpointWithId: Endpoint {
     type IdType: Display;
 
-    fn format_url(host: &str, id: &Self::IdType) -> String {
-        format!("{}/{}/{}", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}", Self::URL, id)
     }
 }
 

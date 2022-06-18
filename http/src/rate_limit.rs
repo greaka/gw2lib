@@ -1,15 +1,15 @@
-use std::sync::Arc;
-
+use async_trait::async_trait;
 use chrono::{Duration, NaiveDateTime, Utc};
-use parking_lot::Mutex;
-use ureq::{Error, Middleware, MiddlewareNext, Request, Response};
 
+use crate::EndpointError;
+
+#[async_trait]
 pub trait RateLimiter: Send {
     /// takes the amount of requests
     /// returns the seconds to wait before executing them
-    fn take(&mut self, num: usize) -> u64;
+    async fn take(&mut self, num: usize) -> Result<u64, EndpointError>;
     /// incurs a penalty, indicating that the rate limit was hit
-    fn penalize(&mut self);
+    async fn penalize(&mut self) -> Result<(), EndpointError>;
 }
 
 pub struct BucketRateLimiter {
@@ -41,8 +41,9 @@ impl Default for BucketRateLimiter {
     }
 }
 
+#[async_trait]
 impl RateLimiter for BucketRateLimiter {
-    fn take(&mut self, num: usize) -> u64 {
+    async fn take(&mut self, num: usize) -> Result<u64, EndpointError> {
         let now = Utc::now().naive_utc();
         let max = (60_f64 * 1000_f64 * (self.burst as f64) / (self.refill as f64)) as i64;
         let base = now - Duration::milliseconds(max);
@@ -56,17 +57,17 @@ impl RateLimiter for BucketRateLimiter {
         // the api calculates the rate limit in intervals of 1s
         // as a result, this code ensures that we never hit it at the cost of a bit of
         // our burst
-        if millis < -1000 {
+        Ok(if millis < -1000 {
             0
         } else {
             let millis = millis.abs();
             let modulo = millis % 1000 != 0;
             let ceil = millis / 1000 + (modulo as i64);
             ceil as _
-        }
+        })
     }
 
-    fn penalize(&mut self) {
+    async fn penalize(&mut self) -> Result<(), EndpointError> {
         let ratio = 60 * 1000 / self.refill as i64;
         let now = Utc::now().naive_utc();
         if self.time < now {
@@ -75,39 +76,18 @@ impl RateLimiter for BucketRateLimiter {
         // the api penalizes us for half a request worth of time when we hit it while
         // rate limited
         self.time += Duration::milliseconds(ratio / 2);
+        Ok(())
     }
 }
 
 pub struct NoopRateLimiter;
+#[async_trait]
 impl RateLimiter for NoopRateLimiter {
-    fn take(&mut self, _num: usize) -> u64 {
-        0
+    async fn take(&mut self, _num: usize) -> Result<u64, EndpointError> {
+        Ok(0)
     }
 
-    fn penalize(&mut self) {}
-}
-
-pub(crate) struct UreqRateLimit<T: RateLimiter + 'static>(Arc<Mutex<T>>);
-
-impl<T: RateLimiter + 'static> UreqRateLimit<T> {
-    pub fn new(r: Arc<Mutex<T>>) -> Self {
-        Self(r)
-    }
-}
-
-impl<T: RateLimiter + 'static> Middleware for UreqRateLimit<T> {
-    fn handle(&self, request: Request, next: MiddlewareNext) -> Result<Response, Error> {
-        let sleep = { self.0.lock().take(1) };
-        if sleep > 0 {
-            std::thread::sleep(std::time::Duration::from_secs(sleep));
-        }
-
-        let res = next.handle(request);
-
-        if let Err(ureq::Error::Status(429, _)) = res {
-            self.0.lock().penalize();
-        }
-
-        res
+    async fn penalize(&mut self) -> Result<(), EndpointError> {
+        Ok(())
     }
 }

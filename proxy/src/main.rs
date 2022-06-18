@@ -1,7 +1,8 @@
-use std::{sync::Mutex, time::Duration};
+use std::{time::Duration};
 
+use tokio::sync::Mutex;
 use actix_web::{http::header::HeaderName, web, HttpRequest, HttpResponse, Responder};
-use gw2api_http::rate_limit::{BucketRateLimiter, RateLimiter};
+use gw2api::rate_limit::{BucketRateLimiter, RateLimiter};
 use reqwest::{header::HeaderValue, Method};
 
 #[actix_web::main]
@@ -38,7 +39,7 @@ async fn index(req: HttpRequest) -> impl Responder {
     let rate = req
         .app_data::<web::Data<Mutex<BucketRateLimiter>>>()
         .unwrap();
-    let dur = { rate.lock().unwrap().take(1) };
+    let dur = { rate.lock().await.take(1).await.unwrap() };
     tokio::time::sleep(Duration::from_secs(dur)).await;
     println!("{} - {:?}", spoof.url(), spoof.headers());
     let res = reqwest::Client::default().execute(spoof).await;

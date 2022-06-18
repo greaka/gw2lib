@@ -50,7 +50,7 @@ build-tests:
   DO +COPY_SRC
   
   RUN --mount=type=cache,target=target \
-    cargo nextest archive --archive-file tests.tar.zst
+    cargo nextest archive --archive-file tests.tar.zst --features=blocking
 
   SAVE ARTIFACT tests.tar.zst /tests.tar.zst
 

@@ -1,5 +1,6 @@
-use gw2api_http::Requester;
-use gw2api_model::items::Item;
+#![cfg(feature = "blocking")]
+
+use gw2api::{model::items::Item, Requester};
 
 pub mod setup;
 
@@ -9,7 +10,7 @@ macro_rules! parse_single {
         #[test]
         fn $name() {
             let client = crate::setup::setup();
-            let x: gw2api_model::items::Item = client.single($id).unwrap();
+            let x: gw2api::model::items::Item = client.single($id).unwrap();
             #[allow(clippy::redundant_closure_call)]
             ($validate)(x);
         }
@@ -19,7 +20,7 @@ macro_rules! parse_single {
 #[macro_export]
 macro_rules! check_type {
     ($name:ident) => {
-        |x: gw2api_model::items::Item| assert!(ItemType::from(x.details) == ItemType::$name)
+        |x: gw2api::model::items::Item| assert!(ItemType::from(x.details) == ItemType::$name)
     };
 }
 
@@ -31,8 +32,10 @@ fn parse_all() {
 }
 
 mod single {
-    use gw2api_http::Requester;
-    use gw2api_model::items::{Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType};
+    use gw2api::{
+        model::items::{Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType},
+        Requester,
+    };
     parse_single!(armor, 80248, check_type!(Armor));
     parse_single!(back, 77474, check_type!(Back));
     parse_single!(bag, 85371, check_type!(Bag));

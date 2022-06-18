@@ -396,8 +396,8 @@ impl BulkEndpoint for Character {
 impl EndpointWithId for Core {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/core", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/core", Self::URL, id)
     }
 }
 
@@ -411,8 +411,8 @@ impl Endpoint for Core {
 impl EndpointWithId for Backstory {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/backstory", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/backstory", Self::URL, id)
     }
 }
 
@@ -426,8 +426,8 @@ impl Endpoint for Backstory {
 impl EndpointWithId for Crafting {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/crafting", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/crafting", Self::URL, id)
     }
 }
 
@@ -441,8 +441,8 @@ impl Endpoint for Crafting {
 impl EndpointWithId for Equipment {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/equipment", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/equipment", Self::URL, id)
     }
 }
 
@@ -456,8 +456,8 @@ impl Endpoint for Equipment {
 impl EndpointWithId for Inventory {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/inventory", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/inventory", Self::URL, id)
     }
 }
 
@@ -471,8 +471,8 @@ impl Endpoint for Inventory {
 impl EndpointWithId for Recipes {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/recipes", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/recipes", Self::URL, id)
     }
 }
 
@@ -486,8 +486,8 @@ impl Endpoint for Recipes {
 impl EndpointWithId for Training {
     type IdType = CharacterId;
 
-    fn format_url(host: &str, id: &CharacterId) -> String {
-        format!("{}/{}/{}/training", host, Self::URL, id)
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/training", Self::URL, id)
     }
 }
 

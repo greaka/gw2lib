@@ -4,6 +4,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use fxhash::{FxHashMap, FxHasher};
 use gw2api_model::{Endpoint, Language};
@@ -12,42 +13,69 @@ use gw2api_model::{Endpoint, Language};
 /// ### Remarks
 /// expects the language to be part of the caching key where relevant
 /// (`E::LOCALE`)
+#[async_trait]
 pub trait Cache {
-    fn insert<T, I, E>(&mut self, id: &I, endpoint: T, expiring: NaiveDateTime, lang: Language)
-    where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+    async fn insert<T, I, E>(
+        &mut self,
+        id: &I,
+        endpoint: T,
+        expiring: NaiveDateTime,
+        lang: Language,
+    ) where
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint;
 
-    fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
+    async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint;
 
-    fn cleanup(&mut self);
+    async fn cleanup(&mut self);
 
-    fn wipe(&mut self) {
-        self.wipe_static();
-        self.wipe_authenticated();
+    async fn wipe(&mut self) {
+        self.wipe_static().await;
+        self.wipe_authenticated().await;
     }
 
-    fn wipe_static(&mut self);
+    async fn wipe_static(&mut self);
 
-    fn wipe_authenticated(&mut self);
+    async fn wipe_authenticated(&mut self);
+}
+
+#[async_trait]
+pub(crate) trait CleanupCache {
+    async fn cleanup(&mut self);
+}
+
+#[async_trait]
+impl<T> CleanupCache for T
+where
+    T: Cache + Send + Sync + 'static,
+{
+    async fn cleanup(&mut self) {
+        Cache::cleanup(self).await;
+    }
 }
 
 #[derive(Default)]
 pub struct InMemoryCache {
-    statics: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send>)>,
-    authenticated: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send>)>,
+    statics: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send + Sync>)>,
+    authenticated: FxHashMap<(TypeId, u64), (NaiveDateTime, Box<dyn Any + Send + Sync>)>,
 }
 
+#[async_trait]
 impl Cache for InMemoryCache {
-    fn insert<T, I, E>(&mut self, id: &I, endpoint: T, expiring: NaiveDateTime, lang: Language)
-    where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+    async fn insert<T, I, E>(
+        &mut self,
+        id: &I,
+        endpoint: T,
+        expiring: NaiveDateTime,
+        lang: Language,
+    ) where
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint,
     {
         let hash = hash::<T, I>(id, E::LOCALE.then(|| lang));
@@ -59,10 +87,10 @@ impl Cache for InMemoryCache {
         map.insert(hash, (expiring, Box::new(endpoint)));
     }
 
-    fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
+    async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint,
     {
         let hash = hash::<T, I>(id, E::LOCALE.then(|| lang));
@@ -87,17 +115,17 @@ impl Cache for InMemoryCache {
         }
     }
 
-    fn cleanup(&mut self) {
+    async fn cleanup(&mut self) {
         let now = Utc::now().naive_utc();
         self.statics.retain(|_, (time, _)| *time < now);
         self.authenticated.retain(|_, (time, _)| *time < now);
     }
 
-    fn wipe_static(&mut self) {
+    async fn wipe_static(&mut self) {
         self.statics.clear();
     }
 
-    fn wipe_authenticated(&mut self) {
+    async fn wipe_authenticated(&mut self) {
         self.authenticated.clear();
     }
 }
@@ -116,29 +144,33 @@ pub(crate) fn hash<T: 'static, I: 'static + Hash>(id: &I, lang: Option<Language>
 }
 
 pub struct NoopCache;
+#[async_trait]
 impl Cache for NoopCache {
-    fn insert<T, I, E>(&mut self, _id: &I, _endpoint: T, _expiring: NaiveDateTime, _lang: Language)
-    where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+    async fn insert<T, I, E>(
+        &mut self,
+        _id: &I,
+        _endpoint: T,
+        _expiring: NaiveDateTime,
+        _lang: Language,
+    ) where
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint,
     {
     }
 
-    fn get<T, I, E>(&mut self, _id: &I, _lang: Language) -> Option<T>
+    async fn get<T, I, E>(&mut self, _id: &I, _lang: Language) -> Option<T>
     where
-        T: Clone + Send + 'static,
-        I: Hash + 'static,
+        T: Clone + Send + Sync + 'static,
+        I: Hash + Sync + 'static,
         E: Endpoint,
     {
         None
     }
 
-    fn cleanup(&mut self) {}
+    async fn cleanup(&mut self) {}
 
-    fn wipe(&mut self) {}
+    async fn wipe_static(&mut self) {}
 
-    fn wipe_static(&mut self) {}
-
-    fn wipe_authenticated(&mut self) {}
+    async fn wipe_authenticated(&mut self) {}
 }

@@ -1,6 +1,10 @@
-use gw2api_http::Requester;
-use gw2api_model::authenticated::characters::{
-    Backstory, Character, CharacterId, Core, Crafting, Equipment, Inventory, Recipes, Training,
+#![cfg(feature = "blocking")]
+
+use gw2api::{
+    model::authenticated::characters::{
+        Backstory, Character, CharacterId, Core, Crafting, Equipment, Inventory, Recipes, Training,
+    },
+    Requester,
 };
 
 pub mod setup;
