@@ -210,8 +210,8 @@ impl<
     > requester::Requester<AUTHENTICATED, false> for Client<C, R, Conn, AUTHENTICATED>
 {
     type Caching = C;
-    type Connector = Conn;
     type RateLimiting = R;
+    type Connector = Conn;
 
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED> {
         self
@@ -244,8 +244,8 @@ impl<
     for CachedRequest<'_, C, R, Conn, AUTHENTICATED, FORCE>
 {
     type Caching = C;
-    type Connector = Conn;
     type RateLimiting = R;
+    type Connector = Conn;
 
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Conn, AUTHENTICATED> {
         self.client
@@ -316,9 +316,5 @@ fn periodically_cleanup_cache(cache: Arc<Mutex<dyn CleanupCache + Send + Sync + 
         }
     };
 
-    #[cfg(not(feature = "blocking"))]
-    tokio::spawn(task);
-
-    #[cfg(feature = "blocking")]
-    std::thread::spawn(|| crate::block::block(task));
+    crate::block::spawn(task);
 }

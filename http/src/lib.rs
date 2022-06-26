@@ -1,5 +1,4 @@
-#[cfg(feature = "blocking")]
-mod block;
+pub(crate) mod block;
 pub mod cache;
 mod client;
 pub mod rate_limit;

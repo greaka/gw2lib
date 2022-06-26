@@ -425,10 +425,8 @@ impl<T: Send> Drop for SenderGuard<'_, T> {
         let hash = self.hash;
 
         let task = async move { inflight.lock().await.remove(&hash) };
-        #[cfg(not(feature = "blocking"))]
-        tokio::spawn(task);
-        #[cfg(feature = "blocking")]
-        std::thread::spawn(|| crate::block::block(task));
+
+        crate::block::spawn(task);
     }
 }
 

@@ -27,8 +27,7 @@ fn inflight() {
     let main = chrono::Utc::now();
     let join = join.join().unwrap();
     let diff = (main - join).num_nanoseconds().unwrap().abs();
-    dbg!(diff);
-    assert!(diff < 100_000);
+    assert!(dbg!(diff) < 100_000);
 }
 
 mod cache {
@@ -46,7 +45,7 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(cached < 30_000);
+        assert!(dbg!(cached) < 30_000);
     }
 
     #[test]
@@ -58,7 +57,7 @@ mod cache {
         let _: Vec<ColorId> = client.ids::<Color, ColorId>().unwrap();
         let end = chrono::Utc::now();
         let cached = dbg!(end - start).num_nanoseconds().unwrap();
-        assert!(cached > 30_000);
+        assert!(dbg!(cached) > 30_000);
     }
 
     #[test]
@@ -70,7 +69,7 @@ mod cache {
         let _: Build = client.forced().get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(cached > 30_000);
+        assert!(dbg!(cached) > 30_000);
     }
 
     #[test]
@@ -86,7 +85,7 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(cached < 30_000);
+        assert!(dbg!(cached) < 30_000);
 
         std::thread::sleep(duration);
 
@@ -95,6 +94,32 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(cached > 30_000);
+        assert!(dbg!(cached) > 30_000);
+    }
+}
+
+mod rate_limit {
+    use tokio::sync::Mutex;
+    use gw2api::rate_limit::BucketRateLimiter;
+    use super::*;
+    use gw2api::Requester;
+
+    #[test]
+    fn hit() {
+        // 1 request every 3 seconds
+        let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::new(1, 20)));
+        let client = setup::setup().rate_limiter(rate_limiter);
+        let client = client.forced();
+
+        let start = chrono::Utc::now();
+
+        // first request
+        let _: Build = client.get().unwrap();
+        // rate limited request
+        let _: Build = client.get().unwrap();
+
+        let end = chrono::Utc::now();
+        let limit = (end - start).num_milliseconds();
+        assert!(dbg!(limit) > 3_000);
     }
 }
