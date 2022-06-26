@@ -386,7 +386,6 @@ impl Endpoint for Character {
 
 impl BulkEndpoint for Character {
     const ALL: bool = true;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.core.name

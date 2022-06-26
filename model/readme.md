@@ -1,6 +1,11 @@
 # Endpoints
 
-Last update: 21/01/06
+An endpoint gets marked as completed once it's mapped out and a small test runs in CI.
+
+Please do help out mapping the API! All you need to do is create the necessary struct and quickly implement 2 traits. If you need help, feel free to reach out.
+You don't even need to fork this library to test your struct!
+
+Last update: 22/06/18
 
 - achievements
   - [ ] achievements
@@ -106,7 +111,7 @@ Last update: 21/01/06
   - [ ] materials
   - pvp
     - [ ] amulets
-  - [x] recipes
+  - [ ] recipes
     - [ ] search
   - [ ] skins
 - map information

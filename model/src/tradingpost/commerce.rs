@@ -28,7 +28,6 @@ impl Endpoint for Listings {
 
 impl BulkEndpoint for Listings {
     const ALL: bool = false;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id
@@ -61,7 +60,6 @@ impl Endpoint for Prices {
 
 impl BulkEndpoint for Prices {
     const ALL: bool = false;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id

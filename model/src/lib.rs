@@ -139,5 +139,5 @@ pub trait BulkEndpoint: EndpointWithId {
     /// whether this endpoint supports `ids=all`
     const ALL: bool;
     /// whether this endpoint supports pagination à la `page=1&page_size=200`
-    const PAGING: bool;
+    const PAGING: bool = true;
 }

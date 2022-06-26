@@ -124,7 +124,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
             None,
         )?;
 
-        let response = self.client().client.request(request).await?;
+        let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let result =
             cache_response::<I, T, T, Self, AUTHENTICATED, FORCE>(self, &id, response).await?;
         // ignoring the error is fine here
@@ -226,9 +226,10 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                     let request =
                         build_request::<T, _, Self, AUTHENTICATED, FORCE>(self, T::URL, rest)?;
 
-                    let response = self.client().client.request(request).await?;
+                    let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
                     let mut result = result.lock().await;
                     let index = result.len();
+                    // TODO: consider postponing the locking
                     cache_response_many(self, response, &mut result).await?;
 
                     let mut txs = txs.lock().await;
@@ -258,6 +259,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let mut result = result.into_inner();
         for mut rx in rxs {
+            // TODO: check cache again
             result.push(rx.recv().await?);
         }
 
@@ -285,7 +287,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         let request =
             build_request::<T, _, Self, AUTHENTICATED, FORCE>(self, T::URL, Some(queries))?;
 
-        let response = self.client().client.request(request).await?;
+        let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let count = get_header(&response, "x-result-total").unwrap_or(0);
         cache_response_many(self, response, result).await?;
 
@@ -343,7 +345,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         let request =
             build_request::<T, _, Self, AUTHENTICATED, FORCE>(self, T::URL, Some("ids=all"))?;
 
-        let response = self.client().client.request(request).await?;
+        let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let count = get_header(&response, "x-result-total").unwrap_or(0);
         let mut result = Vec::with_capacity(count);
         cache_response_many(self, response, &mut result).await?;
@@ -513,13 +515,27 @@ async fn get_or_ids<
 
     let request = build_request::<T, String, Req, A, F>(req, T::URL, None)?;
 
-    let response = req.client().client.request(request).await?;
+    let response = exec_req::<Req, A, F>(req, request).await?;
     let result = cache_response::<(), K, T, Req, A, F>(req, &(), response).await?;
     // ignoring the error is fine here
     // the receiving side will check the cache if nothing got sent
     let _ = tx.lock().await.send(result.clone());
 
     Ok(result)
+}
+
+async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
+    req: &Req,
+    request: Request<hyper::Body>,
+) -> EndpointResult<Response<hyper::Body>> {
+    let time = { req.client().rate_limiter.lock().await.take(1).await? };
+    tokio::time::sleep(std::time::Duration::from_secs(time)).await;
+
+    req.client()
+        .client
+        .request(request)
+        .await
+        .map_err(Into::into)
 }
 
 fn build_request<

@@ -25,7 +25,6 @@ impl Endpoint for Currency {
 
 impl BulkEndpoint for Currency {
     const ALL: bool = true;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id

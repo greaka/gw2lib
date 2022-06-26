@@ -109,7 +109,6 @@ impl Endpoint for Recipe {
 
 impl BulkEndpoint for Recipe {
     const ALL: bool = false;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id

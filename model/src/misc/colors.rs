@@ -72,7 +72,6 @@ impl Endpoint for Color {
 
 impl BulkEndpoint for Color {
     const ALL: bool = true;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id

@@ -522,7 +522,6 @@ impl Endpoint for Item {
 
 impl BulkEndpoint for Item {
     const ALL: bool = false;
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id
