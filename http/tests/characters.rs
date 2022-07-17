@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2api::{
+use gw2lib::{
     model::authenticated::characters::{
         Backstory, Character, CharacterId, Core, Crafting, Equipment, Inventory, Recipes, Training,
     },

@@ -14,7 +14,7 @@ mod blocking;
 
 use chrono::Duration;
 use fxhash::FxHashMap;
-use gw2api_model::Language;
+use gw2lib_model::Language;
 use hyper::client::{connect::Connect, HttpConnector};
 use hyper_rustls::HttpsConnector;
 use static_init::dynamic;
@@ -152,8 +152,8 @@ impl<
     /// sets the cache
     /// ## Example
     /// ```
-    /// use gw2api_http::cache::InMemoryCache;
-    /// use gw2api_http::Client;
+    /// use gw2lib::cache::InMemoryCache;
+    /// use gw2lib::Client;
     ///
     /// let client = Client::empty().cache(InMemoryCache::default());
     pub fn cache<NC: Cache + Send + Sync + 'static>(
@@ -178,9 +178,9 @@ impl<
     /// ```
     /// use std::sync::Arc;
     /// use tokio::sync::Mutex;
-    /// use gw2api_http::cache::InMemoryCache;
-    /// use gw2api_http::Client;
-    /// use gw2api_http::rate_limit::BucketRateLimiter;
+    /// use gw2lib::cache::InMemoryCache;
+    /// use gw2lib::Client;
+    /// use gw2lib::rate_limit::BucketRateLimiter;
     ///
     /// let client = Client::empty().cache(InMemoryCache::default());
     /// let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::default()));
@@ -210,8 +210,8 @@ impl<
     > requester::Requester<AUTHENTICATED, false> for Client<C, R, Conn, AUTHENTICATED>
 {
     type Caching = C;
-    type RateLimiting = R;
     type Connector = Conn;
+    type RateLimiting = R;
 
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED> {
         self
@@ -244,8 +244,8 @@ impl<
     for CachedRequest<'_, C, R, Conn, AUTHENTICATED, FORCE>
 {
     type Caching = C;
-    type RateLimiting = R;
     type Connector = Conn;
+    type RateLimiting = R;
 
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Conn, AUTHENTICATED> {
         self.client

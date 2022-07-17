@@ -1,5 +1,4 @@
-use std::future::Future;
-use std::marker::Send;
+use std::{future::Future, marker::Send};
 
 std::thread_local! {
     static RT: tokio::runtime::Runtime = tokio::runtime::Builder::new_current_thread()
@@ -16,7 +15,10 @@ where
     RT.with(|rt| rt.block_on(fut))
 }
 
-pub(crate) fn spawn<F: Future + Send + 'static>(task: F) where <F as Future>::Output: Send + 'static {
+pub(crate) fn spawn<F: Future + Send + 'static>(task: F)
+where
+    <F as Future>::Output: Send + 'static,
+{
     #[cfg(not(feature = "blocking"))]
     tokio::spawn(task);
 

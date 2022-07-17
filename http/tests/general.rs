@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use gw2api::{
+use gw2lib::{
     model::misc::{build::Build, colors::ColorId},
     Requester,
 };
@@ -33,7 +33,7 @@ fn inflight() {
 mod cache {
     use std::time::Duration;
 
-    use gw2api::model::misc::colors::Color;
+    use gw2lib::model::misc::colors::Color;
 
     use super::*;
     #[test]
@@ -99,10 +99,10 @@ mod cache {
 }
 
 mod rate_limit {
+    use gw2lib::{rate_limit::BucketRateLimiter, Requester};
     use tokio::sync::Mutex;
-    use gw2api::rate_limit::BucketRateLimiter;
+
     use super::*;
-    use gw2api::Requester;
 
     #[test]
     fn hit() {

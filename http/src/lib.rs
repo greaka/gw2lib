@@ -3,7 +3,7 @@ pub mod cache;
 mod client;
 pub mod rate_limit;
 pub use client::*;
-pub use gw2api_model as model;
+pub use gw2lib_model as model;
 use thiserror::Error;
 use tokio::sync::broadcast::error::RecvError;
 

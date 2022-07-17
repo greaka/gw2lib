@@ -65,7 +65,7 @@ Last update: 22/06/18
     - [ ] stats
     - [ ] games
     - [ ] standings
-  - [x] tokeninfo
+  - [ ] tokeninfo
 - daily rewards
   - [ ] dailycrafting
   - [ ] mapchests
@@ -119,8 +119,8 @@ Last update: 22/06/18
   - [ ] maps
 - Miscellaneous
   - [x] build
-  - [x] colors
-  - [x] currencies
+  - [ ] colors
+  - [ ] currencies
   - [ ] dungeons
   - [ ] files
   - [ ] quaggans
@@ -141,11 +141,11 @@ Last update: 22/06/18
       - [ ] leaderboards
 - trading post
   - commerce
-    - [x] listings
+    - [ ] listings
     - [ ] exchange
       - [ ] coins
       - [ ] gems
-    - [x] prices
+    - [ ] prices
 - world v world
   - [ ] wvw
     - [ ] abilities

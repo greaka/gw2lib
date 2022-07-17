@@ -61,14 +61,14 @@ docker-proxy:
   
   CMD ["/proxy"]
 
-  SAVE IMAGE --cache-hint gw2api-proxy
+  SAVE IMAGE --cache-hint gw2lib-proxy
 
 test:
   FROM +tools
 
   DO +BASE_TESTS
 
-  WITH DOCKER --compose integration-compose.yml --load gw2api-proxy=+docker-proxy
+  WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
     RUN --no-cache cargo nextest run --archive-file tests.tar.zst
   END
 
@@ -77,7 +77,7 @@ test-ignored:
 
   DO +BASE_TESTS
 
-  WITH DOCKER --compose integration-compose.yml --load gw2api-proxy=+docker-proxy
+  WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
     RUN --no-cache cargo nextest run --archive-file tests.tar.zst --run-ignored ignored-only
   END
 
@@ -86,7 +86,7 @@ test-all:
 
   DO +BASE_TESTS
 
-  WITH DOCKER --compose integration-compose.yml --load gw2api-proxy=+docker-proxy
+  WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
     RUN --no-cache cargo nextest run --archive-file tests.tar.zst && \
         cargo nextest run --archive-file tests.tar.zst --run-ignored ignored-only
   END

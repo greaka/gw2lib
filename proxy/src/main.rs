@@ -2,7 +2,7 @@ use std::{time::Duration};
 
 use tokio::sync::Mutex;
 use actix_web::{http::header::HeaderName, web, HttpRequest, HttpResponse, Responder};
-use gw2api::rate_limit::{BucketRateLimiter, RateLimiter};
+use gw2lib::rate_limit::{BucketRateLimiter, RateLimiter};
 use reqwest::{header::HeaderValue, Method};
 
 #[actix_web::main]

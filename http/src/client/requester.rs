@@ -13,7 +13,7 @@ use chrono::{Duration, NaiveDateTime, Utc};
 use either::Either;
 use futures::{stream::FuturesUnordered, StreamExt};
 use fxhash::FxHashMap;
-use gw2api_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language};
+use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language};
 use hyper::{body::Buf, client::connect::Connect, Request, Response, Uri};
 use serde::de::DeserializeOwned;
 use tokio::sync::{
@@ -41,9 +41,9 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// function ## Example
     /// ```
     /// use chrono::Duration;
-    /// use gw2api_http::{Client, Requester};
-    /// use gw2api_http::gw2api_model::items::Item;
-    /// use gw2api_http::gw2api_model::misc::build::Build;
+    /// use gw2lib::{Client, Requester};
+    /// use gw2lib::model::items::Item;
+    /// use gw2lib::model::misc::build::Build;
     ///
     /// let client = Client::default();
     /// let cache_client = client.cached(Duration::seconds(5));
@@ -66,8 +66,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// forces a fresh copy from the api
     /// ## Example
     /// ```
-    /// use gw2api_http::{Client, Requester};
-    /// use gw2api_http::gw2api_model::misc::build::Build;
+    /// use gw2lib::{Client, Requester};
+    /// use gw2lib::model::misc::build::Build;
     ///
     /// let client = Client::default();
     /// let build_id: Build = client.get().unwrap();
@@ -136,7 +136,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
     /// retrieves an item from cache
     /// ```
-    /// use gw2api_http::{gw2api_model::items::Item, Client, Requester};
+    /// use gw2lib::{model::items::Item, Client, Requester};
     ///
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_get(&19721);

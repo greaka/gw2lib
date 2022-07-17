@@ -7,7 +7,7 @@ use std::{
 use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use fxhash::{FxHashMap, FxHasher};
-use gw2api_model::{Endpoint, Language};
+use gw2lib_model::{Endpoint, Language};
 
 /// the interface for caching API responses
 /// ### Remarks

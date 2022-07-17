@@ -4,7 +4,7 @@ use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type CurrencyId = u64;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Currency {
     pub id: CurrencyId,
     pub name: String,

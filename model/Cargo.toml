@@ -1,12 +1,12 @@
 [package]
-name = "gw2api-model"
+name = "gw2lib-model"
 version = "0.1.0"
 authors = ["Greaka <cargo@greaka.de>"]
 edition = "2021"
 workspace = "../"
 
 [lib]
-name = "gw2api_model"
+name = "gw2lib_model"
 path = "src/lib.rs"
 
 [dependencies.either]

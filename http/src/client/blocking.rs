@@ -1,7 +1,7 @@
 use std::{fmt::Display, hash::Hash};
 
 use chrono::Duration;
-use gw2api_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
+use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
 use serde::de::DeserializeOwned;
 
 use super::requester::Requester as Req;
@@ -20,9 +20,9 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// function ## Example
     /// ```
     /// use chrono::Duration;
-    /// use gw2api_http::{Client, Requester};
-    /// use gw2api_http::gw2api_model::items::Item;
-    /// use gw2api_http::gw2api_model::misc::build::Build;
+    /// use gw2lib::{Client, Requester};
+    /// use gw2lib::model::items::Item;
+    /// use gw2lib::model::misc::build::Build;
     ///
     /// let client = Client::default();
     /// let cache_client = client.cached(Duration::seconds(5));
@@ -42,8 +42,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// forces a fresh copy from the api
     /// ## Example
     /// ```
-    /// use gw2api_http::{Client, Requester};
-    /// use gw2api_http::gw2api_model::misc::build::Build;
+    /// use gw2lib::{Client, Requester};
+    /// use gw2lib::model::misc::build::Build;
     ///
     /// let client = Client::default();
     /// let build_id: Build = client.get().unwrap();
@@ -78,7 +78,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 
     /// retrieves an item from cache
     /// ```
-    /// use gw2api_http::{gw2api_model::items::Item, Client, Requester};
+    /// use gw2lib::{model::items::Item, Client, Requester};
     ///
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_get(&19721);

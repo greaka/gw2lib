@@ -2,7 +2,7 @@
 
 use std::net::TcpStream;
 
-use gw2api::{self, cache::InMemoryCache, rate_limit::NoopRateLimiter, Client};
+use gw2lib::{self, cache::InMemoryCache, rate_limit::NoopRateLimiter, Client};
 use hyper::client::HttpConnector;
 
 const API_KEY: &str = "564F181A-F0FC-114A-A55D-3C1DCD45F3767AF3848F-AB29-4EBF-9594-F91E6A75E015";
