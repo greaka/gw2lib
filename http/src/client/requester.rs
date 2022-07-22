@@ -22,7 +22,8 @@ use tokio::sync::{
 };
 
 use crate::{
-    cache::hash, Cache, CachedRequest, Client, EndpointError, EndpointResult, Inflight, RateLimiter,
+    cache::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult, Inflight,
+    RateLimiter,
 };
 
 #[async_trait]
@@ -683,12 +684,18 @@ async fn parse_response<
 ) -> Result<(NaiveDateTime, K), EndpointError> {
     let status = response.status();
     if !status.is_success() {
-        if status.as_u16() == 429 {
-            let _ = req.client().rate_limiter.lock().await.penalize().await;
-        }
-        let bytes = hyper::body::to_bytes(response.into_body()).await?;
-        let body = String::from_utf8_lossy(&bytes);
-        return Err(EndpointError::ApiError(status, body.to_string()));
+        return Err(EndpointError::ApiError(match status.as_u16() {
+            401 => ApiError::Unauthorized,
+            429 => {
+                let _ = req.client().rate_limiter.lock().await.penalize().await;
+                ApiError::RateLimited
+            }
+            _ => {
+                let bytes = hyper::body::to_bytes(response.into_body()).await?;
+                let body = String::from_utf8_lossy(&bytes);
+                ApiError::Other(status, body.to_string())
+            }
+        }));
     }
     let expires = get_cache_expiry(req, &response);
     let body = hyper::body::aggregate(response.into_body()).await?;

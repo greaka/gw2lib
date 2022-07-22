@@ -53,57 +53,6 @@ impl From<&str> for Language {
 
 pub type TimeStamp = String;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-#[must_use]
-pub enum ApiResult<T> {
-    Ok(T),
-    Err(ApiError),
-}
-
-impl<T> ApiResult<T> {
-    pub fn to_result(self) -> Result<T, ApiError> {
-        Result::<T, ApiError>::from(self)
-    }
-}
-
-impl<T> From<ApiResult<T>> for Result<T, ApiError> {
-    fn from(val: ApiResult<T>) -> Self {
-        match val {
-            ApiResult::Ok(data) => Ok(data),
-            ApiResult::Err(err) => Err(err),
-        }
-    }
-}
-
-impl<T> From<ApiResult<T>> for Result<T, Box<dyn std::error::Error>> {
-    fn from(val: ApiResult<T>) -> Self {
-        match val {
-            ApiResult::Ok(data) => Ok(data),
-            ApiResult::Err(err) => Err(Box::new(err)),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ApiError {
-    text: String,
-}
-
-impl Display for ApiError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.text)
-    }
-}
-
-impl std::fmt::Debug for ApiError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        Display::fmt(&self, f)
-    }
-}
-
-impl std::error::Error for ApiError {}
-
 pub trait Endpoint: Sized {
     /// whether this endpoint requires authentication
     const AUTHENTICATED: bool;
@@ -134,10 +83,10 @@ pub trait EndpointWithId: Endpoint {
 pub trait FixedEndpoint: Endpoint {}
 
 pub trait BulkEndpoint: EndpointWithId {
-    fn id(&self) -> &Self::IdType;
-
     /// whether this endpoint supports `ids=all`
     const ALL: bool;
     /// whether this endpoint supports pagination à la `page=1&page_size=200`
     const PAGING: bool = true;
+
+    fn id(&self) -> &Self::IdType;
 }
