@@ -36,7 +36,7 @@ impl Endpoint for Account {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account";
-    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
+    const VERSION: &'static str = "2022-07-22T00:00:00.000Z";
 }
 
 impl FixedEndpoint for Account {}
