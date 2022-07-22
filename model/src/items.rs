@@ -224,6 +224,7 @@ pub enum UnlockType {
     Content,
     CraftingRecipe,
     Dye,
+    JadeBotSkin,
     GliderSkin,
     GearLoadoutTab,
     BuildLibrarySlot,
@@ -517,7 +518,7 @@ impl Endpoint for Item {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/items";
-    const VERSION: &'static str = "2021-03-21T00:00:00.000Z";
+    const VERSION: &'static str = "2022-07-22T00:00:00.000Z";
 }
 
 impl BulkEndpoint for Item {
