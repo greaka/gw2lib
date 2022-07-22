@@ -5,7 +5,7 @@ An endpoint gets marked as completed once it's mapped out and a small test runs 
 Please do help out mapping the API! All you need to do is create the necessary struct and quickly implement 2 traits. If you need help, feel free to reach out.
 You don't even need to fork this library to test your struct!
 
-Last update: 22/06/18
+Last update: 22/07/22
 
 - achievements
   - [ ] achievements
@@ -127,7 +127,7 @@ Last update: 22/06/18
   - [ ] minis
   - [ ] raids
   - [ ] titles
-  - [ ] worlds
+  - [x] worlds
 - Story
   - backstory
     - [ ] answers
