@@ -5,6 +5,8 @@ An endpoint gets marked as completed once it's mapped out and a small test runs 
 Please do help out mapping the API! All you need to do is create the necessary struct and quickly implement 2 traits. If you need help, feel free to reach out.
 You don't even need to fork this library to test your struct!
 
+Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/commit/bcb0bd3e99f135f54fb01d088714ce8471a56d86)
+
 Last update: 22/07/22
 
 - achievements
