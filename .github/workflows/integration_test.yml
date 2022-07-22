@@ -57,5 +57,4 @@ jobs:
     - name: download latest earthly
       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
     - name: build and run test
-      continue-on-error: true
       run: earthly --ci --remote-cache=greaka/gw2lib:cache -P +test-ignored
