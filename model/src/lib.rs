@@ -85,8 +85,10 @@ pub trait FixedEndpoint: Endpoint {}
 pub trait BulkEndpoint: EndpointWithId {
     /// whether this endpoint supports `ids=all`
     const ALL: bool;
-    /// whether this endpoint supports pagination à la `page=1&page_size=200`
-    const PAGING: bool = true;
 
     fn id(&self) -> &Self::IdType;
 }
+
+pub trait PagedEndpoint: Endpoint {}
+
+impl<T: BulkEndpoint> PagedEndpoint for T {}

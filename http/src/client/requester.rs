@@ -13,7 +13,9 @@ use chrono::{Duration, NaiveDateTime, Utc};
 use either::Either;
 use futures::{stream::FuturesUnordered, StreamExt};
 use fxhash::FxHashMap;
-use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language};
+use gw2lib_model::{
+    BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language, PagedEndpoint,
+};
 use hyper::{body::Buf, client::connect::Connect, Request, Response, Uri};
 use serde::de::DeserializeOwned;
 use tokio::sync::{
@@ -269,16 +271,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
     /// requests a page of items and returns the number of total items across
     /// all pages
-    async fn page<
-        T: DeserializeOwned
-            + EndpointWithId<IdType = I>
-            + BulkEndpoint
-            + Clone
-            + Send
-            + Sync
-            + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
-    >(
+    async fn page<T: DeserializeOwned + PagedEndpoint + Clone + Send + Sync + 'static>(
         &self,
         page: usize,
         page_size: u8,
@@ -290,7 +283,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let count = get_header(&response, "x-result-total").unwrap_or(0);
-        cache_response_many(self, response, result).await?;
+        let (_expires, res): (_, Vec<T>) = parse_response(self, response).await?;
+        result.extend_from_slice(&res);
 
         Ok(count)
     }
@@ -358,21 +352,10 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     async fn get_all_by_paging<
-        T: DeserializeOwned
-            + EndpointWithId<IdType = I>
-            + BulkEndpoint
-            + Clone
-            + Send
-            + Sync
-            + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
+        T: DeserializeOwned + PagedEndpoint + Clone + Send + Sync + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
-        if !T::PAGING {
-            return Err(EndpointError::UnsupportedEndpointQuery);
-        }
-
         let mut result = Vec::with_capacity(200);
         let max_items = self.page(0, 200, &mut result).await?;
         let remaining = max_items.saturating_sub(200);
@@ -638,7 +621,7 @@ async fn cache_response<
     id: &I,
     response: Response<hyper::Body>,
 ) -> Result<K, EndpointError> {
-    let (expires, result): (_, K) = parse_response(response, req).await?;
+    let (expires, result): (_, K) = parse_response(req, response).await?;
     let res = result.clone();
     {
         let mut cache = req.client().cache.lock().await;
@@ -660,7 +643,7 @@ async fn cache_response_many<
     response: Response<hyper::Body>,
     result: &mut Vec<K>,
 ) -> Result<(), EndpointError> {
-    let (expires, res): (_, Vec<K>) = parse_response(response, req).await?;
+    let (expires, res): (_, Vec<K>) = parse_response(req, response).await?;
     {
         let mut cache = req.client().cache.lock().await;
         for t in res {
@@ -679,8 +662,8 @@ async fn parse_response<
     const A: bool,
     const F: bool,
 >(
-    response: Response<hyper::Body>,
     req: &Req,
+    response: Response<hyper::Body>,
 ) -> Result<(NaiveDateTime, K), EndpointError> {
     let status = response.status();
     if !status.is_success() {
