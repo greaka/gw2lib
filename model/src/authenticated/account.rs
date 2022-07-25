@@ -1,3 +1,4 @@
+mod bank;
 mod wallet;
 
 use serde::{Deserialize, Serialize};
