@@ -7,7 +7,7 @@ You don't even need to fork this library to test your struct!
 
 Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/commit/bcb0bd3e99f135f54fb01d088714ce8471a56d86)
 
-Last update: 22/07/22
+Last update: 2022/07/25
 
 - achievements
   - [ ] achievements
@@ -46,7 +46,7 @@ Last update: 22/07/22
     - [ ] recipes
     - [ ] skins
     - [ ] titles
-    - [ ] wallet
+    - [x] wallet
     - [ ] worldbosses
   - characters
     - [x] :id
