@@ -37,7 +37,7 @@ pub struct Bank(pub Vec<Option<BankItem>>);
 impl Endpoint for Bank {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
-    const URL: &'static str = "v2/account/materials";
+    const URL: &'static str = "v2/account/bank";
     const VERSION: &'static str = "2022-07-25T00:00:00.000Z";
 }
 
