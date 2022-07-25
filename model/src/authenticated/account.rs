@@ -1,6 +1,6 @@
-mod materials;
-mod bank;
-mod wallet;
+pub mod materials;
+pub mod bank;
+pub mod wallet;
 
 use serde::{Deserialize, Serialize};
 
