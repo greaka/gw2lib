@@ -1,7 +1,7 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::Requester;
-use gw2lib_model::authenticated::account::wallet::Wallet;
+use gw2lib::model::authenticated::account::wallet::Wallet;
 
 pub mod setup;
 
