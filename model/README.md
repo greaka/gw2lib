@@ -18,7 +18,7 @@ Last update: 22/07/22
 - authenticated
   - [x] account
     - [ ] achievements
-    - [ ] bank
+    - [x] bank
     - [ ] dailycrafting
     - [ ] dungeons
     - [ ] dyes
@@ -34,7 +34,7 @@ Last update: 22/07/22
     - [ ] masteries
     - mastery
       - [ ] points
-    - [ ] materials
+    - [x] materials
     - [ ] minis
     - mounts
       - [ ] skins
