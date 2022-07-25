@@ -1,3 +1,5 @@
+mod wallet;
+
 use serde::{Deserialize, Serialize};
 
 pub use crate::misc::worlds::WorldId;
