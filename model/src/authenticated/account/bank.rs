@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    items,
     items::{itemstats::StatsId, skins::SkinId, AttributeType, ItemId},
     misc::colors::ColorId,
     Endpoint, FixedEndpoint,
