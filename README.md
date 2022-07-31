@@ -1,4 +1,4 @@
-# GW2 API library [![Build Status](https://img.shields.io/github/workflow/status/greaka/gw2lib/integration_test/master)](https://github.com/greaka/gw2lib/actions/workflows/integration_test.yml) [![Latest Version](https://img.shields.io/crates/v/gw2lib.svg)](https://crates.io/crates/gw2lib) [![](https://img.shields.io/static/v1?label=Get%20Help&message=on%20Discord&style=flat&color=5865f2&labelColor=555&logo=discord&logoColor=fff)](https://discord.gg/bF7Mg38yrx)
+# GW2 API library [![Build Status](https://img.shields.io/github/workflow/status/greaka/gw2lib/integration_test/master)](https://github.com/greaka/gw2lib/actions/workflows/integration_test.yml) [![Latest Version](https://img.shields.io/crates/v/gw2lib-model.svg)](https://crates.io/crates/gw2lib) [![](https://img.shields.io/static/v1?label=Get%20Help&message=on%20Discord&style=flat&color=5865f2&labelColor=555&logo=discord&logoColor=fff)](https://discord.gg/bF7Mg38yrx)
 
 **gw2lib is an API wrapper for the game Guild Wars 2**
 
@@ -66,74 +66,7 @@ Please contribute any endpoints that you define additionally!
 
 ## Contributing
 
-Missing endpoints are easy to add! Here are two examples:
-
-### Fixed Endpoints
-
-Fixed endpoints are endpoints that do not require or support ids, like the build endpoint.
-
-These endpoints require the use of the `get` method: `client.get().await.unwrap()`
-
-```rust
-use serde::{Deserialize, Serialize};
-
-use gw2lib::model::{Endpoint, FixedEndpoint};
-
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-pub struct Build {
-    pub id: u64,
-}
-
-impl Endpoint for Build {
-    const AUTHENTICATED: bool = false;
-    const LOCALE: bool = false;
-    const URL: &'static str = "v2/build";
-    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
-}
-
-impl FixedEndpoint for Build {}
-```
-
-### Bulk Endpoints
-
-Bulk endpoints are endpoints that support ids, like the currencies endpoint.
-
-These endpoints support methods like `ids`, `single`, `many`, `all`, and more.
-
-```rust
-use serde::{Deserialize, Serialize};
-
-use gw2lib::model::{BulkEndpoint, Endpoint, EndpointWithId};
-
-pub type CurrencyId = u64;
-
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-pub struct Currency {
-    pub id: CurrencyId,
-    pub name: String,
-    pub description: String,
-    pub icon: String,
-    pub order: u8,
-}
-
-impl EndpointWithId for Currency {
-    type IdType = CurrencyId;
-}
-impl Endpoint for Currency {
-    const AUTHENTICATED: bool = false;
-    const LOCALE: bool = true;
-    const URL: &'static str = "v2/currencies";
-    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
-}
-
-impl BulkEndpoint for Currency {
-    const ALL: bool = true;
-
-    fn id(&self) -> &Self::IdType {
-        &self.id
-    }
-}
-```
+Missing endpoints are easy to add! [Here](https://github.com/greaka/gw2lib/commit/bcb0bd3e99f135f54fb01d088714ce8471a56d86) is an example
 
 #### License
 

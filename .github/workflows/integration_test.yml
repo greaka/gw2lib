@@ -1,6 +1,6 @@
 name: integration_test
 
-'on':
+on:
   push:
     branches:
       - master
@@ -9,6 +9,7 @@ name: integration_test
       - master
   schedule:
     - cron: '30 5 * * *'
+  workflow_dispatch:
 
 jobs:
   test:
