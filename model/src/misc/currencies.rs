@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
-pub type CurrencyId = u64;
+pub type CurrencyId = u16;
 
 #[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
 pub struct Currency {

@@ -1,7 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::Requester;
-use gw2lib::model::authenticated::account::Account;
+use gw2lib::{model::authenticated::account::Account, Requester};
 
 pub mod setup;
 

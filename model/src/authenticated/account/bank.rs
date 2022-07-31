@@ -1,37 +1,10 @@
-use std::collections::BTreeMap;
-
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    items::{itemstats::StatsId, skins::SkinId, AttributeType, ItemId},
-    misc::colors::ColorId,
-    Endpoint, FixedEndpoint,
-};
+use crate::{authenticated::characters::InventoryItem, Endpoint, FixedEndpoint};
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-pub struct BankItemStats {
-    pub id: StatsId,
-    pub attributes: BTreeMap<AttributeType, u16>,
-}
-
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-pub struct BankItem {
-    pub id: ItemId,
-    pub count: u32,
-    pub charges: Option<u32>,
-    pub skin: Option<SkinId>,
-    pub dyes: Option<ColorId>,
-    pub upgrades: Option<Vec<ItemId>>,
-    pub upgrade_slot_indices: Option<Vec<u32>>,
-    pub infusions: Option<Vec<ItemId>>,
-    pub binding: Option<String>,
-    pub bound_to: Option<String>,
-    pub stats: Option<BankItemStats>,
-}
-
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
 #[serde(transparent)]
-pub struct Bank(pub Vec<Option<BankItem>>);
+pub struct Bank(pub Vec<Option<InventoryItem>>);
 
 impl Endpoint for Bank {
     const AUTHENTICATED: bool = true;

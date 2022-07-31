@@ -128,7 +128,7 @@ pub struct InfusionSlot {
     pub item_id: Option<ItemId>,
 }
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize, Ord, Eq)]
+#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize, Ord, Eq, Hash)]
 pub enum AttributeType {
     AgonyResistance,
     BoonDuration,

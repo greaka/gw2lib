@@ -1,5 +1,5 @@
-pub mod materials;
 pub mod bank;
+pub mod materials;
 pub mod wallet;
 
 use serde::{Deserialize, Serialize};

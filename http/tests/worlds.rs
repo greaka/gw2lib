@@ -1,7 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::Requester;
-use gw2lib::model::misc::worlds::World;
+use gw2lib::{model::misc::worlds::World, Requester};
 
 pub mod setup;
 

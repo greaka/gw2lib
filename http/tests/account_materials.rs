@@ -1,7 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::Requester;
-use gw2lib::model::authenticated::account::materials::Materials;
+use gw2lib::{model::authenticated::account::materials::Materials, Requester};
 
 pub mod setup;
 

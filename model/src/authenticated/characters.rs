@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
     game_mechanics::{skills::SkillId, specializations::SpecializationId, traits::TraitId},
-    items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, ItemId},
+    items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, AttributeType, ItemId},
     misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,
     wvw::abilities::AbilityId,
@@ -90,7 +92,7 @@ pub struct Crafting {
     pub crafting: Vec<Craft>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Slot {
     HelmAquatic,
     Backpack,
@@ -116,35 +118,19 @@ pub enum Slot {
     Pick,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "PascalCase")]
-#[serde(deny_unknown_fields)]
-pub struct Attributes {
-    pub power: Option<u16>,
-    pub precision: Option<u16>,
-    pub crit_damage: Option<u16>,
-    pub toughness: Option<u16>,
-    pub vitality: Option<u16>,
-    pub condition_damage: Option<u16>,
-    pub condition_duration: Option<u16>,
-    pub healing: Option<u16>,
-    pub boon_duration: Option<u16>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
 pub struct Stats {
     pub id: StatsId,
-    pub attributes: Attributes,
+    pub attributes: HashMap<AttributeType, u16>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
 pub enum Binding {
     Character,
     Account,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Location {
     Equipped,
     Armory,
@@ -152,7 +138,7 @@ pub enum Location {
     LegendaryArmory,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct Equip {
     pub id: ItemId,
@@ -178,8 +164,7 @@ pub struct Equipment {
     pub equipment: Vec<Equip>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
 pub struct InventoryItem {
     pub id: ItemId,
     pub count: u8,
