@@ -101,8 +101,9 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
     >(
         &self,
-        id: I,
+        id: impl Into<I> + Send,
     ) -> EndpointResult<T> {
+        let id = id.into();
         let lang = self.client().language;
         if let Some(c) = self.try_get(&id).await {
             return Ok(c);
@@ -149,9 +150,9 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         I: DeserializeOwned + Hash + Clone + Sync + 'static,
     >(
         &self,
-        id: &I,
+        id: impl Into<&I> + Send,
     ) -> Option<T> {
-        check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, id).await
+        check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, id.into()).await
     }
 
     /// request all available ids
@@ -176,15 +177,18 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         I: Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
     >(
         &self,
-        mut ids: Vec<I>,
+        ids: Vec<impl Into<I> + Send>,
     ) -> EndpointResult<Vec<T>> {
         let mut result = Vec::with_capacity(ids.len());
-        if !FORCE {
-            ids = extract_many_from_cache(self, ids, &mut result).await;
+        let ids = if !FORCE {
+            let ids = extract_many_from_cache(self, ids, &mut result).await;
             if ids.is_empty() {
                 return Ok(result);
             }
-        }
+            ids
+        } else {
+            ids.into_iter().map(|id| id.into()).collect()
+        };
 
         let mut txs = FxHashMap::with_capacity_and_hasher(ids.len(), Default::default());
         let mut rxs = Vec::with_capacity(ids.len());
@@ -594,12 +598,13 @@ async fn extract_many_from_cache<
     const F: bool,
 >(
     req: &Req,
-    ids: Vec<I>,
+    ids: Vec<impl Into<I> + Send>,
     result: &mut Vec<K>,
 ) -> Vec<I> {
     let mut rest = Vec::with_capacity(ids.len());
     let mut cache = req.client().cache.lock().await;
     for i in ids {
+        let i = i.into();
         if let Some(cached) = cache.get::<K, I, K>(&i, req.client().language).await {
             result.push(cached);
         } else {

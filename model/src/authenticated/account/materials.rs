@@ -1,25 +1,21 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{Endpoint, FixedEndpoint};
+use crate::{items::ItemId, Endpoint, FixedEndpoint};
 
-pub type MaterialId = u32;
+pub type AccountMaterials = Vec<AccountMaterial>;
 
 #[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-pub struct MaterialsItem {
-    pub id: MaterialId,
+pub struct AccountMaterial {
+    pub id: ItemId,
     pub category: u32,
     pub count: u32,
 }
 
-#[derive(Clone, PartialEq, PartialOrd, Debug, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct Materials(pub Vec<MaterialsItem>);
-
-impl Endpoint for Materials {
+impl Endpoint for AccountMaterials {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account/materials";
     const VERSION: &'static str = "2022-07-25T00:00:00.000Z";
 }
 
-impl FixedEndpoint for Materials {}
+impl FixedEndpoint for AccountMaterials {}

@@ -1,10 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use crate::{authenticated::characters::InventoryItem, Endpoint, FixedEndpoint};
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
-#[serde(transparent)]
-pub struct Bank(pub Vec<Option<InventoryItem>>);
+pub type Bank = Vec<Option<InventoryItem>>;
 
 impl Endpoint for Bank {
     const AUTHENTICATED: bool = true;

@@ -1,12 +1,17 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{misc::currencies::CurrencyId, Endpoint, FixedEndpoint};
 
+pub type InnerWallet = HashMap<CurrencyId, u32>;
+
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(transparent)]
-pub struct Wallet(#[serde(with = "internal_wallet")] pub HashMap<CurrencyId, u32>);
+pub struct Wallet(#[serde(with = "internal_wallet")] pub InnerWallet);
 
 impl Endpoint for Wallet {
     const AUTHENTICATED: bool = true;
@@ -17,6 +22,20 @@ impl Endpoint for Wallet {
 
 impl FixedEndpoint for Wallet {}
 
+impl Deref for Wallet {
+    type Target = InnerWallet;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Wallet {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 mod internal_wallet {
     use std::collections::HashMap;
 
@@ -26,6 +45,7 @@ mod internal_wallet {
         Deserialize, Deserializer, Serialize,
     };
 
+    use super::InnerWallet;
     use crate::misc::currencies::CurrencyId;
 
     #[derive(Debug, Serialize, Deserialize)]
@@ -34,7 +54,7 @@ mod internal_wallet {
         value: u32,
     }
 
-    pub fn serialize<S>(map: &HashMap<CurrencyId, u32>, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S>(map: &InnerWallet, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -44,14 +64,14 @@ mod internal_wallet {
         )
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<HashMap<CurrencyId, u32>, D::Error>
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<InnerWallet, D::Error>
     where
         D: Deserializer<'de>,
     {
         struct InternalWalletVisitor;
 
         impl<'de> Visitor<'de> for InternalWalletVisitor {
-            type Value = HashMap<CurrencyId, u32>;
+            type Value = InnerWallet;
 
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
                 formatter.write_str("a sequence of InternalWallet")

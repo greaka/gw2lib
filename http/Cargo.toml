@@ -1,6 +1,6 @@
 [package]
 name = "gw2lib"
-version = "1.1.0"
+version = "2.0.0"
 edition = "2021"
 workspace = "../"
 description = "A simple to use Gw2 API wrapper library"
@@ -42,7 +42,7 @@ default-features = false
 features = ["http1", "native-tokio", "logging", "tls12"]
 
 [dependencies.gw2lib-model]
-version = "1"
+version = "2"
 path = "../model"
 
 [features]
