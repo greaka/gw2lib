@@ -21,7 +21,7 @@ pub struct Backstory {
     pub backstory: Vec<BackStoryId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Race {
     Asura,
     Charr,
@@ -30,13 +30,13 @@ pub enum Race {
     Sylvari,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Gender {
     Male,
     Female,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Profession {
     Elementalist,
     Engineer,
@@ -65,7 +65,7 @@ pub struct Core {
     pub title: Option<TitleId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Discipline {
     Armorsmith,
     Artificer,
@@ -273,14 +273,14 @@ pub struct EquipmentPvp {
     ),
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Flags {
     Beta,
 }
 
 pub type PetId = u16;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct BuildPets {
     pub terrestrial: [Option<PetId>; 2],

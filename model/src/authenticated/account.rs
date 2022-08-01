@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::misc::worlds::WorldId;
 use crate::*;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum Access {
     None,

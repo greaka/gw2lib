@@ -11,7 +11,7 @@ pub mod pvp;
 pub mod tradingpost;
 pub mod wvw;
 
-#[derive(Hash, Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Hash, Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Language {
     En,
     Fr,

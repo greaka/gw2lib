@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub use crate::authenticated::characters::Discipline;
 use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum RecipeType {
     Axe,
     Dagger,
@@ -62,7 +62,7 @@ pub enum RecipeType {
     UpgradeComponent,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum RecipeFlag {
     AutoLearned,
     LearnedFromItem,

@@ -4,7 +4,7 @@ use crate::*;
 
 pub type WorldId = u16;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum PopulationLevel {
     Medium,
     High,
@@ -12,7 +12,7 @@ pub enum PopulationLevel {
     Full,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct World {
     id: WorldId,
     name: String,

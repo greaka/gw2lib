@@ -16,7 +16,7 @@ pub struct MaterialDetails {
     pub rgb: RGB,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Hue {
     Gray,
     Brown,
@@ -28,14 +28,14 @@ pub enum Hue {
     Purple,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Material {
     Vibrant,
     Leather,
     Metal,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Rarity {
     Starter,
     Common,

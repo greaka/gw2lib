@@ -5,7 +5,7 @@ pub use crate::{authenticated::characters::Profession, items::WeaponType};
 
 pub type SkillId = u32;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum SkillType {
     Bundle,
     Elite,
@@ -15,7 +15,7 @@ pub enum SkillType {
     Weapon,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
 pub enum Slot {
     Downed_1,
@@ -36,7 +36,7 @@ pub enum Slot {
     Weapon_5,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum FactsType {
     AttributeAdjust,
     Buff,

@@ -78,7 +78,7 @@ impl Cache for InMemoryCache {
         I: Hash + Sync + 'static,
         E: Endpoint,
     {
-        let hash = hash::<T, I>(id, E::LOCALE.then(|| lang));
+        let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
         let map = if E::AUTHENTICATED {
             &mut self.authenticated
         } else {
@@ -93,7 +93,7 @@ impl Cache for InMemoryCache {
         I: Hash + Sync + 'static,
         E: Endpoint,
     {
-        let hash = hash::<T, I>(id, E::LOCALE.then(|| lang));
+        let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
         let map = if E::AUTHENTICATED {
             &mut self.authenticated
         } else {

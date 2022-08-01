@@ -4,7 +4,7 @@ use crate::{Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
     Account,
@@ -19,7 +19,7 @@ pub enum Permissions {
     Wallet,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum TokenType {
     APIKey,
     Subtoken,

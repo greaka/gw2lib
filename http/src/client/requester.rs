@@ -428,7 +428,7 @@ async fn check_inflight<
     id: &I,
     lang: Language,
 ) -> Option<Either<Receiver<H>, SenderGuard<'client, H>>> {
-    let hash = hash::<H, I>(id, T::LOCALE.then(|| lang));
+    let hash = hash::<H, I>(id, T::LOCALE.then_some(lang));
     let mut locked = inflight.lock().await;
     Some(match locked.entry(hash) {
         Entry::Occupied(mut e) => {

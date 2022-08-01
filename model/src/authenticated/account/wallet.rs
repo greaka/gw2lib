@@ -7,9 +7,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::{misc::currencies::CurrencyId, Endpoint, FixedEndpoint};
 
-pub type InnerWallet = HashMap<CurrencyId, u32>;
+type InnerWallet = HashMap<CurrencyId, u32>;
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Wallet(#[serde(with = "internal_wallet")] pub InnerWallet);
 
