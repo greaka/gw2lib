@@ -25,8 +25,7 @@ build-proxy:
   FROM +prefetch-proxy
 
   COPY --dir proxy/src ./proxy/
-  COPY --dir http/src ./http/
-  COPY --dir model/src ./model/
+  COPY --dir http/src/rate_limit.rs ./http/src/
   RUN --mount=type=cache,target=proxy/target \
     cd proxy && \
     cargo --color=always build --release && \
