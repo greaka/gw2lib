@@ -20,7 +20,7 @@ pub trait Cache {
     async fn insert<T, I, E>(
         &mut self,
         id: &I,
-        endpoint: T,
+        endpoint: &T,
         expiring: NaiveDateTime,
         lang: Language,
     ) where
@@ -72,7 +72,7 @@ impl Cache for InMemoryCache {
     async fn insert<T, I, E>(
         &mut self,
         id: &I,
-        endpoint: T,
+        endpoint: &T,
         expiring: NaiveDateTime,
         lang: Language,
     ) where
@@ -86,7 +86,7 @@ impl Cache for InMemoryCache {
         } else {
             &mut self.statics
         };
-        map.insert(hash, (expiring, Box::new(endpoint)));
+        map.insert(hash, (expiring, Box::new(endpoint.clone())));
     }
 
     async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
@@ -154,7 +154,7 @@ impl Cache for NoopCache {
     async fn insert<T, I, E>(
         &mut self,
         _id: &I,
-        _endpoint: T,
+        _endpoint: &T,
         _expiring: NaiveDateTime,
         _lang: Language,
     ) where

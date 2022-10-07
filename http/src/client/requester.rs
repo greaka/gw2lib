@@ -633,11 +633,10 @@ async fn cache_response<
     response: Response<hyper::Body>,
 ) -> Result<K, EndpointError> {
     let (expires, result): (_, K) = parse_response(req, response).await?;
-    let res = result.clone();
     {
         let mut cache = req.client().cache.lock().await;
         cache
-            .insert::<K, I, T>(id, res, expires, req.client().language)
+            .insert::<K, I, T>(id, &result, expires, req.client().language)
             .await;
     }
     Ok(result)
@@ -666,7 +665,7 @@ async fn cache_response_many<
         let mut cache = req.client().cache.lock().await;
         for t in res {
             cache
-                .insert::<K, I, K>(t.id(), t.clone(), expires, req.client().language)
+                .insert::<K, I, K>(t.id(), &t, expires, req.client().language)
                 .await;
             result.push(t);
         }

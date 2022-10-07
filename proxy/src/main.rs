@@ -1,9 +1,13 @@
+mod rate_limit;
+
 use std::{time::Duration};
 
 use tokio::sync::Mutex;
 use actix_web::{http::header::HeaderName, web, HttpRequest, HttpResponse, Responder};
-use gw2lib::rate_limit::{BucketRateLimiter, RateLimiter};
+use rate_limit::{BucketRateLimiter, RateLimiter};
 use reqwest::{header::HeaderValue, Method};
+
+pub type EndpointError = ();
 
 #[actix_web::main]
 async fn main() {
