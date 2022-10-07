@@ -2,7 +2,7 @@ use std::{fmt::Display, hash::Hash};
 
 use chrono::Duration;
 use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 
 use super::requester::Requester as Req;
 use crate::{block::block, CachedRequest, Client, EndpointResult};
@@ -59,7 +59,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     }
 
     /// call the fixed endpoint
-    fn get<T: DeserializeOwned + Clone + Send + Sync + FixedEndpoint + 'static>(
+    fn get<T: DeserializeOwned + Serialize + Clone + Send + Sync + FixedEndpoint + 'static>(
         &self,
     ) -> EndpointResult<T> {
         block(Req::get(self))
@@ -67,7 +67,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 
     /// request a single item
     fn single<
-        T: DeserializeOwned + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
         I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
     >(
         &self,
@@ -84,8 +84,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// let from_cache: Option<Item> = client.try_get(&19721);
     /// ```
     fn try_get<
-        T: DeserializeOwned + Clone + Endpoint + Send + Sync + 'static,
-        I: DeserializeOwned + Hash + Clone + Sync + 'static,
+        T: DeserializeOwned + Serialize + Clone + Endpoint + Send + Sync + 'static,
+        I: DeserializeOwned + Display + Hash + Clone + Sync + 'static,
     >(
         &self,
         id: &I,
@@ -95,8 +95,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 
     /// request all available ids
     fn ids<
-        T: DeserializeOwned + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + 'static,
+        T: DeserializeOwned + Serialize + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<I>> {
@@ -106,6 +106,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// request multiple ids at once
     fn many<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
@@ -149,13 +150,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// mechanisms.
     fn all<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
@@ -167,6 +169,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_ids_all<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
@@ -203,13 +206,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_requesting_ids<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {

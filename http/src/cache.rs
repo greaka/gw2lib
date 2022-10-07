@@ -1,6 +1,7 @@
 use std::{
     any::{Any, TypeId},
     collections::hash_map::Entry,
+    fmt::Display,
     hash::{Hash, Hasher},
 };
 
@@ -8,6 +9,7 @@ use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use fxhash::{FxHashMap, FxHasher};
 use gw2lib_model::{Endpoint, Language};
+use serde::{de::DeserializeOwned, Serialize};
 
 /// the interface for caching API responses
 /// ### Remarks
@@ -22,14 +24,14 @@ pub trait Cache {
         expiring: NaiveDateTime,
         lang: Language,
     ) where
-        T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
+        I: Display + Hash + Sync + 'static + ?Sized,
         E: Endpoint;
 
     async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
-        T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
+        I: Display + Hash + Sync + 'static + ?Sized,
         E: Endpoint;
 
     async fn cleanup(&mut self);
@@ -75,7 +77,7 @@ impl Cache for InMemoryCache {
         lang: Language,
     ) where
         T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
     {
         let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
@@ -90,7 +92,7 @@ impl Cache for InMemoryCache {
     async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
     {
         let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
@@ -131,7 +133,10 @@ impl Cache for InMemoryCache {
 }
 
 #[inline]
-pub(crate) fn hash<T: 'static, I: 'static + Hash>(id: &I, lang: Option<Language>) -> (TypeId, u64) {
+pub(crate) fn hash<T: 'static, I: 'static + Hash + ?Sized>(
+    id: &I,
+    lang: Option<Language>,
+) -> (TypeId, u64) {
     let type_id = TypeId::of::<T>();
     let hash = {
         let mut hasher = FxHasher::default();
@@ -154,7 +159,7 @@ impl Cache for NoopCache {
         _lang: Language,
     ) where
         T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
     {
     }
@@ -162,7 +167,7 @@ impl Cache for NoopCache {
     async fn get<T, I, E>(&mut self, _id: &I, _lang: Language) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static,
+        I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
     {
         None

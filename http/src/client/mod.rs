@@ -155,12 +155,12 @@ impl<
     /// use gw2lib::cache::InMemoryCache;
     /// use gw2lib::Client;
     ///
-    /// let client = Client::empty().cache(InMemoryCache::default());
+    /// let cache = Arc::new(Mutex::new(InMemoryCache::default()));
+    /// let client = Client::empty().cache(cache);
     pub fn cache<NC: Cache + Send + Sync + 'static>(
         self,
-        cache: NC,
+        cache: Arc<Mutex<NC>>,
     ) -> Client<NC, R, Conn, AUTHENTICATED> {
-        let cache = Arc::new(Mutex::new(cache));
         periodically_cleanup_cache(cache.clone());
         Client {
             host: self.host,
@@ -182,7 +182,7 @@ impl<
     /// use gw2lib::Client;
     /// use gw2lib::rate_limit::BucketRateLimiter;
     ///
-    /// let client = Client::empty().cache(InMemoryCache::default());
+    /// let client = Client::empty().cache(Arc::new(Mutex::new(InMemoryCache::default())));
     /// let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::default()));
     /// let client = client.rate_limiter(rate_limiter.clone());
     /// let new_client = Client::default().rate_limiter(rate_limiter.clone());

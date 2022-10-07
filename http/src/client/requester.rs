@@ -17,7 +17,7 @@ use gw2lib_model::{
     BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language, PagedEndpoint,
 };
 use hyper::{body::Buf, client::connect::Connect, Request, Response, Uri};
-use serde::de::DeserializeOwned;
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{
     broadcast::{self, Receiver, Sender},
     Mutex,
@@ -89,7 +89,9 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     }
 
     /// call the fixed endpoint
-    async fn get<T: DeserializeOwned + Clone + Send + Sync + FixedEndpoint + 'static>(
+    async fn get<
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + FixedEndpoint + 'static,
+    >(
         &self,
     ) -> EndpointResult<T> {
         get_or_ids::<T, T, Self, AUTHENTICATED, FORCE>(self).await
@@ -97,7 +99,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
     /// request a single item
     async fn single<
-        T: DeserializeOwned + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
         I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
     >(
         &self,
@@ -146,8 +148,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// let from_cache: Option<Item> = client.try_get(&19721);
     /// ```
     async fn try_get<
-        T: DeserializeOwned + Clone + Endpoint + Send + Sync + 'static,
-        I: DeserializeOwned + Hash + Clone + Sync + 'static,
+        T: DeserializeOwned + Serialize + Clone + Endpoint + Send + Sync + 'static,
+        I: DeserializeOwned + Display + Hash + Clone + Sync + 'static,
     >(
         &self,
         id: impl Into<&I> + Send,
@@ -157,8 +159,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
     /// request all available ids
     async fn ids<
-        T: DeserializeOwned + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + 'static,
+        T: DeserializeOwned + Serialize + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<I>> {
@@ -168,6 +170,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// request multiple ids at once
     async fn many<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
@@ -302,13 +305,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// mechanisms.
     async fn all<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
@@ -327,6 +331,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// use [`Self::all`] to use the most efficient way to request all items
     async fn get_all_by_ids_all<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
@@ -378,13 +383,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// use [`Self::all`] to use the most efficient way to request all items
     async fn get_all_by_requesting_ids<
         T: DeserializeOwned
+            + Serialize
             + EndpointWithId<IdType = I>
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Send + Sync + Eq + 'static,
+        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
     >(
         &self,
     ) -> EndpointResult<Vec<T>> {
@@ -454,8 +460,8 @@ async fn check_inflight<
 }
 
 async fn check_cache<
-    T: Clone + Send + Sync + 'static,
-    I: Hash + Sync + 'static,
+    T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
+    I: Display + Hash + Sync + 'static + ?Sized,
     E: Endpoint,
     Req: Requester<A, F>,
     const A: bool,
@@ -473,8 +479,8 @@ async fn check_cache<
 }
 
 async fn get_or_ids<
-    T: DeserializeOwned + Endpoint + Clone + Send + Sync + 'static,
-    K: DeserializeOwned + Clone + Send + Sync + 'static,
+    T: DeserializeOwned + Serialize + Endpoint + Clone + Send + Sync + 'static,
+    K: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
     Req: Requester<A, F>,
     const A: bool,
     const F: bool,
@@ -482,7 +488,7 @@ async fn get_or_ids<
     req: &Req,
 ) -> EndpointResult<K> {
     let lang = req.client().language;
-    if let Some(c) = check_cache::<K, (), T, Req, A, F>(req, &()).await {
+    if let Some(c) = check_cache::<K, str, T, Req, A, F>(req, "").await {
         return Ok(c);
     }
 
@@ -492,7 +498,7 @@ async fn get_or_ids<
             Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
             Some(Either::Right(tx)) => break tx,
             None => {
-                if let Some(c) = check_cache::<K, (), T, Req, A, F>(req, &()).await {
+                if let Some(c) = check_cache::<K, str, T, Req, A, F>(req, "").await {
                     return Ok(c);
                 }
             }
@@ -502,7 +508,7 @@ async fn get_or_ids<
     let request = build_request::<T, String, Req, A, F>(req, T::URL, None)?;
 
     let response = exec_req::<Req, A, F>(req, request).await?;
-    let result = cache_response::<(), K, T, Req, A, F>(req, &(), response).await?;
+    let result = cache_response::<str, K, T, Req, A, F>(req, "", response).await?;
     // ignoring the error is fine here
     // the receiving side will check the cache if nothing got sent
     let _ = tx.lock().await.send(result.clone());
@@ -592,7 +598,7 @@ fn build_query<T: Endpoint, Q: Into<String>>(
 /// returns the remaining ids not found in cache
 async fn extract_many_from_cache<
     I: Display + Hash + Sync + 'static,
-    K: EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
+    K: EndpointWithId<IdType = I> + DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
     Req: Requester<A, F>,
     const A: bool,
     const F: bool,
@@ -615,8 +621,8 @@ async fn extract_many_from_cache<
 }
 
 async fn cache_response<
-    I: Hash + Sync + 'static,
-    K: DeserializeOwned + Clone + Send + Sync + 'static,
+    I: Hash + Sync + 'static + Display + ?Sized,
+    K: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
     T: Endpoint,
     Req: Requester<A, F>,
     const A: bool,
@@ -639,7 +645,14 @@ async fn cache_response<
 
 async fn cache_response_many<
     I: Display + Hash + Sync + 'static,
-    K: DeserializeOwned + BulkEndpoint + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
+    K: DeserializeOwned
+        + Serialize
+        + BulkEndpoint
+        + EndpointWithId<IdType = I>
+        + Clone
+        + Send
+        + Sync
+        + 'static,
     Req: Requester<A, F>,
     const A: bool,
     const F: bool,
