@@ -15,11 +15,11 @@ name = "gw2lib_model"
 path = "src/lib.rs"
 
 [dependencies.either]
-version = "1.6.1"
+version = "1.8.0"
 features = ["serde"]
 
 [dependencies.serde]
-version = "1.0.137"
+version = "1.0.150"
 features = [
     "derive"
 ]
