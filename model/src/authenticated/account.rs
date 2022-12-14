@@ -8,6 +8,7 @@ pub use crate::misc::worlds::WorldId;
 use crate::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 #[non_exhaustive]
 pub enum Access {
     None,
@@ -19,6 +20,7 @@ pub enum Access {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Account {
     pub id: String,
     pub age: u64,

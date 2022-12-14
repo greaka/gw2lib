@@ -5,6 +5,7 @@ use crate::*;
 pub type WorldId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum PopulationLevel {
     Medium,
     High,
@@ -13,10 +14,11 @@ pub enum PopulationLevel {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct World {
-    id: WorldId,
-    name: String,
-    population: PopulationLevel,
+    pub id: WorldId,
+    pub name: String,
+    pub population: PopulationLevel,
 }
 
 impl Endpoint for World {

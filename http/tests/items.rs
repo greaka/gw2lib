@@ -53,12 +53,18 @@ mod single {
     //    parse_single!(trait_guide, 0,    check_type!(Trait));
     parse_single!(trophy, 18996, check_type!(Trophy));
     parse_single!(key, 82444, check_type!(Key));
-    parse_single!(quux, 95948, check_type!(Quux));
-    parse_single!(qux, 95864, check_type!(Qux));
-    parse_single!(gathering_foo, 95993, |x: Item| assert!(
+    parse_single!(powercore, 95864, check_type!(PowerCore));
+    parse_single!(jadetechmodule, 95948, check_type!(JadeTechModule));
+    parse_single!(gathering_bait, 95993, |x: Item| assert!(
         x.details
             == Details::Gathering(GatheringToolsDetails {
-                _type: GatheringToolsType::Foo,
+                _type: GatheringToolsType::Bait,
+            })
+    ));
+    parse_single!(gathering_lure, 98073, |x: Item| assert!(
+        x.details
+            == Details::Gathering(GatheringToolsDetails {
+                _type: GatheringToolsType::Lure,
             })
     ));
 }

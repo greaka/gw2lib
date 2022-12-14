@@ -6,6 +6,7 @@ pub use crate::authenticated::characters::Discipline;
 use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum RecipeType {
     Axe,
     Dagger,
@@ -63,24 +64,28 @@ pub enum RecipeType {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum RecipeFlag {
     AutoLearned,
     LearnedFromItem,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Ingredient {
     pub item_id: ItemId,
     pub count: u16,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct GuildIngredient {
     pub upgrade_id: u32,
     pub count: u16,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Recipe {
     id: RecipeId,
     #[serde(rename = "type")]

@@ -5,6 +5,7 @@ use crate::{items::ItemId, Endpoint, FixedEndpoint};
 pub type AccountMaterials = Vec<AccountMaterial>;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct AccountMaterial {
     pub id: ItemId,
     pub category: u32,

@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct ListingDetails {
     pub listings: u64,
     pub unit_price: u64,
@@ -10,6 +11,7 @@ pub struct ListingDetails {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Listings {
     pub id: ItemId,
     pub buys: Vec<ListingDetails>,
@@ -35,12 +37,14 @@ impl BulkEndpoint for Listings {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct PriceDetails {
     pub unit_price: u64,
     pub quantity: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Prices {
     pub id: ItemId,
     pub whitelisted: bool,

@@ -16,12 +16,13 @@ pub type CharacterId = String;
 pub type BackStoryId = String;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Backstory {
     pub backstory: Vec<BackStoryId>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Race {
     Asura,
     Charr,
@@ -31,12 +32,14 @@ pub enum Race {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Gender {
     Male,
     Female,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Profession {
     Elementalist,
     Engineer,
@@ -50,7 +53,7 @@ pub enum Profession {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Core {
     pub name: CharacterId,
     pub race: Race,
@@ -66,6 +69,7 @@ pub struct Core {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Discipline {
     Armorsmith,
     Artificer,
@@ -79,7 +83,7 @@ pub enum Discipline {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Craft {
     pub discipline: Discipline,
     pub rating: u16,
@@ -87,12 +91,13 @@ pub struct Craft {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Crafting {
     pub crafting: Vec<Craft>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Slot {
     HelmAquatic,
     Backpack,
@@ -119,18 +124,21 @@ pub enum Slot {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Stats {
     pub id: StatsId,
     pub attributes: HashMap<AttributeType, u16>,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Binding {
     Character,
     Account,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Location {
     Equipped,
     Armory,
@@ -139,7 +147,7 @@ pub enum Location {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Equip {
     pub id: ItemId,
     pub slot: Option<Slot>,
@@ -159,12 +167,13 @@ pub struct Equip {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Equipment {
     pub equipment: Vec<Equip>,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct InventoryItem {
     pub id: ItemId,
     pub count: u8,
@@ -180,7 +189,7 @@ pub struct InventoryItem {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct InventoryBag {
     pub id: ItemId,
     pub size: u8,
@@ -188,7 +197,7 @@ pub struct InventoryBag {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Inventory {
     pub bags: Vec<Option<InventoryBag>>,
 }
@@ -196,7 +205,7 @@ pub struct Inventory {
 pub type Utilities = [Option<SkillId>; 3];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Skillset {
     pub heal: Option<SkillId>,
     pub utilities: Utilities,
@@ -206,7 +215,7 @@ pub struct Skillset {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct SkillDataSet {
     pub pve: Skillset,
     pub pvp: Skillset,
@@ -216,7 +225,7 @@ pub struct SkillDataSet {
 pub type TraitSet = [Option<TraitId>; 3];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct TraitLine {
     pub id: Option<SpecializationId>,
     pub traits: Option<TraitSet>,
@@ -225,7 +234,7 @@ pub struct TraitLine {
 pub type Specialization = [Option<TraitLine>; 3];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct SpecializationSet {
     pub pve: Specialization,
     pub pvp: Specialization,
@@ -233,7 +242,7 @@ pub struct SpecializationSet {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct TrainingSet {
     // TODO: training id
     pub id: u64,
@@ -242,26 +251,26 @@ pub struct TrainingSet {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Training {
     pub training: Vec<TrainingSet>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Recipes {
     pub recipes: Vec<RecipeId>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct WvwAbility {
     pub id: AbilityId,
     pub rank: u8,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct EquipmentPvp {
     pub amulet: Option<AmuletId>,
     pub rune: Option<ItemId>,
@@ -274,6 +283,7 @@ pub struct EquipmentPvp {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Flags {
     Beta,
 }
@@ -281,14 +291,14 @@ pub enum Flags {
 pub type PetId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct BuildPets {
     pub terrestrial: [Option<PetId>; 2],
     pub aquatic: [Option<PetId>; 2],
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct BuildLegends {
     pub legends: LegendSlots,
     pub aquatic_legends: LegendSlots,
@@ -298,7 +308,7 @@ pub type LegendId = String;
 pub type LegendSlots = [Option<LegendId>; 2];
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct BuildTemplate {
     pub name: Option<String>,
     pub profession: Option<Profession>,
@@ -311,7 +321,7 @@ pub struct BuildTemplate {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct BuildTab {
     /// this index starts at 1
     pub tab: usize,
@@ -320,7 +330,7 @@ pub struct BuildTab {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct EquipmentTab {
     /// this index starts at 1
     pub tab: usize,
@@ -331,7 +341,7 @@ pub struct EquipmentTab {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Character {
     pub backstory: Vec<BackStoryId>,
     #[serde(flatten)]

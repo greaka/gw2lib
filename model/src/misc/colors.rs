@@ -7,6 +7,7 @@ pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct MaterialDetails {
     pub brightness: i8,
     pub contrast: f32,
@@ -17,6 +18,7 @@ pub struct MaterialDetails {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Hue {
     Gray,
     Brown,
@@ -29,6 +31,7 @@ pub enum Hue {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Material {
     Vibrant,
     Leather,
@@ -36,6 +39,7 @@ pub enum Material {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Rarity {
     Starter,
     Common,
@@ -45,6 +49,7 @@ pub enum Rarity {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Color {
     pub id: ColorId,
     pub name: String,

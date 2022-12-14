@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Endpoint, FixedEndpoint};
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Build {
     pub id: u64,
 }

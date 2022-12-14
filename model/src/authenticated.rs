@@ -5,6 +5,7 @@ pub mod account;
 pub mod characters;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
     Account,
@@ -20,12 +21,14 @@ pub enum Permissions {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum TokenType {
     APIKey,
     Subtoken,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct SubtokenDetails {
     pub expires_at: TimeStamp,
     pub issued_at: TimeStamp,
@@ -33,6 +36,7 @@ pub struct SubtokenDetails {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Tokeninfo {
     pub id: String,
     pub name: String,
