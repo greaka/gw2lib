@@ -8,14 +8,14 @@ name = "proxy"
 path = "src/main.rs"
 
 [dependencies]
-actix-web = "4.1.0"
+actix-web = "4.2.1"
 [dependencies.reqwest]
-version = "0.11.11"
+version = "0.11.13"
 default-features = false
 features = ["rustls-tls"]
 
 [dependencies.tokio]
-version = "1.19.2"
+version = "1.23.0"
 features = ["full"]
 
 [dependencies.gw2lib]
