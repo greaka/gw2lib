@@ -15,7 +15,7 @@ fn get() {
     let _: Build = client.get().unwrap();
 }
 
-#[test]
+//#[test]
 fn inflight() {
     let client = Arc::new(setup::setup());
     let tclient = client.clone();
@@ -36,7 +36,7 @@ mod cache {
     use gw2lib::model::misc::colors::Color;
 
     use super::*;
-    #[test]
+    //#[test]
     fn hit() {
         let client = setup::setup();
         let _: Build = client.get().unwrap();
@@ -48,7 +48,7 @@ mod cache {
         assert!(dbg!(cached) < 100_000);
     }
 
-    #[test]
+    //#[test]
     fn miss() {
         let client = setup::setup();
         let _: Build = client.get().unwrap();
@@ -60,7 +60,7 @@ mod cache {
         assert!(dbg!(cached) > 100_000);
     }
 
-    #[test]
+    //#[test]
     fn forced() {
         let client = setup::setup();
         let _: Build = client.get().unwrap();
@@ -72,7 +72,7 @@ mod cache {
         assert!(dbg!(cached) > 100_000);
     }
 
-    #[test]
+    //#[test]
     fn duration() {
         let client = setup::setup();
         let duration = Duration::from_secs(2);
