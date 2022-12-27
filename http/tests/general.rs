@@ -1,4 +1,5 @@
 #![cfg(feature = "blocking")]
+#![allow(dead_code)]
 
 use std::sync::Arc;
 
