@@ -45,7 +45,7 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(dbg!(cached) < 30_000);
+        assert!(dbg!(cached) < 100_000);
     }
 
     #[test]
@@ -57,7 +57,7 @@ mod cache {
         let _: Vec<ColorId> = client.ids::<Color, ColorId>().unwrap();
         let end = chrono::Utc::now();
         let cached = dbg!(end - start).num_nanoseconds().unwrap();
-        assert!(dbg!(cached) > 30_000);
+        assert!(dbg!(cached) > 100_000);
     }
 
     #[test]
@@ -69,7 +69,7 @@ mod cache {
         let _: Build = client.forced().get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(dbg!(cached) > 30_000);
+        assert!(dbg!(cached) > 100_000);
     }
 
     #[test]
@@ -85,7 +85,7 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(dbg!(cached) < 30_000);
+        assert!(dbg!(cached) < 100_000);
 
         std::thread::sleep(duration);
 
@@ -94,7 +94,7 @@ mod cache {
         let _: Build = client.get().unwrap();
         let end = chrono::Utc::now();
         let cached = (end - start).num_nanoseconds().unwrap();
-        assert!(dbg!(cached) > 30_000);
+        assert!(dbg!(cached) > 100_000);
     }
 }
 
