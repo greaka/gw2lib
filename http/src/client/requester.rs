@@ -281,7 +281,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         page_size: u8,
         result: &mut Vec<T>,
     ) -> EndpointResult<usize> {
-        let queries = format!("page={}&page_size={}", page, page_size);
+        let queries = format!("page={page}&page_size={page_size}");
         let request =
             build_request::<T, _, Self, AUTHENTICATED, FORCE>(self, T::URL, Some(queries))?;
 
@@ -717,7 +717,7 @@ fn join_ids<I: Display + 'static>(ids: &[I]) -> Vec<String> {
         let mut query_string = String::with_capacity(6 * ids.len()); // arbitrary. most ids are 5 digits + comma
         write!(&mut query_string, "{}", ids[0]).expect("failed to concatenate ids");
         for i in ids.iter().skip(1) {
-            write!(&mut query_string, ",{}", i).expect("failed to concatenate ids");
+            write!(&mut query_string, ",{i}").expect("failed to concatenate ids");
         }
         result.push(query_string);
     }

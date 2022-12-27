@@ -6,7 +6,7 @@ tools:
   RUN apt-get install -y --no-install-recommends build-essential
   RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   ENV PATH="/root/.cargo/bin:${PATH}"
-  RUN cargo install cargo-nextest
+  RUN cargo --color=always install cargo-nextest --locked
 
   SAVE IMAGE --cache-hint tools
 
@@ -17,7 +17,7 @@ prefetch-proxy:
   COPY model/Cargo.toml ./model/
   COPY http/Cargo.toml ./http/
   COPY proxy/Cargo.toml ./proxy/
-  RUN cd proxy && cargo fetch
+  RUN cd proxy && cargo --color=always fetch
 
   SAVE IMAGE prefetch-proxy
 
@@ -29,7 +29,7 @@ build-proxy:
   COPY --dir model/src ./model/
   RUN --mount=type=cache,target=proxy/target \
     cd proxy && \
-    cargo build --release && \
+    cargo --color=always build --release && \
     mv target/release/proxy ../artifact
 
   SAVE ARTIFACT artifact /proxy
@@ -40,7 +40,7 @@ prefetch:
   COPY Cargo.toml ./
   COPY model/Cargo.toml ./model/
   COPY http/Cargo.toml ./http/
-  RUN cargo fetch
+  RUN cargo --color=always fetch
 
   SAVE IMAGE prefetch
 
@@ -50,7 +50,7 @@ build-tests:
   DO +COPY_SRC
   
   RUN --mount=type=cache,target=target \
-    cargo nextest archive --archive-file tests.tar.zst --features=blocking
+    cargo --color=always nextest archive --archive-file tests.tar.zst --features=blocking
 
   SAVE ARTIFACT tests.tar.zst /tests.tar.zst
 
@@ -69,7 +69,7 @@ test:
   DO +BASE_TESTS
 
   WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
-    RUN --no-cache cargo nextest run --archive-file tests.tar.zst
+    RUN --no-cache cargo --color=always nextest run --archive-file tests.tar.zst
   END
 
 test-ignored:
@@ -78,7 +78,7 @@ test-ignored:
   DO +BASE_TESTS
 
   WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
-    RUN --no-cache cargo nextest run --archive-file tests.tar.zst --run-ignored ignored-only
+    RUN --no-cache cargo --color=always nextest run --archive-file tests.tar.zst --run-ignored ignored-only
   END
 
 test-all:
@@ -87,8 +87,8 @@ test-all:
   DO +BASE_TESTS
 
   WITH DOCKER --compose integration-compose.yml --load gw2lib-proxy=+docker-proxy
-    RUN --no-cache cargo nextest run --archive-file tests.tar.zst && \
-        cargo nextest run --archive-file tests.tar.zst --run-ignored ignored-only
+    RUN --no-cache cargo --color=always nextest run --archive-file tests.tar.zst && \
+        cargo --color=always nextest run --archive-file tests.tar.zst --run-ignored ignored-only
   END
 
 BASE_TESTS:
@@ -106,3 +106,4 @@ COPY_SRC:
   COPY --dir .config ./
   COPY --dir http ./
   COPY --dir model ./
+
