@@ -9,8 +9,8 @@ path = "src/main.rs"
 
 [dependencies]
 actix-web = "4.2.1"
-chrono = "0.4.22"
-async-trait = "0.1.57"
+chrono = "0.4.23"
+async-trait = "0.1.60"
 
 [dependencies.reqwest]
 version = "0.11.13"
