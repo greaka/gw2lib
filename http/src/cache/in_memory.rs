@@ -1,7 +1,6 @@
 use std::{
     any::{Any, TypeId},
     collections::hash_map::Entry,
-    fmt::Display,
     hash::{Hash, Hasher},
 };
 
@@ -9,57 +8,8 @@ use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use fxhash::{FxHashMap, FxHasher};
 use gw2lib_model::{Endpoint, Language};
-use serde::{de::DeserializeOwned, Serialize};
 
-/// the interface for caching API responses
-/// ### Remarks
-/// expects the language to be part of the caching key where relevant
-/// (`E::LOCALE`)
-#[async_trait]
-pub trait Cache {
-    async fn insert<T, I, E>(
-        &mut self,
-        id: &I,
-        endpoint: &T,
-        expiring: NaiveDateTime,
-        lang: Language,
-    ) where
-        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
-        I: Display + Hash + Sync + 'static + ?Sized,
-        E: Endpoint;
-
-    async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
-    where
-        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
-        I: Display + Hash + Sync + 'static + ?Sized,
-        E: Endpoint;
-
-    async fn cleanup(&mut self);
-
-    async fn wipe(&mut self) {
-        self.wipe_static().await;
-        self.wipe_authenticated().await;
-    }
-
-    async fn wipe_static(&mut self);
-
-    async fn wipe_authenticated(&mut self);
-}
-
-#[async_trait]
-pub(crate) trait CleanupCache {
-    async fn cleanup(&mut self);
-}
-
-#[async_trait]
-impl<T> CleanupCache for T
-where
-    T: Cache + Send + Sync + 'static,
-{
-    async fn cleanup(&mut self) {
-        Cache::cleanup(self).await;
-    }
-}
+use crate::cache::Cache;
 
 #[derive(Default)]
 pub struct InMemoryCache {
@@ -69,18 +19,20 @@ pub struct InMemoryCache {
 
 #[async_trait]
 impl Cache for InMemoryCache {
-    async fn insert<T, I, E>(
+    async fn insert<T, I, E, A>(
         &mut self,
         id: &I,
         endpoint: &T,
         expiring: NaiveDateTime,
         lang: Language,
+        auth: &Option<A>,
     ) where
         T: Clone + Send + Sync + 'static,
         I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
+        A: Hash + Sync + 'static,
     {
-        let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
+        let hash = hash::<T, I, A>(id, E::LOCALE.then_some(lang), auth);
         let map = if E::AUTHENTICATED {
             &mut self.authenticated
         } else {
@@ -89,13 +41,14 @@ impl Cache for InMemoryCache {
         map.insert(hash, (expiring, Box::new(endpoint.clone())));
     }
 
-    async fn get<T, I, E>(&mut self, id: &I, lang: Language) -> Option<T>
+    async fn get<T, I, E, A>(&mut self, id: &I, lang: Language, auth: &Option<A>) -> Option<T>
     where
         T: Clone + Send + Sync + 'static,
         I: Hash + Sync + 'static + ?Sized,
         E: Endpoint,
+        A: Hash + Sync + 'static,
     {
-        let hash = hash::<T, I>(id, E::LOCALE.then_some(lang));
+        let hash = hash::<T, I, A>(id, E::LOCALE.then_some(lang), auth);
         let map = if E::AUTHENTICATED {
             &mut self.authenticated
         } else {
@@ -133,49 +86,19 @@ impl Cache for InMemoryCache {
 }
 
 #[inline]
-pub(crate) fn hash<T: 'static, I: 'static + Hash + ?Sized>(
+pub(crate) fn hash<T: 'static, I: 'static + Hash + ?Sized, A: 'static + Hash>(
     id: &I,
     lang: Option<Language>,
+    auth: &Option<A>,
 ) -> (TypeId, u64) {
     let type_id = TypeId::of::<T>();
     let hash = {
         let mut hasher = FxHasher::default();
         id.hash(&mut hasher);
         lang.hash(&mut hasher);
+        auth.hash(&mut hasher);
         hasher.finish()
     };
 
     (type_id, hash)
-}
-
-pub struct NoopCache;
-#[async_trait]
-impl Cache for NoopCache {
-    async fn insert<T, I, E>(
-        &mut self,
-        _id: &I,
-        _endpoint: &T,
-        _expiring: NaiveDateTime,
-        _lang: Language,
-    ) where
-        T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static + ?Sized,
-        E: Endpoint,
-    {
-    }
-
-    async fn get<T, I, E>(&mut self, _id: &I, _lang: Language) -> Option<T>
-    where
-        T: Clone + Send + Sync + 'static,
-        I: Hash + Sync + 'static + ?Sized,
-        E: Endpoint,
-    {
-        None
-    }
-
-    async fn cleanup(&mut self) {}
-
-    async fn wipe_static(&mut self) {}
-
-    async fn wipe_authenticated(&mut self) {}
 }

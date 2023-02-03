@@ -21,8 +21,8 @@ use static_init::dynamic;
 use tokio::sync::Mutex;
 
 use crate::{
-    cache::CleanupCache, BucketRateLimiter, Cache, InMemoryCache, NoopCache, NoopRateLimiter,
-    RateLimiter,
+    cache::{CleanupCache, InMemoryCache},
+    BucketRateLimiter, Cache, NoopCache, NoopRateLimiter, RateLimiter,
 };
 
 pub(crate) type Inflight = Arc<Mutex<FxHashMap<(TypeId, u64), Box<dyn Any + Send>>>>;
@@ -37,6 +37,7 @@ pub struct Client<
     pub language: Language,
     client: hyper::Client<Conn, hyper::Body>,
     api_key: Option<String>,
+    identifier: Option<String>,
     cache: Arc<Mutex<C>>,
     inflight: Inflight,
     rate_limiter: Arc<Mutex<R>>,
@@ -57,6 +58,7 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
             language: Language::En,
             client,
             api_key: None,
+            identifier: None,
             cache: Arc::new(Mutex::new(NoopCache {})),
             inflight: Default::default(),
             rate_limiter,
@@ -75,6 +77,7 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpCon
             language: Language::En,
             client,
             api_key: None,
+            identifier: None,
             cache,
             inflight: Default::default(),
             rate_limiter,
@@ -104,6 +107,7 @@ impl<
             language: self.language,
             client,
             api_key: self.api_key,
+            identifier: self.identifier,
             cache: self.cache,
             inflight: self.inflight,
             rate_limiter: self.rate_limiter,
@@ -120,6 +124,7 @@ impl<
             language: self.language,
             client,
             api_key: self.api_key,
+            identifier: self.identifier,
             cache: self.cache,
             inflight: self.inflight,
             rate_limiter: self.rate_limiter,
@@ -127,26 +132,56 @@ impl<
     }
 
     /// sets the language
-    pub fn language(&mut self, language: impl Into<Language>) {
-        self.language = language.into();
+    pub fn language(self, language: impl Into<Language>) -> Self {
+        Client {
+            language: language.into(),
+            ..self
+        }
     }
 
     /// sets a new api key
-    /// ### Warning
-    /// this wipes the cache for all authenticated endpoints to prevent leaking
-    /// account specific information
-    #[cfg(not(feature = "blocking"))]
-    pub async fn api_key(self, key: impl Into<String>) -> Client<C, R, Conn, true> {
-        set_api_key(self, key).await
-    }
-
-    /// sets a new api key
-    /// ### Warning
-    /// this wipes the cache for all authenticated endpoints to prevent leaking
-    /// account specific information
-    #[cfg(feature = "blocking")]
     pub fn api_key(self, key: impl Into<String>) -> Client<C, R, Conn, true> {
-        crate::block::block(set_api_key(self, key))
+        let key = key.into();
+        Client {
+            host: self.host,
+            language: self.language,
+            client: self.client,
+            api_key: Some(key.clone()),
+            identifier: Some(key),
+            cache: self.cache,
+            inflight: self.inflight,
+            rate_limiter: self.rate_limiter,
+        }
+    }
+
+    /// sets a new identifier
+    ///
+    /// Identifiers are used to identify authentications in the cache.
+    /// Defaults to the api key
+    ///
+    /// ## Example
+    /// ```
+    /// use gw2lib::{Client, Requester};
+    /// use gw2lib_model::authenticated::{account::Account, characters::CharacterId};
+    ///
+    /// let client = Client::default().api_key("<subtoken>");
+    /// let account: Account = client.get().unwrap();
+    /// let client = client.identifier(&account.id);
+    ///
+    /// // make a request
+    /// let characters: Vec<CharacterId> = client.ids().unwrap();
+    ///
+    /// let client = Client::default().api_key("<different subtoken>");
+    /// let client = client.identifier(account.id);
+    ///
+    /// // cache hit
+    /// let characters: Vec<CharacterId> = client.ids().unwrap();
+    /// ```
+    pub fn identifier(self, id: impl Into<String>) -> Self {
+        Client {
+            identifier: Some(id.into()),
+            ..self
+        }
     }
 
     /// sets the cache
@@ -167,6 +202,7 @@ impl<
             language: self.language,
             client: self.client,
             api_key: self.api_key,
+            identifier: self.identifier,
             cache,
             inflight: self.inflight,
             rate_limiter: self.rate_limiter,
@@ -195,6 +231,7 @@ impl<
             language: self.language,
             client: self.client,
             api_key: self.api_key,
+            identifier: self.identifier,
             cache: self.cache,
             inflight: self.inflight,
             rate_limiter,
@@ -263,27 +300,6 @@ fn create_client() -> hyper::Client<HttpsConnector<HttpConnector>, hyper::Body> 
         .enable_http1()
         .build();
     hyper::Client::builder().build(https)
-}
-
-async fn set_api_key<
-    C: Cache,
-    R: RateLimiter,
-    Conn: Connect + Clone + Send + Sync + 'static,
-    const AUTHENTICATED: bool,
->(
-    client: Client<C, R, Conn, AUTHENTICATED>,
-    key: impl Into<String>,
-) -> Client<C, R, Conn, true> {
-    client.cache.lock().await.wipe_authenticated().await;
-    Client {
-        host: client.host,
-        language: client.language,
-        client: client.client,
-        api_key: Some(key.into()),
-        cache: client.cache,
-        inflight: client.inflight,
-        rate_limiter: client.rate_limiter,
-    }
 }
 
 fn periodically_cleanup_cache(cache: Arc<Mutex<dyn CleanupCache + Send + Sync + 'static>>) {

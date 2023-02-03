@@ -24,8 +24,8 @@ use tokio::sync::{
 };
 
 use crate::{
-    cache::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult, Inflight,
-    RateLimiter,
+    cache::in_memory::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult,
+    Inflight, RateLimiter,
 };
 
 #[async_trait]
@@ -112,7 +112,13 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         }
 
         let tx = loop {
-            let either = check_inflight::<T, I, T>(&self.client().inflight, &id, lang).await;
+            let either = check_inflight::<T, I, T, String>(
+                &self.client().inflight,
+                &id,
+                lang,
+                &self.client().identifier,
+            )
+            .await;
             match either {
                 Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
                 Some(Either::Right(tx)) => break tx,
@@ -198,9 +204,13 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         let mut remaining_ids = Vec::with_capacity(ids.len());
         for id in ids {
             let retain = loop {
-                let either =
-                    check_inflight::<T, I, T>(&self.client().inflight, &id, self.client().language)
-                        .await;
+                let either = check_inflight::<T, I, T, String>(
+                    &self.client().inflight,
+                    &id,
+                    self.client().language,
+                    &self.client().identifier,
+                )
+                .await;
                 match either {
                     Some(Either::Left(rx)) => {
                         rxs.push(rx);
@@ -429,12 +439,14 @@ async fn check_inflight<
     H: Send + Clone + 'static,
     I: 'static + Hash,
     T: Endpoint + Send + 'static,
+    A: 'static + Hash,
 >(
     inflight: &'client Inflight,
     id: &I,
     lang: Language,
+    auth: &Option<A>,
 ) -> Option<Either<Receiver<H>, SenderGuard<'client, H>>> {
-    let hash = hash::<H, I>(id, T::LOCALE.then_some(lang));
+    let hash = hash::<H, I, A>(id, T::LOCALE.then_some(lang), auth);
     let mut locked = inflight.lock().await;
     Some(match locked.entry(hash) {
         Entry::Occupied(mut e) => {
@@ -472,7 +484,9 @@ async fn check_cache<
 ) -> Option<T> {
     if !F {
         let mut cache = req.client().cache.lock().await;
-        cache.get::<T, I, E>(id, req.client().language).await
+        cache
+            .get::<T, I, E, String>(id, req.client().language, &req.client().identifier)
+            .await
     } else {
         None
     }
@@ -493,7 +507,13 @@ async fn get_or_ids<
     }
 
     let tx = loop {
-        let either = check_inflight::<K, (), T>(&req.client().inflight, &(), lang).await;
+        let either = check_inflight::<K, (), T, String>(
+            &req.client().inflight,
+            &(),
+            lang,
+            &req.client().identifier,
+        )
+        .await;
         match either {
             Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
             Some(Either::Right(tx)) => break tx,
@@ -611,7 +631,10 @@ async fn extract_many_from_cache<
     let mut cache = req.client().cache.lock().await;
     for i in ids {
         let i = i.into();
-        if let Some(cached) = cache.get::<K, I, K>(&i, req.client().language).await {
+        if let Some(cached) = cache
+            .get::<K, I, K, String>(&i, req.client().language, &req.client().identifier)
+            .await
+        {
             result.push(cached);
         } else {
             rest.push(i);
@@ -636,7 +659,13 @@ async fn cache_response<
     {
         let mut cache = req.client().cache.lock().await;
         cache
-            .insert::<K, I, T>(id, &result, expires, req.client().language)
+            .insert::<K, I, T, String>(
+                id,
+                &result,
+                expires,
+                req.client().language,
+                &req.client().identifier,
+            )
             .await;
     }
     Ok(result)
@@ -665,7 +694,13 @@ async fn cache_response_many<
         let mut cache = req.client().cache.lock().await;
         for t in res {
             cache
-                .insert::<K, I, K>(t.id(), &t, expires, req.client().language)
+                .insert::<K, I, K, String>(
+                    t.id(),
+                    &t,
+                    expires,
+                    req.client().language,
+                    &req.client().identifier,
+                )
                 .await;
             result.push(t);
         }

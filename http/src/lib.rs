@@ -8,7 +8,7 @@ use thiserror::Error;
 use tokio::sync::broadcast::error::RecvError;
 
 use crate::{
-    cache::{Cache, InMemoryCache, NoopCache},
+    cache::{Cache, NoopCache},
     rate_limit::{BucketRateLimiter, NoopRateLimiter, RateLimiter},
 };
 
