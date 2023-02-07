@@ -18,8 +18,10 @@ pub enum EndpointError {
     UnsupportedEndpointQuery,
     #[error("endpoint requires authentication")]
     NotAuthenticated,
-    #[error("unexpected rate limiting error")]
-    RateLimiterCrashed,
+    #[error("unexpected rate limiting error: {0}")]
+    RateLimiterCrashed(String),
+    #[error("requested too many tokens at once")]
+    RateLimiterBucketExceeded,
     #[error("connection to gw2 api failed: {0}")]
     RequestFailed(#[from] hyper::Error),
     #[error("gw2 api returned non success status: {0}")]

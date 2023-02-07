@@ -1,6 +1,6 @@
 version: "3"
 services:
-  proxy:
-    image: gw2lib-proxy
+  redis:
+    image: redis
     ports:
-      - 52321:52321
+      - "6379:6379"

@@ -1,6 +1,5 @@
 use std::{
     any::TypeId,
-    collections::hash_map::Entry,
     fmt::Display,
     hash::Hash,
     ops::Deref,
@@ -10,9 +9,9 @@ use std::{
 
 use async_trait::async_trait;
 use chrono::{Duration, NaiveDateTime, Utc};
+use dashmap::{mapref::entry::Entry, DashMap};
 use either::Either;
 use futures::{stream::FuturesUnordered, StreamExt};
-use fxhash::FxHashMap;
 use gw2lib_model::{
     BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language, PagedEndpoint,
 };
@@ -30,9 +29,9 @@ use crate::{
 
 #[async_trait]
 pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync {
-    type Caching: Cache + Send;
-    type RateLimiting: RateLimiter + Sync;
+    type Caching: Cache + Send + Sync + 'static;
     type Connector: Connect + Clone + Send + Sync + 'static;
+    type RateLimiting: RateLimiter + Send + Sync + 'static;
 
     #[doc(hidden)]
     fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED>;
@@ -199,7 +198,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
             ids.into_iter().map(|id| id.into()).collect()
         };
 
-        let mut txs = FxHashMap::with_capacity_and_hasher(ids.len(), Default::default());
+        let txs = DashMap::with_capacity(ids.len());
         let mut rxs = Vec::with_capacity(ids.len());
         let mut remaining_ids = Vec::with_capacity(ids.len());
         for id in ids {
@@ -236,7 +235,6 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         }
 
         let result = Mutex::new(result);
-        let txs = Mutex::new(txs);
         let chunks = join_ids(&remaining_ids);
         let futs: FuturesUnordered<_> = chunks
             .into_iter()
@@ -252,9 +250,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                     // TODO: consider postponing the locking
                     cache_response_many(self, response, &mut result).await?;
 
-                    let mut txs = txs.lock().await;
                     for x in result.iter().skip(index) {
-                        let tx = txs
+                        let (_, tx) = txs
                             .remove(x.id())
                             .expect("received unexpected entry from api");
                         // ignoring the error is fine here
@@ -428,7 +425,7 @@ impl<T: Send> Drop for SenderGuard<'_, T> {
         let inflight = self.inflight.clone();
         let hash = self.hash;
 
-        let task = async move { inflight.lock().await.remove(&hash) };
+        let task = async move { inflight.remove(&hash) };
 
         crate::block::spawn(task);
     }
@@ -446,9 +443,8 @@ async fn check_inflight<
     lang: Language,
     auth: &Option<A>,
 ) -> Option<Either<Receiver<H>, SenderGuard<'client, H>>> {
-    let hash = hash::<H, I, A>(id, T::LOCALE.then_some(lang), auth);
-    let mut locked = inflight.lock().await;
-    Some(match locked.entry(hash) {
+    let hash = hash::<_, H, I, A>(inflight.hasher(), id, T::LOCALE.then_some(lang), auth);
+    Some(match inflight.entry(hash) {
         Entry::Occupied(mut e) => {
             let r = e
                 .get_mut()
@@ -483,8 +479,8 @@ async fn check_cache<
     id: &I,
 ) -> Option<T> {
     if !F {
-        let mut cache = req.client().cache.lock().await;
-        cache
+        req.client()
+            .cache
             .get::<T, I, E, String>(id, req.client().language, &req.client().identifier)
             .await
     } else {
@@ -540,8 +536,8 @@ async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
     request: Request<hyper::Body>,
 ) -> EndpointResult<Response<hyper::Body>> {
-    let time = { req.client().rate_limiter.lock().await.take(1).await? };
-    tokio::time::sleep(std::time::Duration::from_secs(time)).await;
+    let time = req.client().rate_limiter.take(1).await?;
+    tokio::time::sleep(time).await;
 
     req.client()
         .client
@@ -628,10 +624,11 @@ async fn extract_many_from_cache<
     result: &mut Vec<K>,
 ) -> Vec<I> {
     let mut rest = Vec::with_capacity(ids.len());
-    let mut cache = req.client().cache.lock().await;
     for i in ids {
         let i = i.into();
-        if let Some(cached) = cache
+        if let Some(cached) = req
+            .client()
+            .cache
             .get::<K, I, K, String>(&i, req.client().language, &req.client().identifier)
             .await
         {
@@ -657,8 +654,8 @@ async fn cache_response<
 ) -> Result<K, EndpointError> {
     let (expires, result): (_, K) = parse_response(req, response).await?;
     {
-        let mut cache = req.client().cache.lock().await;
-        cache
+        req.client()
+            .cache
             .insert::<K, I, T, String>(
                 id,
                 &result,
@@ -691,9 +688,9 @@ async fn cache_response_many<
 ) -> Result<(), EndpointError> {
     let (expires, res): (_, Vec<K>) = parse_response(req, response).await?;
     {
-        let mut cache = req.client().cache.lock().await;
         for t in res {
-            cache
+            req.client()
+                .cache
                 .insert::<K, I, K, String>(
                     t.id(),
                     &t,
@@ -722,7 +719,7 @@ async fn parse_response<
         return Err(EndpointError::ApiError(match status.as_u16() {
             401 => ApiError::Unauthorized,
             429 => {
-                let _ = req.client().rate_limiter.lock().await.penalize().await;
+                let _ = req.client().rate_limiter.penalize().await;
                 ApiError::RateLimited
             }
             _ => {

@@ -13,7 +13,7 @@ pub use requester::Requester;
 mod blocking;
 
 use chrono::Duration;
-use fxhash::FxHashMap;
+use dashmap::DashMap;
 use gw2lib_model::Language;
 use hyper::client::{connect::Connect, HttpConnector};
 use hyper_rustls::HttpsConnector;
@@ -25,11 +25,11 @@ use crate::{
     BucketRateLimiter, Cache, NoopCache, NoopRateLimiter, RateLimiter,
 };
 
-pub(crate) type Inflight = Arc<Mutex<FxHashMap<(TypeId, u64), Box<dyn Any + Send>>>>;
+pub(crate) type Inflight = Arc<DashMap<(TypeId, u64), Box<dyn Any + Send + Sync>>>;
 
 pub struct Client<
-    C: Cache,
-    R: RateLimiter,
+    C: Cache + Send + Sync + 'static,
+    R: RateLimiter + Send + Sync + 'static,
     Conn: Connect + Clone + Send + Sync + 'static,
     const AUTHENTICATED: bool,
 > {
@@ -38,9 +38,9 @@ pub struct Client<
     client: hyper::Client<Conn, hyper::Body>,
     api_key: Option<String>,
     identifier: Option<String>,
-    cache: Arc<Mutex<C>>,
+    cache: Arc<C>,
     inflight: Inflight,
-    rate_limiter: Arc<Mutex<R>>,
+    rate_limiter: R,
 }
 
 impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
@@ -52,14 +52,14 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
     /// [`Client::default`].
     pub fn empty() -> Self {
         let client = create_client();
-        let rate_limiter = Arc::new(Mutex::new(NoopRateLimiter {}));
+        let rate_limiter = NoopRateLimiter {};
         Self {
             host: "https://api.guildwars2.com".to_string(),
             language: Language::En,
             client,
             api_key: None,
             identifier: None,
-            cache: Arc::new(Mutex::new(NoopCache {})),
+            cache: Arc::new(NoopCache {}),
             inflight: Default::default(),
             rate_limiter,
         }
@@ -69,8 +69,8 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
 impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpConnector>, false> {
     fn default() -> Self {
         let client = create_client();
-        let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::default()));
-        let cache = Arc::new(Mutex::new(InMemoryCache::default()));
+        let rate_limiter = BucketRateLimiter::default();
+        let cache = Arc::new(InMemoryCache::default());
         periodically_cleanup_cache(cache.clone());
         Self {
             host: "https://api.guildwars2.com".to_string(),
@@ -87,8 +87,8 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpCon
 
 /// constructing client
 impl<
-        C: Cache,
-        R: RateLimiter,
+        C: Cache + Send + Sync + 'static,
+        R: RateLimiter + Send + Sync + 'static,
         Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
     > Client<C, R, Conn, AUTHENTICATED>
@@ -194,7 +194,7 @@ impl<
     /// let client = Client::empty().cache(cache);
     pub fn cache<NC: Cache + Send + Sync + 'static>(
         self,
-        cache: Arc<Mutex<NC>>,
+        cache: Arc<NC>,
     ) -> Client<NC, R, Conn, AUTHENTICATED> {
         periodically_cleanup_cache(cache.clone());
         Client {
@@ -222,9 +222,9 @@ impl<
     /// let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::default()));
     /// let client = client.rate_limiter(rate_limiter.clone());
     /// let new_client = Client::default().rate_limiter(rate_limiter.clone());
-    pub fn rate_limiter<NR: RateLimiter + 'static>(
+    pub fn rate_limiter<NR: RateLimiter + Send + Sync + 'static>(
         self,
-        rate_limiter: Arc<Mutex<NR>>,
+        rate_limiter: NR,
     ) -> Client<C, NR, Conn, AUTHENTICATED> {
         Client {
             host: self.host,
@@ -240,8 +240,8 @@ impl<
 }
 
 impl<
-        C: Cache + Send,
-        R: RateLimiter + Sync,
+        C: Cache + Send + Sync + 'static,
+        R: RateLimiter + Send + Sync + 'static,
         Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
     > requester::Requester<AUTHENTICATED, false> for Client<C, R, Conn, AUTHENTICATED>
@@ -261,8 +261,8 @@ impl<
 
 pub struct CachedRequest<
     'client,
-    C: Cache,
-    R: RateLimiter,
+    C: Cache + Send + Sync + 'static,
+    R: RateLimiter + Send + Sync + 'static,
     Conn: Connect + Clone + Send + Sync + 'static,
     const AUTHENTICATED: bool,
     const FORCE: bool,
@@ -272,8 +272,8 @@ pub struct CachedRequest<
 }
 
 impl<
-        C: Cache + Send,
-        R: RateLimiter + Sync,
+        C: Cache + Send + Sync + 'static,
+        R: RateLimiter + Send + Sync + 'static,
         Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
         const FORCE: bool,
@@ -302,9 +302,9 @@ fn create_client() -> hyper::Client<HttpsConnector<HttpConnector>, hyper::Body> 
     hyper::Client::builder().build(https)
 }
 
-fn periodically_cleanup_cache(cache: Arc<Mutex<dyn CleanupCache + Send + Sync + 'static>>) {
+fn periodically_cleanup_cache(cache: Arc<dyn CleanupCache + Send + Sync + 'static>) {
     #[dynamic]
-    static CACHES: Mutex<Vec<Weak<Mutex<dyn CleanupCache + Send + Sync>>>> =
+    static CACHES: Mutex<Vec<Weak<dyn CleanupCache + Send + Sync>>> =
         Mutex::new(Vec::with_capacity(1));
 
     let task = async move {
@@ -325,7 +325,7 @@ fn periodically_cleanup_cache(cache: Arc<Mutex<dyn CleanupCache + Send + Sync + 
 
                 for cache in caches.iter() {
                     if let Some(cache) = cache.upgrade() {
-                        cache.lock().await.cleanup().await;
+                        cache.cleanup().await;
                     }
                 }
             }

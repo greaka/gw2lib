@@ -101,14 +101,13 @@ mod cache {
 
 mod rate_limit {
     use gw2lib::{rate_limit::BucketRateLimiter, Requester};
-    use tokio::sync::Mutex;
 
     use super::*;
 
     #[test]
     fn hit() {
         // 1 request every 3 seconds
-        let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::new(1, 20)));
+        let rate_limiter = BucketRateLimiter::new(1, 20);
         let client = setup::setup().rate_limiter(rate_limiter);
         let client = client.forced();
 

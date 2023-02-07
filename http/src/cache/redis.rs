@@ -21,7 +21,7 @@ pub struct RedisCache<C: AsRef<Client> + Send + Sync> {
 #[async_trait]
 impl<C: AsRef<Client> + Send + Sync> Cache for RedisCache<C> {
     async fn insert<T, I, E, A>(
-        &mut self,
+        &self,
         id: &I,
         endpoint: &T,
         expiring: NaiveDateTime,
@@ -53,7 +53,7 @@ impl<C: AsRef<Client> + Send + Sync> Cache for RedisCache<C> {
         }
     }
 
-    async fn get<T, I, E, A>(&mut self, id: &I, lang: Language, auth: &Option<A>) -> Option<T>
+    async fn get<T, I, E, A>(&self, id: &I, lang: Language, auth: &Option<A>) -> Option<T>
     where
         T: DeserializeOwned + Serialize + Clone + Send + Sync + Sync + 'static,
         I: Display + Hash + Sync + 'static + ?Sized,
@@ -68,13 +68,13 @@ impl<C: AsRef<Client> + Send + Sync> Cache for RedisCache<C> {
             .and_then(|x: String| serde_json::from_str(&x).ok())
     }
 
-    async fn cleanup(&mut self) {}
+    async fn cleanup(&self) {}
 
-    async fn wipe_static(&mut self) {
+    async fn wipe_static(&self) {
         self.delete_keys("gw2lib_static_*").await;
     }
 
-    async fn wipe_authenticated(&mut self) {
+    async fn wipe_authenticated(&self) {
         self.delete_keys("gw2lib_auth_*").await;
     }
 }
@@ -86,11 +86,11 @@ impl<C: AsRef<Client> + Send + Sync> RedisCache<C> {
 }
 
 impl<C: AsRef<Client> + Send + Sync> RedisCache<C> {
-    async fn connection(&mut self) -> Option<Connection> {
+    async fn connection(&self) -> Option<Connection> {
         self.client.as_ref().get_async_connection().await.ok()
     }
 
-    async fn delete_keys(&mut self, pattern: &str) {
+    async fn delete_keys(&self, pattern: &str) {
         let mut conn = match self.connection().await {
             Some(conn) => conn,
             None => return,
