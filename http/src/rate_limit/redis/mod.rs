@@ -5,28 +5,32 @@ use redis::{aio::Connection, Client, RedisError};
 
 use crate::{block, rate_limit::RateLimiter, EndpointError};
 
-pub struct RedisRateLimiter<C: AsRef<Client> + Send + Sync> {
+pub struct RedisRateLimiter {
     /// maximum number of requests in burst
     burst: usize,
     /// requests per minute
     refill: usize,
-    client: C,
+    client: Client,
 }
 
-impl<C: AsRef<Client> + Send + Sync> RedisRateLimiter<C> {
+impl RedisRateLimiter {
     #[cfg(feature = "blocking")]
-    pub fn new(client: C) -> Result<Self, RedisError> {
+    pub fn new(client: Client) -> Result<Self, RedisError> {
         block::block(Self::with_values(client, 300, 300))
     }
 
     #[cfg(not(feature = "blocking"))]
-    pub fn new(client: C) -> impl Future<Output = Result<Self, RedisError>> {
+    pub fn new(client: Client) -> impl Future<Output = Result<Self, RedisError>> {
         Self::with_values(client, 300, 300)
     }
 
     /// burst takes the maximum number of requests in burst
     /// refill sets the requests per minute
-    pub async fn with_values(client: C, burst: usize, refill: usize) -> Result<Self, RedisError> {
+    pub async fn with_values(
+        client: Client,
+        burst: usize,
+        refill: usize,
+    ) -> Result<Self, RedisError> {
         let this = Self {
             burst,
             refill,
@@ -49,12 +53,12 @@ impl<C: AsRef<Client> + Send + Sync> RedisRateLimiter<C> {
     }
 
     fn connection(&self) -> impl Future<Output = Result<Connection, RedisError>> + '_ {
-        self.client.as_ref().get_async_connection()
+        self.client.get_async_connection()
     }
 }
 
 #[async_trait]
-impl<C: AsRef<Client> + Send + Sync> RateLimiter for RedisRateLimiter<C> {
+impl RateLimiter for RedisRateLimiter {
     async fn take(&self, num: usize) -> Result<Duration, EndpointError> {
         if num > self.burst {
             return Err(EndpointError::RateLimiterBucketExceeded);

@@ -14,12 +14,12 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::cache::Cache;
 
-pub struct RedisCache<C: AsRef<Client> + Send + Sync> {
-    client: C,
+pub struct RedisCache {
+    client: Client,
 }
 
 #[async_trait]
-impl<C: AsRef<Client> + Send + Sync> Cache for RedisCache<C> {
+impl Cache for RedisCache {
     async fn insert<T, I, E, A>(
         &self,
         id: &I,
@@ -79,15 +79,15 @@ impl<C: AsRef<Client> + Send + Sync> Cache for RedisCache<C> {
     }
 }
 
-impl<C: AsRef<Client> + Send + Sync> RedisCache<C> {
-    pub fn new(client: C) -> Self {
+impl RedisCache {
+    pub fn new(client: Client) -> Self {
         Self { client }
     }
 }
 
-impl<C: AsRef<Client> + Send + Sync> RedisCache<C> {
+impl RedisCache {
     async fn connection(&self) -> Option<Connection> {
-        self.client.as_ref().get_async_connection().await.ok()
+        self.client.get_async_connection().await.ok()
     }
 
     async fn delete_keys(&self, pattern: &str) {

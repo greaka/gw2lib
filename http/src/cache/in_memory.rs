@@ -21,7 +21,7 @@ impl Default for InMemoryCache {
         let hasher = RandomState::new();
         Self {
             statics: DashMap::with_hasher(hasher.clone()),
-            authenticated: DashMap::with_hasher(hasher.clone()),
+            authenticated: DashMap::with_hasher(hasher),
         }
     }
 }
