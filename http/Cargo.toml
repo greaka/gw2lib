@@ -1,6 +1,6 @@
 [package]
 name = "gw2lib"
-version = "3.0.0-alpha-3"
+version = "3.0.0-alpha-4"
 edition = "2021"
 workspace = "../"
 description = "A simple to use Gw2 API wrapper library"
@@ -53,3 +53,7 @@ path = "../model"
 
 [features]
 blocking = []
+redis = ["dep:redis"]
+
+[package.metadata.docs.rs]
+features = ["redis"]
