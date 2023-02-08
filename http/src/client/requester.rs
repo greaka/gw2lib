@@ -353,13 +353,19 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
             return Err(EndpointError::UnsupportedEndpointQuery);
         }
 
+        if let Some(c) =
+            check_cache::<Vec<T>, str, T, Self, AUTHENTICATED, FORCE>(self, "ids=all").await
+        {
+            return Ok(c);
+        }
+
         let request =
             build_request::<T, _, Self, AUTHENTICATED, FORCE>(self, T::URL, Some("ids=all"))?;
 
         let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let count = get_header(&response, "x-result-total").unwrap_or(0);
         let mut result = Vec::with_capacity(count);
-        cache_response_many(self, response, &mut result).await?;
+        cache_response_all(self, response, &mut result).await?;
 
         Ok(result)
     }
@@ -653,18 +659,18 @@ async fn cache_response<
     response: Response<hyper::Body>,
 ) -> Result<K, EndpointError> {
     let (expires, result): (_, K) = parse_response(req, response).await?;
-    {
-        req.client()
-            .cache
-            .insert::<K, I, T, String>(
-                id,
-                &result,
-                expires,
-                req.client().language,
-                &req.client().identifier,
-            )
-            .await;
-    }
+
+    req.client()
+        .cache
+        .insert::<K, I, T, String>(
+            id,
+            &result,
+            expires,
+            req.client().language,
+            &req.client().identifier,
+        )
+        .await;
+
     Ok(result)
 }
 
@@ -687,21 +693,69 @@ async fn cache_response_many<
     result: &mut Vec<K>,
 ) -> Result<(), EndpointError> {
     let (expires, res): (_, Vec<K>) = parse_response(req, response).await?;
-    {
-        for t in res {
-            req.client()
-                .cache
-                .insert::<K, I, K, String>(
-                    t.id(),
-                    &t,
-                    expires,
-                    req.client().language,
-                    &req.client().identifier,
-                )
-                .await;
-            result.push(t);
-        }
+
+    for t in res {
+        req.client()
+            .cache
+            .insert::<K, I, K, String>(
+                t.id(),
+                &t,
+                expires,
+                req.client().language,
+                &req.client().identifier,
+            )
+            .await;
+        result.push(t);
     }
+
+    Ok(())
+}
+
+async fn cache_response_all<
+    I: Display + Hash + Sync + 'static,
+    K: DeserializeOwned
+        + Serialize
+        + BulkEndpoint
+        + EndpointWithId<IdType = I>
+        + Clone
+        + Send
+        + Sync
+        + 'static,
+    Req: Requester<A, F>,
+    const A: bool,
+    const F: bool,
+>(
+    req: &Req,
+    response: Response<hyper::Body>,
+    result: &mut Vec<K>,
+) -> Result<(), EndpointError> {
+    let (expires, res): (_, Vec<K>) = parse_response(req, response).await?;
+
+    req.client()
+        .cache
+        .insert::<Vec<K>, str, K, String>(
+            "ids=all",
+            &res,
+            expires,
+            req.client().language,
+            &req.client().identifier,
+        )
+        .await;
+
+    for t in res {
+        req.client()
+            .cache
+            .insert::<K, I, K, String>(
+                t.id(),
+                &t,
+                expires,
+                req.client().language,
+                &req.client().identifier,
+            )
+            .await;
+        result.push(t);
+    }
+
     Ok(())
 }
 

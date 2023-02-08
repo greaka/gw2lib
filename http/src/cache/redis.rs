@@ -14,6 +14,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::cache::Cache;
 
+#[derive(Debug, Clone)]
 pub struct RedisCache {
     client: Client,
 }

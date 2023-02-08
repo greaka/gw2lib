@@ -259,6 +259,27 @@ impl<
     }
 }
 
+impl<
+        C: Cache + Send + Sync + 'static,
+        R: RateLimiter + Clone + Send + Sync + 'static,
+        Conn: Connect + Clone + Send + Sync + 'static,
+        const AUTHENTICATED: bool,
+    > Clone for Client<C, R, Conn, AUTHENTICATED>
+{
+    fn clone(&self) -> Self {
+        Self {
+            host: self.host.clone(),
+            language: self.language,
+            client: self.client.clone(),
+            api_key: self.api_key.clone(),
+            identifier: self.identifier.clone(),
+            cache: self.cache.clone(),
+            inflight: self.inflight.clone(),
+            rate_limiter: self.rate_limiter.clone(),
+        }
+    }
+}
+
 pub struct CachedRequest<
     'client,
     C: Cache + Send + Sync + 'static,

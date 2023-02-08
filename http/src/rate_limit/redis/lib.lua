@@ -10,11 +10,11 @@ local function take(keys, args)
         return redis.error_reply('bucket exhausted')
     end
 
-    local ratio = 60000 / refill
+    local ratio = math.floor(60000 / refill)
     local max = math.floor(60000 * burst / refill)
 
     local time = redis.call('TIME')
-    local ms = math.floor(time[1] * 1000 + time[2] / 1000)
+    local ms = math.ceil(time[1] * 1000 + time[2] / 1000)
     local base = ms - max
     local value = redis.call('GET', key)
     if not value then
@@ -30,7 +30,8 @@ local function take(keys, args)
 
     redis.call('SET', key, value)
 
-    local res = value - ms
+    -- add a buffer of one second
+    local res = value - ms + 1000
     if res < 0 then
         res = 0
     end
@@ -43,8 +44,8 @@ local function penalize(keys, args)
 
     local ratio = 60000 / refill
 
-    local time = redis.call('TIME')[1]
-    local ms = math.floor(time[1] * 1000 + time[2] / 1000)
+    local time = redis.call('TIME')
+    local ms = math.ceil(time[1] * 1000 + time[2] / 1000)
     local value = redis.call('GET', key)
     if not value then
         value = 0
@@ -56,7 +57,7 @@ local function penalize(keys, args)
     end
 
     -- the api penalizes for half a request while above the rate limit
-    value = math.floor(value + ratio * amount / 2)
+    value = math.floor(value + ratio / 2)
 
     return redis.call('SET', key, value)
 end

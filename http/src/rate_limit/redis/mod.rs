@@ -3,8 +3,9 @@ use std::{future::Future, time::Duration};
 use async_trait::async_trait;
 use redis::{aio::Connection, Client, RedisError};
 
-use crate::{block, rate_limit::RateLimiter, EndpointError};
+use crate::{rate_limit::RateLimiter, EndpointError};
 
+#[derive(Debug, Clone)]
 pub struct RedisRateLimiter {
     /// maximum number of requests in burst
     burst: usize,
@@ -16,7 +17,7 @@ pub struct RedisRateLimiter {
 impl RedisRateLimiter {
     #[cfg(feature = "blocking")]
     pub fn new(client: Client) -> Result<Self, RedisError> {
-        block::block(Self::with_values(client, 300, 300))
+        crate::block::block(Self::with_values(client, 300, 300))
     }
 
     #[cfg(not(feature = "blocking"))]
