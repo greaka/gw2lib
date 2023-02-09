@@ -1,4 +1,4 @@
-use std::{fmt::Display, hash::Hash};
+use std::{fmt::Display, hash::Hash, ops::Deref};
 
 use async_trait::async_trait;
 use chrono::NaiveDateTime;
@@ -65,5 +65,52 @@ where
 {
     async fn cleanup(&self) {
         Cache::cleanup(self).await;
+    }
+}
+
+#[async_trait]
+impl<X, K> Cache for X
+where
+    X: Deref<Target = K> + Sync,
+    K: Cache + Sync,
+{
+    async fn insert<T, I, E, A>(
+        &self,
+        id: &I,
+        endpoint: &T,
+        expiring: NaiveDateTime,
+        lang: Language,
+        auth: &Option<A>,
+    ) where
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
+        I: Display + Hash + Sync + 'static + ?Sized,
+        E: Endpoint,
+        A: Display + Hash + Sync + 'static,
+    {
+        self.deref()
+            .insert::<T, I, E, A>(id, endpoint, expiring, lang, auth)
+            .await
+    }
+
+    async fn get<T, I, E, A>(&self, id: &I, lang: Language, auth: &Option<A>) -> Option<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
+        I: Display + Hash + Sync + 'static + ?Sized,
+        E: Endpoint,
+        A: Display + Hash + Sync + 'static,
+    {
+        self.deref().get::<T, I, E, A>(id, lang, auth).await
+    }
+
+    async fn cleanup(&self) {
+        self.deref().cleanup().await
+    }
+
+    async fn wipe_static(&self) {
+        self.deref().wipe_static().await
+    }
+
+    async fn wipe_authenticated(&self) {
+        self.deref().wipe_authenticated().await
     }
 }
