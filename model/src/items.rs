@@ -100,6 +100,7 @@ pub enum Restrictions {
     Thief,
     Warrior,
     Female,
+    Revenant,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]

@@ -53,6 +53,11 @@ impl From<&str> for Language {
 
 pub type TimeStamp = String;
 
+#[derive(Hash, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ErrorResponse {
+    pub text: String,
+}
+
 pub trait Endpoint: Sized {
     /// whether this endpoint requires authentication
     const AUTHENTICATED: bool;
