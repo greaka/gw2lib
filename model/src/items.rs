@@ -295,6 +295,7 @@ pub enum GatheringToolsType {
     Mining,
     Lure,
     Bait,
+    Fishing,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
