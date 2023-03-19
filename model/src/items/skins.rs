@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::items::{
     ArmorSlot, DamageType, GatheringToolsType, Rarity, Restrictions, WeaponType, WeightClass,
@@ -18,7 +18,7 @@ pub enum SkinType {
     Weapon,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Flags {
     /// Displayed in the account wardrobe.
@@ -124,8 +124,8 @@ pub struct Skin {
     pub icon: Option<String>,
     pub description: Option<String>,
     pub rarity: Rarity,
-    pub flags: Vec<Flags>,
-    pub restrictions: Vec<Restrictions>,
+    pub flags: BTreeSet<Flags>,
+    pub restrictions: BTreeSet<Restrictions>,
     #[serde(flatten)]
     pub details: Details,
 }

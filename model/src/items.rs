@@ -83,7 +83,7 @@ pub enum GameTypes {
     Wvw,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Restrictions {
     Asura,
