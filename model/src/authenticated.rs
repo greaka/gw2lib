@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 use crate::{Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 #[serde(rename_all = "lowercase")]
 pub enum Permissions {
@@ -40,7 +41,7 @@ pub struct SubtokenDetails {
 pub struct Tokeninfo {
     pub id: String,
     pub name: String,
-    pub permissions: Vec<Permissions>,
+    pub permissions: BTreeSet<Permissions>,
     #[serde(rename = "type")]
     pub _type: TokenType,
     #[serde(flatten)]

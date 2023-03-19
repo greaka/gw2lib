@@ -1,6 +1,7 @@
 pub type RecipeId = u32;
 
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 pub use crate::authenticated::characters::Discipline;
 use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
@@ -63,7 +64,7 @@ pub enum RecipeType {
     UpgradeComponent,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum RecipeFlag {
     AutoLearned,
@@ -93,9 +94,9 @@ pub struct Recipe {
     output_item_id: ItemId,
     output_item_count: u16,
     time_to_craft_ms: u16,
-    disciplines: Vec<Discipline>,
+    disciplines: BTreeSet<Discipline>,
     min_rating: u16,
-    flags: Vec<RecipeFlag>,
+    flags: BTreeSet<RecipeFlag>,
     ingredients: Vec<Ingredient>,
     guild_ingredients: Option<Vec<GuildIngredient>>,
     output_upgrade_id: Option<u32>,
