@@ -109,7 +109,7 @@ Last update: 2022/08/01
 - items
   - [ ] finishers
   - [x] items
-  - [ ] itemstats
+  - [x] itemstats
   - [ ] materials
   - pvp
     - [ ] amulets
