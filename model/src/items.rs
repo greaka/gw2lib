@@ -441,6 +441,7 @@ pub enum WeaponType {
     Shortbow,
     Staff,
     Harpoon,
+    Spear,
     Speargun,
     Trident,
     LargeBundle,
