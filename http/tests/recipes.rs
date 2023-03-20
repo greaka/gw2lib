@@ -35,4 +35,5 @@ fn all() {
 mod single {
     use gw2lib::Requester;
     parse_single!(refinement_ectoplasm, 7319, check_type!(RefinementEctoplasm));
+    parse_single!(insignia, 13598, check_type!(Insignia));
 }
