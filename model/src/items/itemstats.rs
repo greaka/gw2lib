@@ -29,7 +29,7 @@ impl Endpoint for ItemStat {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/itemstats";
-    const VERSION: &'static str = "2022-07-22T00:00:00.000Z";
+    const VERSION: &'static str = "2023-03-20T19:00:00.000Z";
 }
 
 impl BulkEndpoint for ItemStat {
