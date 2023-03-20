@@ -32,13 +32,11 @@ pub enum Flags {
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Material {
-    #[serde(rename = "cloth")]
     Cloth,
-    #[serde(rename = "leather")]
     Leather,
-    #[serde(rename = "metal")]
     Metal,
 }
 
