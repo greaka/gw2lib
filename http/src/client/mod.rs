@@ -160,22 +160,22 @@ impl<
     /// Defaults to the api key
     ///
     /// ## Example
-    /// ```
+    /// ```no_run
     /// use gw2lib::{Client, Requester};
-    /// use gw2lib_model::authenticated::{account::Account, characters::CharacterId};
+    /// use gw2lib_model::authenticated::{account::Account, characters::{Character, CharacterId}};
     ///
     /// let client = Client::default().api_key("<subtoken>");
     /// let account: Account = client.get().unwrap();
     /// let client = client.identifier(&account.id);
     ///
     /// // make a request
-    /// let characters: Vec<CharacterId> = client.ids().unwrap();
+    /// let characters: Vec<CharacterId> = client.ids::<Character, CharacterId>().unwrap();
     ///
     /// let client = Client::default().api_key("<different subtoken>");
     /// let client = client.identifier(account.id);
     ///
     /// // cache hit
-    /// let characters: Vec<CharacterId> = client.ids().unwrap();
+    /// let characters: Vec<CharacterId> = client.ids::<Character, CharacterId>().unwrap();
     /// ```
     pub fn identifier(self, id: impl Into<String>) -> Self {
         Client {
@@ -189,8 +189,9 @@ impl<
     /// ```
     /// use gw2lib::cache::InMemoryCache;
     /// use gw2lib::Client;
+    /// use std::sync::{Arc, Mutex};
     ///
-    /// let cache = Arc::new(Mutex::new(InMemoryCache::default()));
+    /// let cache = Arc::new(InMemoryCache::default());
     /// let client = Client::empty().cache(cache);
     pub fn cache<NC: Cache + Send + Sync + 'static>(
         self,
@@ -213,13 +214,12 @@ impl<
     /// multiple clients ## Example
     /// ```
     /// use std::sync::Arc;
-    /// use tokio::sync::Mutex;
     /// use gw2lib::cache::InMemoryCache;
     /// use gw2lib::Client;
     /// use gw2lib::rate_limit::BucketRateLimiter;
     ///
-    /// let client = Client::empty().cache(Arc::new(Mutex::new(InMemoryCache::default())));
-    /// let rate_limiter = Arc::new(Mutex::new(BucketRateLimiter::default()));
+    /// let client = Client::empty().cache(Arc::new(InMemoryCache::default()));
+    /// let rate_limiter = Arc::new(BucketRateLimiter::default());
     /// let client = client.rate_limiter(rate_limiter.clone());
     /// let new_client = Client::default().rate_limiter(rate_limiter.clone());
     pub fn rate_limiter<NR: RateLimiter + Send + Sync + 'static>(
