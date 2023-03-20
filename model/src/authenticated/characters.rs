@@ -68,7 +68,7 @@ pub struct Core {
     pub title: Option<TitleId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Discipline {
     Armorsmith,

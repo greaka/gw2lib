@@ -3,6 +3,7 @@ pub mod recipes;
 pub mod skins;
 
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 use crate::{
     game_mechanics::skills::SkillId,
@@ -50,7 +51,7 @@ pub enum Rarity {
     Legendary,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Flags {
     AccountBindOnUse,
@@ -72,7 +73,7 @@ pub enum Flags {
     Unique,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum GameTypes {
     Activity,
@@ -83,7 +84,7 @@ pub enum GameTypes {
     Wvw,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum Restrictions {
     Asura,
@@ -124,7 +125,7 @@ pub enum WeightClass {
     Clothing,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum InfusionType {
     Enrichment,
@@ -134,7 +135,7 @@ pub enum InfusionType {
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct InfusionSlot {
-    pub flags: Vec<InfusionType>,
+    pub flags: BTreeSet<InfusionType>,
     pub item_id: Option<ItemId>,
 }
 
@@ -368,7 +369,7 @@ pub enum UpgradeComponentType {
     Sigil,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum UpgradeComponentFlags {
     Axe,
@@ -396,7 +397,7 @@ pub enum UpgradeComponentFlags {
     Trinket,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub enum InfusionUpgradeFlags {
     Enrichment,
@@ -412,8 +413,8 @@ pub enum InfusionUpgradeFlags {
 pub struct UpgradeComponentDetails {
     #[serde(rename = "type")]
     pub _type: UpgradeComponentType,
-    pub flags: Vec<UpgradeComponentFlags>,
-    pub infusion_upgrade_flags: Vec<InfusionUpgradeFlags>,
+    pub flags: BTreeSet<UpgradeComponentFlags>,
+    pub infusion_upgrade_flags: BTreeSet<InfusionUpgradeFlags>,
     pub suffix: String,
     pub attribute_adjustment: f32,
     pub infix_upgrade: InfixUpgrade,
@@ -533,9 +534,9 @@ pub struct Item {
     pub level: u8,
     pub vendor_value: u64,
     pub default_skin: Option<SkinId>,
-    pub flags: Vec<Flags>,
-    pub game_types: Vec<GameTypes>,
-    pub restrictions: Vec<Restrictions>,
+    pub flags: BTreeSet<Flags>,
+    pub game_types: BTreeSet<GameTypes>,
+    pub restrictions: BTreeSet<Restrictions>,
     #[serde(flatten)]
     pub details: Details,
 }

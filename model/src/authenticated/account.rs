@@ -3,11 +3,12 @@ pub mod materials;
 pub mod wallet;
 
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 pub use crate::misc::worlds::WorldId;
 use crate::*;
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 #[non_exhaustive]
 pub enum Access {
@@ -29,7 +30,7 @@ pub struct Account {
     pub guilds: Vec<String>,
     pub guild_leader: Option<Vec<String>>,
     pub created: TimeStamp,
-    pub access: Vec<Access>,
+    pub access: BTreeSet<Access>,
     pub commander: bool,
     pub fractal_level: Option<u8>,
     pub daily_ap: Option<u16>,
