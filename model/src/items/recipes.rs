@@ -88,19 +88,19 @@ pub struct GuildIngredient {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Recipe {
-    id: RecipeId,
+    pub id: RecipeId,
     #[serde(rename = "type")]
-    _type: RecipeType,
-    output_item_id: ItemId,
-    output_item_count: u16,
-    time_to_craft_ms: u16,
-    disciplines: BTreeSet<Discipline>,
-    min_rating: u16,
-    flags: BTreeSet<RecipeFlag>,
-    ingredients: Vec<Ingredient>,
-    guild_ingredients: Option<Vec<GuildIngredient>>,
-    output_upgrade_id: Option<u32>,
-    chat_link: String,
+    pub _type: RecipeType,
+    pub output_item_id: ItemId,
+    pub output_item_count: u16,
+    pub time_to_craft_ms: u16,
+    pub disciplines: BTreeSet<Discipline>,
+    pub min_rating: u16,
+    pub flags: BTreeSet<RecipeFlag>,
+    pub ingredients: Vec<Ingredient>,
+    pub guild_ingredients: Option<Vec<GuildIngredient>>,
+    pub output_upgrade_id: Option<u32>,
+    pub chat_link: String,
 }
 
 impl EndpointWithId for Recipe {
