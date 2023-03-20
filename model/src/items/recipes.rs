@@ -106,7 +106,7 @@ impl Endpoint for Recipe {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/recipes";
-    const VERSION: &'static str = "2022-03-09T02:00:00.000Z";
+    const VERSION: &'static str = "2023-03-20T13:00:00.000Z";
 }
 
 impl BulkEndpoint for Recipe {
