@@ -13,7 +13,7 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use either::Either;
 use futures::{stream::FuturesUnordered, StreamExt};
 use gw2lib_model::{
-    BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint, Language, PagedEndpoint,
+    BulkEndpoint, Endpoint, EndpointWithId, ErrorResponse, FixedEndpoint, Language, PagedEndpoint,
 };
 use hyper::{body::Buf, client::connect::Connect, Request, Response, Uri};
 use serde::{de::DeserializeOwned, Serialize};
@@ -28,6 +28,7 @@ use crate::{
 };
 
 #[async_trait]
+#[must_use]
 pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync {
     type Caching: Cache + Send + Sync + 'static;
     type Connector: Connect + Clone + Send + Sync + 'static;
@@ -770,14 +771,23 @@ async fn parse_response<
 ) -> Result<(NaiveDateTime, K), EndpointError> {
     let status = response.status();
     if !status.is_success() {
-        return Err(EndpointError::ApiError(match status.as_u16() {
-            401 => ApiError::Unauthorized,
-            429 => {
+        let bytes = hyper::body::to_bytes(response.into_body()).await?;
+        let error = serde_json::from_slice::<'_, ErrorResponse>(&bytes);
+        return Err(EndpointError::ApiError(match (status.as_u16(), error) {
+            (401, _) => ApiError::Unauthorized,
+            (400, Ok(ErrorResponse { text })) if &text == "invalid key" => ApiError::Unauthorized,
+            (400, Ok(ErrorResponse { text })) if &text == "Invalid access token" => {
+                ApiError::Unauthorized
+            }
+            (400, Ok(ErrorResponse { text })) if &text == "account does not have game access" => {
+                ApiError::MissingGameAccess
+            }
+            (429, _) => {
                 let _ = req.client().rate_limiter.penalize().await;
                 ApiError::RateLimited
             }
+            (_, Ok(ErrorResponse { text })) => ApiError::Other(status, text),
             _ => {
-                let bytes = hyper::body::to_bytes(response.into_body()).await?;
                 let body = String::from_utf8_lossy(&bytes);
                 ApiError::Other(status, body.to_string())
             }

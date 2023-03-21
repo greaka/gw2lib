@@ -36,6 +36,8 @@ pub enum EndpointError {
 pub enum ApiError {
     #[error("invalid key")]
     Unauthorized,
+    #[error("account does not have game access")]
+    MissingGameAccess,
     #[error("too many requests")]
     RateLimited,
     #[error("{0}: {1}")]

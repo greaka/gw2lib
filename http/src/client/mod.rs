@@ -27,6 +27,7 @@ use crate::{
 
 pub(crate) type Inflight = Arc<DashMap<(TypeId, u64), Box<dyn Any + Send + Sync>>>;
 
+#[must_use]
 pub struct Client<
     C: Cache + Send + Sync + 'static,
     R: RateLimiter + Send + Sync + 'static,
@@ -162,7 +163,10 @@ impl<
     /// ## Example
     /// ```no_run
     /// use gw2lib::{Client, Requester};
-    /// use gw2lib_model::authenticated::{account::Account, characters::{Character, CharacterId}};
+    /// use gw2lib_model::authenticated::{
+    ///     account::Account,
+    ///     characters::{Character, CharacterId},
+    /// };
     ///
     /// let client = Client::default().api_key("<subtoken>");
     /// let account: Account = client.get().unwrap();
@@ -280,6 +284,7 @@ impl<
     }
 }
 
+#[must_use]
 pub struct CachedRequest<
     'client,
     C: Cache + Send + Sync + 'static,

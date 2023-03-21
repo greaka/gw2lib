@@ -34,8 +34,10 @@ fn parse_all() {
 
 mod single {
     use gw2lib::{
-        model::items::skins::{Details, GatheringToolsDetails, Skin, SkinType},
-        model::items::GatheringToolsType,
+        model::items::{
+            skins::{Details, GatheringToolsDetails, Skin, SkinType},
+            GatheringToolsType,
+        },
         Requester,
     };
     parse_single!(armor, 123, check_type!(Armor));
