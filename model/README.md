@@ -115,7 +115,7 @@ Last update: 2023/03/20
     - [ ] amulets
   - [x] recipes
     - [ ] search
-  - [ ] skins
+  - [x] skins
 - map information
   - [ ] continents
   - [ ] maps
