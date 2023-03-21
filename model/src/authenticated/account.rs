@@ -2,8 +2,9 @@ pub mod bank;
 pub mod materials;
 pub mod wallet;
 
-use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+
+use serde::{Deserialize, Serialize};
 
 pub use crate::misc::worlds::WorldId;
 use crate::*;

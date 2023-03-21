@@ -1,11 +1,14 @@
-use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::items::{
-    ArmorSlot, DamageType, GatheringToolsType, Rarity, Restrictions, WeaponType, WeightClass,
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    items::{
+        ArmorSlot, DamageType, GatheringToolsType, Rarity, Restrictions, WeaponType, WeightClass,
+    },
+    misc::colors::ColorId,
+    BulkEndpoint, Endpoint, EndpointWithId,
 };
-use crate::misc::colors::ColorId;
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type SkinId = u32;
 

@@ -1,12 +1,14 @@
 pub type RecipeId = u32;
 
-use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
+use serde::{Deserialize, Serialize};
+
 pub use crate::authenticated::characters::Discipline;
-use crate::guild::upgrades::GuildUpgradeId;
-use crate::misc::currencies::CurrencyId;
-use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{
+    guild::upgrades::GuildUpgradeId, items::ItemId, misc::currencies::CurrencyId, BulkEndpoint,
+    Endpoint, EndpointWithId,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(test, serde(deny_unknown_fields))]

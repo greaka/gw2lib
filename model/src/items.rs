@@ -2,8 +2,9 @@ pub mod itemstats;
 pub mod recipes;
 pub mod skins;
 
-use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+
+use serde::{Deserialize, Serialize};
 
 use crate::{
     game_mechanics::skills::SkillId,
