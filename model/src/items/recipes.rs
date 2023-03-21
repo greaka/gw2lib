@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 pub use crate::authenticated::characters::Discipline;
+use crate::guild::upgrades::GuildUpgradeId;
+use crate::misc::currencies::CurrencyId;
 use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -72,35 +74,29 @@ pub enum RecipeFlag {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "type")]
 #[cfg_attr(test, serde(deny_unknown_fields))]
-pub struct Ingredient {
-    pub item_id: ItemId,
-    pub count: u16,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[cfg_attr(test, serde(deny_unknown_fields))]
-pub struct GuildIngredient {
-    pub upgrade_id: u32,
-    pub count: u16,
+pub enum Ingredient {
+    Currency { id: CurrencyId, count: u16 },
+    Item { id: ItemId, count: u16 },
+    GuildUpgrade { id: GuildUpgradeId, count: u16 },
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Recipe {
-    id: RecipeId,
+    pub id: RecipeId,
     #[serde(rename = "type")]
-    _type: RecipeType,
-    output_item_id: ItemId,
-    output_item_count: u16,
-    time_to_craft_ms: u16,
-    disciplines: BTreeSet<Discipline>,
-    min_rating: u16,
-    flags: BTreeSet<RecipeFlag>,
-    ingredients: Vec<Ingredient>,
-    guild_ingredients: Option<Vec<GuildIngredient>>,
-    output_upgrade_id: Option<u32>,
-    chat_link: String,
+    pub _type: RecipeType,
+    pub output_item_id: ItemId,
+    pub output_item_count: u16,
+    pub time_to_craft_ms: u16,
+    pub disciplines: BTreeSet<Discipline>,
+    pub min_rating: u16,
+    pub flags: BTreeSet<RecipeFlag>,
+    pub ingredients: Vec<Ingredient>,
+    pub output_upgrade_id: Option<u32>,
+    pub chat_link: String,
 }
 
 impl EndpointWithId for Recipe {
@@ -110,7 +106,7 @@ impl Endpoint for Recipe {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/recipes";
-    const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
+    const VERSION: &'static str = "2023-03-20T13:00:00.000Z";
 }
 
 impl BulkEndpoint for Recipe {
