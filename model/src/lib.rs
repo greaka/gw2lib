@@ -80,6 +80,10 @@ pub trait Endpoint: Sized {
 pub trait EndpointWithId: Endpoint {
     type IdType: Display;
 
+    fn format_id(id: &Self::IdType) -> String {
+        urlencoding::encode(&id.to_string()).into_owned()
+    }
+
     fn format_url(id: &str) -> String {
         format!("{}/{}", Self::URL, id)
     }
