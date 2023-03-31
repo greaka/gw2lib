@@ -6,6 +6,7 @@ pub mod authenticated;
 pub mod game_mechanics;
 pub mod guild;
 pub mod items;
+pub mod maps;
 pub mod misc;
 pub mod pvp;
 pub mod tradingpost;
