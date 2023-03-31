@@ -19,11 +19,17 @@ pub struct Dimensions {
 #[derive(Clone, Debug, Serialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Continent {
+    /// The id of the continent.
     pub id: ContinentId,
+    /// The name of the continent.
     pub name: String,
+    /// The dimensions of the continent.
     pub continent_dims: Dimensions,
+    /// The minimal zoom level for use with the map tile service.
     pub min_zoom: u8,
+    /// The maximum zoom level for use with the map tile service.
     pub max_zoom: u8,
+    /// A list of floors ids available for this continent.
     #[serde(serialize_with = "serialize_floor")]
     pub floors: BTreeSet<FloorId>,
 }
