@@ -11,6 +11,7 @@ pub type FloorId = i16;
 pub type RegionId = u8;
 pub type MasteryPointId = u16;
 pub type PointOfInterestId = u16;
+pub type GodShrineId = u8;
 pub type TaskId = u16;
 pub type SectorId = u16;
 
@@ -75,6 +76,25 @@ pub struct PointOfInterest {
     pub chat_link: String,
     /// For [`Unlock`](PointOfInterestType::Unlock) type, provides the render service url for the POI's icon.
     pub icon: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
+pub struct GodShrine {
+    /// The shrine id.
+    pub id: GodShrineId,
+    /// The shrine name when not contested.
+    pub name: String,
+    /// The shrine name when contested.
+    pub name_contested: String,
+    /// The shrine coordinates.
+    pub coord: Coordinates,
+    /// The associated waypoint id.
+    pub poi_id: PointOfInterestId,
+    /// The render service url for the shrine's icon when not contested.
+    pub icon: String,
+    /// The render service url for the shrine's icon when contested.
+    pub icon_contested: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -185,6 +205,7 @@ pub struct Map {
     pub continent_rect: ContinentRectangle,
     /// The list of points of interest (landmarks, waypoints, vistas, etc) of the map.
     pub points_of_interest: HashMap<PointOfInterestId, PointOfInterest>,
+    pub god_shrines: Option<Vec<GodShrine>>,
     /// The list of renown hearts of the map.
     pub tasks: HashMap<TaskId, Task>,
     /// The list of hero challenges of the map.
@@ -200,6 +221,8 @@ pub struct Map {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Region {
+    /// The region id.
+    pub id: RegionId,
     /// The region name.
     pub name: String,
     ///  The coordinates of the region label.
