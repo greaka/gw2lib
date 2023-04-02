@@ -1,7 +1,8 @@
-pub mod floors;
+mod floors;
 
 use serde::ser::SerializeSeq;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 use std::collections::BTreeSet;
 
 pub use crate::maps::continents::floors::*;
@@ -9,7 +10,7 @@ use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type ContinentId = u32;
 
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize_tuple, Deserialize_tuple)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Dimensions {
     pub width: u32,
@@ -31,10 +32,10 @@ pub struct Continent {
     pub max_zoom: u8,
     /// A list of floors ids available for this continent.
     #[serde(serialize_with = "serialize_floor")]
-    pub floors: BTreeSet<FloorId>,
+    pub floors: BTreeSet<ContinentFloorId>,
 }
 
-fn serialize_floor<S>(floors: &BTreeSet<FloorId>, s: S) -> Result<S::Ok, S::Error>
+fn serialize_floor<S>(floors: &BTreeSet<ContinentFloorId>, s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
@@ -57,14 +58,14 @@ impl<'de> Deserialize<'de> for Continent {
             continent_dims: Dimensions,
             min_zoom: u8,
             max_zoom: u8,
-            floors: BTreeSet<i8>,
+            floors: BTreeSet<FloorId>,
         }
 
         let intermediate: Intermediate = Deserialize::deserialize(deserializer)?;
         let floors = intermediate
             .floors
             .iter()
-            .map(|id| FloorId {
+            .map(|id| ContinentFloorId {
                 continent: intermediate.id,
                 floor: *id,
             })
