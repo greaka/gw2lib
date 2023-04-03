@@ -37,7 +37,7 @@ default-features = false
 features = ["runtime", "http1", "client"]
 
 [dependencies.hyper-rustls]
-version = "0.23.2"
+version = "0.24.0"
 default-features = false
 features = ["http1", "native-tokio", "logging", "tls12"]
 
