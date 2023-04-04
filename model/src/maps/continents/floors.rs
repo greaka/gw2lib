@@ -21,6 +21,15 @@ pub struct ContinentFloorId {
     pub floor: FloorId,
 }
 
+impl From<(ContinentId, FloorId)> for ContinentFloorId {
+    fn from(value: (ContinentId, FloorId)) -> Self {
+        Self {
+            continent: value.0,
+            floor: value.1,
+        }
+    }
+}
+
 impl Display for ContinentFloorId {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}/floors/{}", self.continent, self.floor)

@@ -30,3 +30,12 @@ fn mists_all_floors() {
         let _: Floor = client.single(floor).unwrap();
     }
 }
+
+#[test]
+fn single_from_tuple() {
+    let client = crate::setup::setup();
+    let floor: Floor = client
+        .single((/* continent: */ 1, /* floor: */ 12).into())
+        .unwrap();
+    assert_eq!(floor.id, 12);
+}
