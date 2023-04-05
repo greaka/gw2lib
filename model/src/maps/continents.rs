@@ -1,9 +1,9 @@
 mod floors;
 
-use serde::ser::SerializeSeq;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 use std::collections::BTreeSet;
+
+use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
+use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 pub use crate::maps::continents::floors::*;
 use crate::{BulkEndpoint, Endpoint, EndpointWithId};

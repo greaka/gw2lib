@@ -1,7 +1,11 @@
-use crate::maps::continents::{ContinentId, ContinentRectangle, FloorId, MapRectangle, RegionId};
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
-use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
+
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    maps::continents::{ContinentId, ContinentRectangle, FloorId, MapRectangle, RegionId},
+    BulkEndpoint, Endpoint, EndpointWithId,
+};
 
 pub mod continents;
 
@@ -20,7 +24,8 @@ pub enum MapType {
     GreenHome,
     /// An instanced map.
     Instance,
-    /// At present only a WvW map that houses a jumping puzzle (Obsidian Sanctum).
+    /// At present only a WvW map that houses a jumping puzzle (Obsidian
+    /// Sanctum).
     JumpPuzzle,
     /// Open world map.
     Public,

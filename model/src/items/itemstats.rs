@@ -1,6 +1,6 @@
-use crate::items::AttributeType;
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 use serde::{Deserialize, Serialize};
+
+use crate::{items::AttributeType, BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type StatsId = u32;
 

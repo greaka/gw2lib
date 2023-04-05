@@ -1,11 +1,18 @@
+use std::{
+    collections::HashMap,
+    fmt::{Display, Formatter},
+};
+
 use serde::{Deserialize, Serialize};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
-use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
 
-use crate::maps::continents::{ContinentId, Dimensions};
-use crate::maps::MapId;
-use crate::{Endpoint, EndpointWithId};
+use crate::{
+    maps::{
+        continents::{ContinentId, Dimensions},
+        MapId,
+    },
+    Endpoint, EndpointWithId,
+};
 
 pub type FloorId = i16;
 pub type RegionId = u8;
@@ -83,7 +90,8 @@ pub struct PointOfInterest {
     pub coord: Coordinates,
     /// The POI chat link.
     pub chat_link: String,
-    /// For [`Unlock`](PointOfInterestType::Unlock) type, provides the render service url for the POI's icon.
+    /// For [`Unlock`](PointOfInterestType::Unlock) type, provides the render
+    /// service url for the POI's icon.
     pub icon: Option<String>,
 }
 
@@ -119,7 +127,8 @@ pub struct Task {
     pub coord: Coordinates,
     /// A list of coordinates marking the boundary of the task.
     pub bounds: Vec<Coordinates>,
-    /// The task chat link (provides an invalid link if attempting to display in-game).
+    /// The task chat link (provides an invalid link if attempting to display
+    /// in-game).
     pub chat_link: String,
 }
 
@@ -128,10 +137,12 @@ pub struct Task {
 pub struct SkillChallenge {
     /// The hero challenge id, if any.
     ///
-    /// It is formed of two numbers separated by a dash. The first number represents the expansion
-    /// (0 for Core Tyria, 1 for Heart of Thorns and 2 for Path of Fire), and therefore could be
-    /// used to change the hero challenge map marker icon. If the first number and dash prefix is
-    /// removed from the string, the second number is no longer unique among other hero challenges.
+    /// It is formed of two numbers separated by a dash. The first number
+    /// represents the expansion (0 for Core Tyria, 1 for Heart of Thorns
+    /// and 2 for Path of Fire), and therefore could be used to change the
+    /// hero challenge map marker icon. If the first number and dash prefix is
+    /// removed from the string, the second number is no longer unique among
+    /// other hero challenges.
     pub id: Option<String>,
     /// The coordinates of this hero challenge.
     pub coord: Coordinates,
@@ -150,7 +161,8 @@ pub struct Sector {
     pub coord: Coordinates,
     /// A list of coordinates marking the boundary of the sector.
     pub bounds: Vec<Coordinates>,
-    /// The sector chat link (provides an invalid link if attempting to display in-game).
+    /// The sector chat link (provides an invalid link if attempting to display
+    /// in-game).
     pub chat_link: String,
 }
 
@@ -212,7 +224,8 @@ pub struct Map {
     pub map_rect: MapRectangle,
     /// The dimensions of the map within the continent coordinate system.
     pub continent_rect: ContinentRectangle,
-    /// The list of points of interest (landmarks, waypoints, vistas, etc) of the map.
+    /// The list of points of interest (landmarks, waypoints, vistas, etc) of
+    /// the map.
     pub points_of_interest: HashMap<PointOfInterestId, PointOfInterest>,
     pub god_shrines: Option<Vec<GodShrine>>,
     /// The list of renown hearts of the map.
@@ -248,8 +261,9 @@ pub struct Floor {
     pub id: FloorId,
     /// The dimensions of the texture.
     pub texture_dims: Dimensions,
-    /// If present, it represents a rectangle of downloadable textures. Every tile coordinate
-    /// outside this rectangle is not available on the tile server.
+    /// If present, it represents a rectangle of downloadable textures. Every
+    /// tile coordinate outside this rectangle is not available on the tile
+    /// server.
     pub clamped_view: Option<ContinentRectangle>,
     /// The list of regions in on this floor.
     pub regions: HashMap<RegionId, Region>,
