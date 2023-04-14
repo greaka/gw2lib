@@ -2,11 +2,7 @@ name: integration_test
 
 on:
   push:
-    branches:
-      - master
   pull_request:
-    branches:
-      - master
   schedule:
     - cron: '30 5 * * *'
   workflow_dispatch:
@@ -30,17 +26,20 @@ jobs:
         fi
         git checkout -b "$branch" || true
     - name: Docker Login
+      if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
       run: docker login --username "$DOCKERHUB_USERNAME" --password "$DOCKERHUB_TOKEN"
     - name: download latest earthly
       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
     - name: build and run test
+      if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
       run: earthly --ci --push --remote-cache=greaka/gw2lib:cache -P +test
+    - name: build and run test
+      if: ${{ !(github.event_name == 'push' && github.ref_name == 'master') }}
+      run: earthly --ci --remote-cache=greaka/gw2lib:cache -P +test
 
   test-ignored:
     runs-on: ubuntu-latest
     env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       FORCE_COLOR: 1
     steps:
     - uses: actions/checkout@v3
@@ -53,8 +52,6 @@ jobs:
           branch="${GITHUB_REF##*/}"
         fi
         git checkout -b "$branch" || true
-    - name: Docker Login
-      run: docker login --username "$DOCKERHUB_USERNAME" --password "$DOCKERHUB_TOKEN"
     - name: download latest earthly
       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
     - name: build and run test
