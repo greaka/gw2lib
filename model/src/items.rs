@@ -380,13 +380,15 @@ pub enum UpgradeComponentFlags {
     Greatsword,
     Hammer,
     Harpoon,
-    Longbow,
+    #[serde(alias = "Longbow")]
+    LongBow,
     Mace,
     Pistol,
     Rifle,
     Scepter,
     Shield,
-    Shortbow,
+    #[serde(alias = "Shortbow")]
+    ShortBow,
     Speargun,
     Staff,
     Sword,
@@ -438,9 +440,11 @@ pub enum WeaponType {
     Warhorn,
     Greatsword,
     Hammer,
-    Longbow,
+    #[serde(alias = "Longbow")]
+    LongBow,
     Rifle,
-    Shortbow,
+    #[serde(alias = "Shortbow")]
+    ShortBow,
     Staff,
     Harpoon,
     Spear,

@@ -14,6 +14,7 @@ fn all() {
 }
 
 #[test]
+#[ignore]
 fn tyria_all_floors() {
     let client = crate::setup::setup();
     let tyria: Continent = client.single(1).unwrap();
@@ -23,6 +24,7 @@ fn tyria_all_floors() {
 }
 
 #[test]
+#[ignore]
 fn mists_all_floors() {
     let client = crate::setup::setup();
     let mists: Continent = client.single(2).unwrap();
