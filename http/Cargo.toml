@@ -15,14 +15,14 @@ name = "gw2lib"
 path = "src/lib.rs"
 
 [dependencies]
-chrono = "0.4.23"
+chrono = "0.4.24"
 dashmap = "5.4.0"
-serde = "1.0.152"
-thiserror = "1.0.38"
-async-trait = "0.1.60"
-either = "1.8.0"
-futures = "0.3.25"
-serde_json = "1.0.91"
+serde = "1.0.160"
+thiserror = "1.0.40"
+async-trait = "0.1.68"
+either = "1.8.1"
+futures = "0.3.28"
+serde_json = "1.0.96"
 static_init = "1.0.3"
 urlencoding = "2.1.2"
 
@@ -31,23 +31,23 @@ version = "0.1.37"
 optional = true
 
 [dependencies.redis]
-version = "0.22.1"
+version = "0.23.0"
 default-features = false
 features = ["tokio-comp"]
 optional = true
 
 [dependencies.tokio]
-version = "1.23.0"
+version = "1.27.0"
 default-features = false
 features = ["sync", "rt", "time"]
 
 [dependencies.hyper]
-version = "0.14.23"
+version = "0.14.26"
 default-features = false
 features = ["runtime", "http1", "client"]
 
 [dependencies.hyper-rustls]
-version = "0.23.2"
+version = "0.24.0"
 default-features = false
 features = ["http1", "native-tokio", "logging", "tls12"]
 
