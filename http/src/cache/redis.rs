@@ -40,17 +40,10 @@ impl Cache for RedisCache {
         };
         let ex = expiring - Utc::now().naive_utc();
         let key = self.gen_key::<E, I, A>(id, lang, auth);
-        match serde_json::to_string(endpoint) {
-            Ok(value) => {
-                conn.set_ex::<_, _, ()>(
-                    key,
-                    value,
-                    ex.num_seconds().try_into().unwrap_or_default(),
-                )
+        if let Ok(value) = serde_json::to_string(endpoint) {
+            conn.set_ex::<_, _, ()>(key, value, ex.num_seconds().try_into().unwrap_or_default())
                 .await
                 .ok();
-            }
-            _ => (),
         }
     }
 

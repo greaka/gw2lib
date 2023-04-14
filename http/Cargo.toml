@@ -26,6 +26,10 @@ serde_json = "1.0.91"
 static_init = "1.0.3"
 urlencoding = "2.1.2"
 
+[dependencies.tracing]
+version = "0.1.37"
+optional = true
+
 [dependencies.redis]
 version = "0.22.1"
 default-features = false
@@ -54,6 +58,7 @@ path = "../model"
 [features]
 blocking = []
 redis = ["dep:redis"]
+tracing = ["dep:tracing"]
 
 [package.metadata.docs.rs]
 features = ["redis"]

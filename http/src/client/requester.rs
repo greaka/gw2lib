@@ -21,6 +21,8 @@ use tokio::sync::{
     broadcast::{self, Receiver, Sender},
     Mutex,
 };
+#[cfg(feature = "tracing")]
+use tracing::instrument;
 
 use crate::{
     cache::in_memory::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult,
@@ -89,6 +91,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     }
 
     /// call the fixed endpoint
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
     async fn get<
         T: DeserializeOwned + Serialize + Clone + Send + Sync + FixedEndpoint + 'static,
     >(
@@ -98,6 +101,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     }
 
     /// request a single item
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(id, endpoint = %T::URL)))]
     async fn single<
         T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
         I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
@@ -106,6 +110,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         id: impl Into<I> + Send,
     ) -> EndpointResult<T> {
         let id = id.into();
+        #[cfg(feature = "tracing")]
+        tracing::Span::current().record("id", id.to_string());
         let lang = self.client().language;
         if let Some(c) = self.try_get(&id).await {
             return Ok(c);
@@ -153,6 +159,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_get(&19721);
     /// ```
+    #[cfg_attr(feature = "tracing", instrument(name = "get cached", skip_all, fields(id, endpoint = %T::URL)))]
     async fn try_get<
         T: DeserializeOwned + Serialize + Clone + Endpoint + Send + Sync + 'static,
         I: DeserializeOwned + Display + Hash + Clone + Sync + 'static,
@@ -160,10 +167,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         &self,
         id: impl Into<&I> + Send,
     ) -> Option<T> {
-        check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, id.into()).await
+        let id = id.into();
+        #[cfg(feature = "tracing")]
+        tracing::Span::current().record("id", id.to_string());
+        check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, id).await
     }
 
     /// request all available ids
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
     async fn ids<
         T: DeserializeOwned + Serialize + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
         I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
@@ -174,6 +185,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     }
 
     /// request multiple ids at once
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
     async fn many<
         T: DeserializeOwned
             + Serialize
@@ -286,6 +298,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
     /// requests a page of items and returns the number of total items across
     /// all pages
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
     async fn page<T: DeserializeOwned + PagedEndpoint + Clone + Send + Sync + 'static>(
         &self,
         page: usize,
@@ -311,6 +324,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// this needs to perform an additional request to get all ids, but is much
     /// more cache friendly, being able to utilize the cache and inflight
     /// mechanisms.
+    #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
     async fn all<
         T: DeserializeOwned
             + Serialize
@@ -337,6 +351,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// Gets all items by querying ids=all
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
+    #[cfg_attr(feature = "tracing", instrument(name = "get all by ids all", skip_all, fields(endpoint = %T::URL)))]
     async fn get_all_by_ids_all<
         T: DeserializeOwned
             + Serialize
@@ -374,6 +389,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// Gets all items by querying all pages
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
+    #[cfg_attr(feature = "tracing", instrument(name = "get all by paging", skip_all, fields(endpoint = %T::URL)))]
     async fn get_all_by_paging<
         T: DeserializeOwned + PagedEndpoint + Clone + Send + Sync + 'static,
     >(
@@ -395,6 +411,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// Gets all items by querying all ids
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
+    #[cfg_attr(feature = "tracing", instrument(name = "get all by requesting ids", skip_all, fields(endpoint = %T::URL)))]
     async fn get_all_by_requesting_ids<
         T: DeserializeOwned
             + Serialize
@@ -438,6 +455,7 @@ impl<T: Send> Drop for SenderGuard<'_, T> {
     }
 }
 
+#[cfg_attr(feature = "tracing", instrument(name = "check inflight", skip_all, fields(endpoint = %T::URL)))]
 async fn check_inflight<
     'client,
     H: Send + Clone + 'static,
@@ -474,6 +492,7 @@ async fn check_inflight<
     })
 }
 
+#[cfg_attr(feature = "tracing", instrument(name = "check cache", skip_all, fields(%id, endpoint = %E::URL)))]
 async fn check_cache<
     T: DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
     I: Display + Hash + Sync + 'static + ?Sized,
@@ -539,6 +558,7 @@ async fn get_or_ids<
     Ok(result)
 }
 
+#[cfg_attr(feature = "tracing", instrument(name = "execute request", skip_all, fields(uri = %request.uri())))]
 async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
     request: Request<hyper::Body>,
@@ -619,6 +639,7 @@ fn build_query<T: Endpoint, Q: Into<String>>(
 }
 
 /// returns the remaining ids not found in cache
+#[cfg_attr(feature = "tracing", instrument(name = "check cache many", skip_all, fields(endpoint = %K::URL)))]
 async fn extract_many_from_cache<
     I: Display + Hash + Sync + 'static,
     K: EndpointWithId<IdType = I> + DeserializeOwned + Serialize + Clone + Send + Sync + 'static,
