@@ -138,7 +138,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let request = build_request::<T, String, Self, AUTHENTICATED, FORCE>(
             self,
-            &T::format_url(urlencoding::encode(&id.to_string()).as_ref()),
+            &T::format_url(T::format_id(&id).as_ref()),
             None,
         )?;
 
