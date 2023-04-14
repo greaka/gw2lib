@@ -1,6 +1,6 @@
 [package]
 name = "gw2lib"
-version = "3.0.0-alpha-ac"
+version = "3.0.0-alpha-ad"
 edition = "2021"
 workspace = "../"
 description = "A simple to use Gw2 API wrapper library"

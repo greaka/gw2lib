@@ -558,19 +558,41 @@ async fn get_or_ids<
     Ok(result)
 }
 
-#[cfg_attr(feature = "tracing", instrument(name = "execute request", skip_all, fields(uri = %request.uri())))]
+#[cfg_attr(feature = "tracing", instrument(name = "execute request", skip_all, fields(uri = %request.uri().path())))]
 async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
     request: Request<hyper::Body>,
 ) -> EndpointResult<Response<hyper::Body>> {
-    let time = req.client().rate_limiter.take(1).await?;
-    tokio::time::sleep(time).await;
+    wait_for_rate_limit(req).await?;
+    #[cfg(feature = "tracing")]
+    {
+        let uri = request.uri().path();
+        let ids = request
+            .uri()
+            .query()
+            .unwrap_or_default()
+            .strip_prefix("ids=")
+            .unwrap_or_default();
+        tracing::info!(%uri, %ids, "gw2 request");
+    }
 
     req.client()
         .client
         .request(request)
         .await
         .map_err(Into::into)
+}
+
+#[cfg_attr(
+    feature = "tracing",
+    instrument(name = "wait for rate limit", skip_all)
+)]
+async fn wait_for_rate_limit<Req: Requester<A, F>, const A: bool, const F: bool>(
+    req: &Req,
+) -> EndpointResult<()> {
+    let time = req.client().rate_limiter.take(1).await?;
+    tokio::time::sleep(time).await;
+    Ok(())
 }
 
 fn build_request<
