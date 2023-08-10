@@ -1,7 +1,7 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::misc::raids::{Raid, RaidId, Wing},
+    model::misc::raids::{Raid, RaidId},
     Requester,
 };
 
@@ -20,14 +20,12 @@ fn ids() {
 }
 
 #[test]
-#[ignore]
 fn forsaken_thicket_wings() {
     let client = crate::setup::setup();
     let _: Raid = client.single("forsaken_thicket".to_string()).unwrap();
 }
 
 #[test]
-#[ignore]
 fn bastion_of_the_penitent_wings() {
     let client = crate::setup::setup();
     let _: Raid = client
@@ -36,14 +34,12 @@ fn bastion_of_the_penitent_wings() {
 }
 
 #[test]
-#[ignore]
 fn hall_of_chains_wings() {
     let client = crate::setup::setup();
     let _: Raid = client.single("hall_of_chains".to_string()).unwrap();
 }
 
 #[test]
-#[ignore]
 fn the_key_of_ahdashim_wings() {
     let client = crate::setup::setup();
     let _: Raid = client.single("the_key_of_ahdashim".to_string()).unwrap();

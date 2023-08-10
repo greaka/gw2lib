@@ -3,27 +3,26 @@ use serde::{Deserialize, Serialize};
 use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type RaidId = String;
+pub type WingId = String;
+pub type EventId = String;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Raid {
-    pub id: String,
+    pub id: RaidId,
     pub wings: Vec<Wing>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Wing {
-    pub id: String,
+    pub id: WingId,
     pub events: Vec<Event>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Event {
-    pub id: String,
+    pub id: EventId,
     #[serde(rename = "type")]
-    pub type_field: String,
+    pub _type: String,
 }
 
 impl EndpointWithId for Raid {

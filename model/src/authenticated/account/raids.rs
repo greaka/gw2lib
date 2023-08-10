@@ -1,6 +1,7 @@
 use crate::{Endpoint, FixedEndpoint};
+use crate::misc::raids::{EventId};
 
-pub type RaidEvent = Vec<String>;
+pub type RaidEvent = Vec<EventId>;
 
 impl Endpoint for RaidEvent {
     const AUTHENTICATED: bool = true;
