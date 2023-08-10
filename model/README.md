@@ -42,7 +42,7 @@ Last update: 2023/04/02
     - [ ] outfits
     - pvp
       - [ ] heroes
-    - [ ] raids
+    - [x] raids
     - [ ] recipes
     - [ ] skins
     - [ ] titles
@@ -127,7 +127,7 @@ Last update: 2023/04/02
   - [ ] files
   - [ ] quaggans
   - [ ] minis
-  - [ ] raids
+  - [x] raids
   - [ ] titles
   - [x] worlds
 - Story
