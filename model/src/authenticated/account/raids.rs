@@ -1,5 +1,4 @@
-use crate::{Endpoint, FixedEndpoint};
-use crate::misc::raids::{EventId};
+use crate::{misc::raids::EventId, Endpoint, FixedEndpoint};
 
 pub type RaidEvent = Vec<EventId>;
 
