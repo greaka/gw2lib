@@ -10,6 +10,12 @@ pub mod setup;
 #[test]
 fn all() {
     let client = crate::setup::setup();
+    let _: Vec<Raid> = client.all().unwrap();
+}
+
+#[test]
+fn ids() {
+    let client = crate::setup::setup();
     let _: Vec<RaidId> = client.ids::<Raid, _>().unwrap();
 }
 
