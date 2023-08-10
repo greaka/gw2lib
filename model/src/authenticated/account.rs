@@ -1,5 +1,6 @@
 pub mod bank;
 pub mod materials;
+pub mod raids;
 pub mod wallet;
 
 use std::collections::BTreeSet;
