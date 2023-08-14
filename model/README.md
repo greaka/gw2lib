@@ -5,8 +5,11 @@
 This package mostly follows semver. Patches will be released in the following format:
 
 - `x.*.*` Breaking change that also requires a new version of `gw2lib`
+  - updates automatically when updating `gw2lib`
 - `*.x.*` Breaking change that is required because of api changes
+  - updates automatically with `cargo update`
 - `*.*.x` New endpoint/non-breaking change
+  - updates automatically with `cargo update`
 
 ### Endpoints
 
