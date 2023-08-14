@@ -33,7 +33,10 @@ fn parse_all() {
 
 mod single {
     use gw2lib::{
-        model::items::{Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType},
+        model::items::{
+            Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType, WeaponDetails,
+            WeaponType,
+        },
         Requester,
     };
     parse_single!(armor, 80248, check_type!(Armor));
@@ -67,4 +70,18 @@ mod single {
                 _type: GatheringToolsType::Lure,
             })
     ));
+    parse_single!(spear, 30691, |x: Item| assert!(matches!(
+        x.details,
+        Details::Weapon(WeaponDetails {
+            _type: WeaponType::Spear,
+            ..
+        })
+    )));
+    parse_single!(harpoon_gun, 30697, |x: Item| assert!(matches!(
+        x.details,
+        Details::Weapon(WeaponDetails {
+            _type: WeaponType::HarpoonGun,
+            ..
+        })
+    )));
 }

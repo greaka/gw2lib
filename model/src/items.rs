@@ -379,7 +379,8 @@ pub enum UpgradeComponentFlags {
     Focus,
     Greatsword,
     Hammer,
-    Harpoon,
+    #[serde(rename = "Harpoon")]
+    Spear,
     #[serde(alias = "Longbow")]
     LongBow,
     Mace,
@@ -389,7 +390,8 @@ pub enum UpgradeComponentFlags {
     Shield,
     #[serde(alias = "Shortbow")]
     ShortBow,
-    Speargun,
+    #[serde(rename = "Speargun")]
+    HarpoonGun,
     Staff,
     Sword,
     Torch,
@@ -446,9 +448,10 @@ pub enum WeaponType {
     #[serde(alias = "Shortbow")]
     ShortBow,
     Staff,
-    Harpoon,
+    #[serde(rename = "Harpoon", alias = "Spear")]
     Spear,
-    Speargun,
+    #[serde(rename = "Speargun")]
+    HarpoonGun,
     Trident,
     LargeBundle,
     SmallBundle,
