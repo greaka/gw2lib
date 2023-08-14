@@ -12,7 +12,7 @@ pub mod setup;
 #[test]
 fn elementalist() {
     let client = setup::setup();
-    let _: Character = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Character = client.single(character_name()).unwrap();
 }
 
 #[test]
@@ -30,41 +30,48 @@ fn ids() {
 #[test]
 fn core() {
     let client = setup::setup();
-    let _: Core = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Core = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn backstory() {
     let client = setup::setup();
-    let _: Backstory = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Backstory = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn crafting() {
     let client = setup::setup();
-    let _: Crafting = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Crafting = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn equipment() {
     let client = setup::setup();
-    let _: Equipment = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Equipment = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn inventory() {
     let client = setup::setup();
-    let _: Inventory = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Inventory = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn recipes() {
     let client = setup::setup();
-    let _: Recipes = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Recipes = client.single(character_name()).unwrap();
 }
 
 #[test]
 fn training() {
     let client = setup::setup();
-    let _: Training = client.single("Eff Testing Ele".to_string()).unwrap();
+    let _: Training = client.single(character_name()).unwrap();
+}
+
+fn character_name() -> String {
+    std::env::var("GW2_TESTING_CHAR")
+        .ok()
+        .and_then(|x| (!x.is_empty()).then_some(x))
+        .unwrap_or("Eff Testing Ele".to_string())
 }
