@@ -1,7 +1,7 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::home_instance::Node,
+    model::home_instance::{Node, NodeId},
     Requester,
 };
 
