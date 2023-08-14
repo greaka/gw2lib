@@ -13,6 +13,7 @@ jobs:
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      EARTHLY_SECRETS: ${{ secrets.EARTHLY_SECRETS }}
       FORCE_COLOR: 1
     steps:
     - uses: actions/checkout@v3
@@ -41,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_COLOR: 1
+      EARTHLY_SECRETS: ${{ secrets.EARTHLY_SECRETS }}
     steps:
     - uses: actions/checkout@v3
     - name: Put back the git branch into git (Earthly uses it for tagging)
