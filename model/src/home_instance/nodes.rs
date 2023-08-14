@@ -21,7 +21,7 @@ impl Endpoint for Node {
 }
 
 impl BulkEndpoint for Node {
-    const ALL: bool = false;
+    const ALL: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id

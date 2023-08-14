@@ -22,7 +22,7 @@ impl Endpoint for Cat {
 }
 
 impl BulkEndpoint for Cat {
-    const ALL: bool = false;
+    const ALL: bool = true;
 
     fn id(&self) -> &Self::IdType {
         &self.id
