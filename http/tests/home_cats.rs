@@ -1,7 +1,7 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::home_instance::{Cat, CatId},
+    model::home_instance::cats::{Cat, CatId},
     Requester,
 };
 
