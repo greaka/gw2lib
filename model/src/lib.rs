@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub mod authenticated;
 pub mod game_mechanics;
 pub mod guild;
+pub mod home_instance;
 pub mod items;
 pub mod maps;
 pub mod misc;
