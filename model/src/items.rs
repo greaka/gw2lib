@@ -37,6 +37,7 @@ pub enum ItemType {
     Key,
     PowerCore,
     JadeTechModule,
+    Mwcc,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
@@ -505,6 +506,7 @@ pub enum Details {
     Key,
     PowerCore,
     JadeTechModule,
+    Mwcc,
 }
 
 impl From<Details> for ItemType {
@@ -528,6 +530,7 @@ impl From<Details> for ItemType {
             Details::Key => ItemType::Key,
             Details::PowerCore => ItemType::PowerCore,
             Details::JadeTechModule => ItemType::JadeTechModule,
+            Details::Mwcc => ItemType::Mwcc,
         }
     }
 }
