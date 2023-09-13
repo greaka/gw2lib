@@ -34,9 +34,6 @@ test:
 
   DO +BASE_TESTS
 
-  ARG GW2_API_KEY
-  ARG GW2_TESTING_CHAR
-
   WITH DOCKER --compose integration-compose.yml
     RUN --secret GW2_API_KEY --secret GW2_TESTING_CHAR --no-cache cargo --color=always \
         nextest run --archive-file tests.tar.zst
@@ -47,9 +44,6 @@ test-ignored:
 
   DO +BASE_TESTS
 
-  ARG GW2_API_KEY
-  ARG GW2_TESTING_CHAR
-
   WITH DOCKER --compose integration-compose.yml
     RUN --secret GW2_API_KEY --secret GW2_TESTING_CHAR --no-cache cargo --color=always \
         nextest run --archive-file tests.tar.zst --run-ignored ignored-only
@@ -59,9 +53,6 @@ test-all:
   FROM +tools
 
   DO +BASE_TESTS
-
-  ARG GW2_API_KEY
-  ARG GW2_TESTING_CHAR
 
   WITH DOCKER --compose integration-compose.yml
     RUN --secret GW2_API_KEY --secret GW2_TESTING_CHAR --no-cache cargo --color=always \

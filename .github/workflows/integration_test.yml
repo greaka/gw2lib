@@ -31,6 +31,11 @@ jobs:
       run: docker login --username "$DOCKERHUB_USERNAME" --password "$DOCKERHUB_TOKEN"
     - name: download latest earthly
       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+    - name: export secrets
+      if: ${{ !(github.event_name == 'push' && github.ref_name == 'master') }}
+      run: |
+        export GW2_API_KEY=""
+        export GW2_TESTING_CHAR=""
     - name: build and run test
       if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
       run: earthly --ci --push --remote-cache=greaka/gw2lib:cache -P +test
@@ -56,5 +61,10 @@ jobs:
         git checkout -b "$branch" || true
     - name: download latest earthly
       run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+    - name: export secrets
+      if: ${{ !(github.event_name == 'push' && github.ref_name == 'master') }}
+      run: |
+        export GW2_API_KEY=""
+        export GW2_TESTING_CHAR=""
     - name: build and run test
       run: earthly --ci --remote-cache=greaka/gw2lib:cache -P +test-ignored
