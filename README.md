@@ -1,4 +1,4 @@
-# GW2 API library [![Build Status](https://img.shields.io/github/actions/workflow/status/greaka/gw2lib/integration_test.yml?branch=master)](https://github.com/greaka/gw2lib/actions/workflows/integration_test.yml) [![Latest Version](https://img.shields.io/crates/v/gw2lib.svg)](https://crates.io/crates/gw2lib) [![](https://img.shields.io/static/v1?label=Get%20Help&message=on%20Discord&style=flat&color=5865f2&labelColor=555&logo=discord&logoColor=fff)](https://discord.gg/bF7Mg38yrx)
+# GW2 API library [![Build Status](https://img.shields.io/github/actions/workflow/status/greaka/gw2lib/integration_test.yml?branch=master)](https://github.com/greaka/gw2lib/actions/workflows/integration_test.yml) [![Latest Version](https://img.shields.io/crates/v/gw2lib.svg?label=gw2lib)](https://crates.io/crates/gw2lib) [![Latest Version](https://img.shields.io/crates/v/gw2lib-model.svg?label=model)](https://crates.io/crates/gw2lib-model) [![](https://img.shields.io/static/v1?label=Get%20Help&message=on%20Discord&style=flat&color=5865f2&labelColor=555&logo=discord&logoColor=fff)](https://discord.gg/bF7Mg38yrx)
 
 **gw2lib is an API wrapper for the game Guild Wars 2**
 
