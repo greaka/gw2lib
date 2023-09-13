@@ -55,7 +55,7 @@ mod single {
     // doesn't seem to exist anymore
     //    parse_single!(trait_guide, 0,    check_type!(Trait));
     parse_single!(trophy, 18996, check_type!(Trophy));
-    parse_single!(mwcc, 100739, check_type!(Mwcc));
+    parse_single!(relic, 100739, check_type!(Relic));
     parse_single!(key, 82444, check_type!(Key));
     parse_single!(powercore, 95864, check_type!(PowerCore));
     parse_single!(jadetechmodule, 95948, check_type!(JadeTechModule));

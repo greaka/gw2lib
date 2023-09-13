@@ -7,6 +7,8 @@ use gw2lib::{
     Requester,
 };
 
+use crate::setup::character_name;
+
 pub mod setup;
 
 #[test]
@@ -67,11 +69,4 @@ fn recipes() {
 fn training() {
     let client = setup::setup();
     let _: Training = client.single(character_name()).unwrap();
-}
-
-fn character_name() -> String {
-    std::env::var("GW2_TESTING_CHAR")
-        .ok()
-        .and_then(|x| (!x.is_empty()).then_some(x))
-        .unwrap_or("Eff Testing Ele".to_string())
 }

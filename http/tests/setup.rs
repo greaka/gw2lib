@@ -29,3 +29,10 @@ pub fn setup() -> Client<InMemoryCache, RedisRateLimiter, HttpsConnector<HttpCon
     let rate_limiter = RedisRateLimiter::new(client).unwrap();
     Client::default().api_key(apikey).rate_limiter(rate_limiter)
 }
+
+pub fn character_name() -> String {
+    std::env::var("GW2_TESTING_CHAR")
+        .ok()
+        .and_then(|x| (!x.is_empty()).then_some(x))
+        .unwrap_or("Eff Testing Ele".to_string())
+}

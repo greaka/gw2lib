@@ -37,7 +37,7 @@ pub enum ItemType {
     Key,
     PowerCore,
     JadeTechModule,
-    Mwcc,
+    Relic,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
@@ -501,12 +501,12 @@ pub enum Details {
     UpgradeComponent(UpgradeComponentDetails),
     Weapon(WeaponDetails),
     CraftingMaterial,
-    //Trait,
     Trophy,
     Key,
     PowerCore,
     JadeTechModule,
-    Mwcc,
+    #[serde(alias = "Mwcc")]
+    Relic,
 }
 
 impl From<Details> for ItemType {
@@ -525,12 +525,11 @@ impl From<Details> for ItemType {
             Details::UpgradeComponent(_) => ItemType::UpgradeComponent,
             Details::Weapon(_) => ItemType::Weapon,
             Details::CraftingMaterial => ItemType::CraftingMaterial,
-            //Details::Trait => ItemType::Trait,
             Details::Trophy => ItemType::Trophy,
             Details::Key => ItemType::Key,
             Details::PowerCore => ItemType::PowerCore,
             Details::JadeTechModule => ItemType::JadeTechModule,
-            Details::Mwcc => ItemType::Mwcc,
+            Details::Relic => ItemType::Relic,
         }
     }
 }
