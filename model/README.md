@@ -36,6 +36,7 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
     - [ ] dungeons
     - [ ] dyes
     - [ ] finishers
+    - [x] inventory
     - [ ] gliders
     - home
       - [ ] cats
@@ -75,6 +76,7 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
       - [x] specializations
       - [x] training
   - commerce
+    - [x] delivery
     - [ ] transactions
   - pvp
     - [ ] stats
@@ -160,7 +162,7 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
     - [ ] exchange
       - [ ] coins
       - [ ] gems
-    - [ ] prices
+    - [x] prices
 - world v world
   - [ ] wvw
     - [ ] abilities
