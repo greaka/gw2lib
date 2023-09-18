@@ -3,6 +3,7 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 pub mod authenticated;
+pub mod commerce;
 pub mod game_mechanics;
 pub mod guild;
 pub mod home_instance;
