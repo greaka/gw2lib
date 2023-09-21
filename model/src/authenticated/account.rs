@@ -1,4 +1,5 @@
 pub mod bank;
+pub mod inventory;
 pub mod materials;
 pub mod raids;
 pub mod wallet;
