@@ -11,7 +11,7 @@ pub struct Currency {
     pub name: String,
     pub description: String,
     pub icon: String,
-    pub order: u8,
+    pub order: u16,
 }
 
 impl EndpointWithId for Currency {
