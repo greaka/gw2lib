@@ -121,6 +121,13 @@ pub enum Slot {
     Sickle,
     Axe,
     Pick,
+    FishingRod,
+    FishingBait,
+    FishingLure,
+    PowerCore,
+    SensoryArray,
+    ServiceChip,
+    Relic,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]

@@ -505,7 +505,6 @@ pub enum Details {
     Key,
     PowerCore,
     JadeTechModule,
-    #[serde(alias = "Mwcc")]
     Relic,
 }
 
