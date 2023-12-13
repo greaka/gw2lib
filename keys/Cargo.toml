@@ -1,6 +1,6 @@
 [package]
-name = "gw2lib-model"
-version = "2.1.4"
+name = "gw2lib-keys"
+version = "0.1.0"
 authors = ["Greaka <cargo@greaka.de>"]
 edition = "2021"
 workspace = "../"
@@ -10,20 +10,14 @@ categories = ["api-bindings"]
 keywords = ["api", "guild-wars-2", "gw2", "wrapper", "async"]
 license = "MIT/Apache-2.0"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [lib]
-name = "gw2lib_model"
+name = "gw2lib_keys"
 path = "src/lib.rs"
 
 [dependencies]
-serde_tuple = "0.5.0"
-urlencoding = "2.1.2"
-
-[dependencies.either]
-version = "1.8.1"
-features = ["serde"]
-
-[dependencies.serde]
-version = "1.0.160"
-features = [
-    "derive"
-]
+serde_json = "1.0.102"
+base64 = "0.21.5"
+chrono = { version = "0.4.26", features = ["serde"] }
+serde = { version = "1.0.171", features = ["derive"] }

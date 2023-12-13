@@ -16,6 +16,7 @@ prefetch:
   COPY Cargo.toml ./
   COPY model/Cargo.toml ./model/
   COPY http/Cargo.toml ./http/
+  COPY keys/Cargo.toml ./keys/
   RUN cargo --color=always fetch
 
   SAVE IMAGE prefetch
@@ -74,3 +75,4 @@ COPY_SRC:
   COPY --dir .config ./
   COPY --dir http ./
   COPY --dir model ./
+  COPY --dir keys ./

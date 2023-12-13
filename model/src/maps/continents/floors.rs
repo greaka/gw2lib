@@ -190,8 +190,10 @@ pub enum MasteryPointRegion {
     Desert,
     /// Living World Season 5, in blue.
     Tundra,
-    /// Seems to be used for End of Dragons, in blue.
-    Unknown,
+    /// End of Dragons
+    Jade,
+    /// Secrets of the Obscure
+    Sky,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
