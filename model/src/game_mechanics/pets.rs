@@ -1,13 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 use crate::*;
-pub use crate::game_mechanics::skills;
-pub use crate::authenticated::characters::PetId;
+pub use crate::game_mechanics::skills::SkillId;
+
+pub type PetId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct PetSkill {
-	pub id: skills::SkillId,
+	pub id: SkillId,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -24,7 +25,7 @@ impl Endpoint for Pet {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/pets";
-    const VERSION: &'static str = "2022-07-22T00:00:00.000Z";
+    const VERSION: &'static str = "2024-03-09T00:00:00.000Z";
 }
 
 impl EndpointWithId for Pet {
