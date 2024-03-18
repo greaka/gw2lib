@@ -1,8 +1,8 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-	model::game_mechanics::pets::{Pet, PetId},
-	Requester
+    model::game_mechanics::pets::{Pet, PetId},
+    Requester,
 };
 
 pub mod setup;

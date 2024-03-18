@@ -1,24 +1,24 @@
 use serde::{Deserialize, Serialize};
 
-use crate::*;
 pub use crate::game_mechanics::skills::SkillId;
+use crate::*;
 
 pub type PetId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct PetSkill {
-	pub id: SkillId,
+    pub id: SkillId,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
 pub struct Pet {
-	pub id: PetId,
-	pub name: String,
-	pub description: String,
-	pub icon: Option<String>,
-	pub skills: Vec<PetSkill>,
+    pub id: PetId,
+    pub name: String,
+    pub description: String,
+    pub icon: Option<String>,
+    pub skills: Vec<PetSkill>,
 }
 
 impl Endpoint for Pet {
@@ -29,7 +29,7 @@ impl Endpoint for Pet {
 }
 
 impl EndpointWithId for Pet {
-	type IdType = PetId;
+    type IdType = PetId;
 }
 
 impl BulkEndpoint for Pet {
