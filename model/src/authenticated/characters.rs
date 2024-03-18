@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    game_mechanics::{skills::SkillId, specializations::SpecializationId, traits::TraitId},
+    game_mechanics::{skills::SkillId, specializations::SpecializationId, traits::TraitId, pets::PetId},
     items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, AttributeType, ItemId},
     misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,
@@ -294,8 +294,6 @@ pub struct EquipmentPvp {
 pub enum Flags {
     Beta,
 }
-
-pub type PetId = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
