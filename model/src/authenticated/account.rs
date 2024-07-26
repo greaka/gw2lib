@@ -21,6 +21,8 @@ pub enum Access {
     HeartOfThorns,
     PathOfFire,
     EndOfDragons,
+    SecretsOfTheObscure,
+    JanthirWilds,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

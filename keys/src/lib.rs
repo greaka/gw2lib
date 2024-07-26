@@ -103,7 +103,7 @@ pub enum ApiKeyPermissions {
 }
 
 mod timestamp_parser {
-    use chrono::NaiveDateTime;
+    use chrono::{DateTime, NaiveDateTime, Utc};
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub fn deserialize<'de, D>(d: D) -> Result<NaiveDateTime, D::Error>
@@ -111,20 +111,23 @@ mod timestamp_parser {
         D: Deserializer<'de>,
     {
         let timestamp = i64::deserialize(d)?;
-        Ok(NaiveDateTime::from_timestamp_opt(timestamp, 0)
-            .expect("invalid or out-of-range datetime"))
+        Ok(DateTime::<Utc>::from_timestamp(timestamp, 0)
+            .expect("invalid or out-of-range datetime")
+            .naive_utc())
     }
 
     pub fn serialize<S>(dt: &NaiveDateTime, s: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        s.serialize_i64(dt.timestamp())
+        s.serialize_i64(dt.and_utc().timestamp())
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use chrono::DateTime;
+
     use super::*;
 
     const VALID_MAIN_KEY: &str =
@@ -146,7 +149,9 @@ mod tests {
         };
         assert_eq!(
             subkey.expires,
-            NaiveDateTime::from_timestamp_opt(1702136340, 0).unwrap()
+            DateTime::<Utc>::from_timestamp(1702136340, 0)
+                .unwrap()
+                .naive_utc()
         );
         assert_eq!(subkey.permissions, vec![ApiKeyPermissions::Account]);
         assert_eq!(subkey.urls, Some(vec!["/v2/tokeninfo".to_string()]));
@@ -160,7 +165,7 @@ mod tests {
         };
         assert_eq!(
             subkey.expires,
-            NaiveDateTime::from_timestamp_opt(1701599984, 0).unwrap()
+            DateTime::from_timestamp(1701599984, 0).unwrap().naive_utc()
         );
         assert_eq!(subkey.permissions, vec![ApiKeyPermissions::Account]);
         assert_eq!(subkey.urls, None);
