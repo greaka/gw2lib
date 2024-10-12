@@ -194,6 +194,9 @@ pub enum MasteryPointRegion {
     Jade,
     /// Secrets of the Obscure
     Sky,
+    /// Janthir Wilds
+    #[serde(alias = "Unknown")]
+    Janthir,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
