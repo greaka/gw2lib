@@ -138,7 +138,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let request = build_request::<T, String, Self, AUTHENTICATED, FORCE>(
             self,
-            &T::format_url(T::format_id(&id).as_ref()),
+            T::format_url(T::format_id(&id).as_ref()),
             None,
         )?;
 
@@ -595,69 +595,54 @@ async fn wait_for_rate_limit<Req: Requester<A, F>, const A: bool, const F: bool>
     Ok(())
 }
 
-fn build_request<
-    T: Endpoint,
-    Q: Into<String>,
-    Req: Requester<A, F>,
-    const A: bool,
-    const F: bool,
->(
+fn build_request<T: Endpoint, Q: AsRef<str>, Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
-    path: &str,
+    path: impl AsRef<str>,
     extra_queries: Option<Q>,
 ) -> Result<Request<hyper::Body>, EndpointError> {
     if T::AUTHENTICATED && !A {
         return Err(EndpointError::NotAuthenticated);
     }
 
-    let uri = build_query::<T, Q>(
-        &req.client().host,
-        path,
-        req.client().language,
-        extra_queries,
-    );
+    let client = req.client();
 
-    let mut request = hyper::Request::builder().uri(uri);
+    let mut pnq = String::with_capacity(400);
+    pnq.push('/');
+    pnq.push_str(path.as_ref());
+    pnq.push('?');
 
-    request = request.header("X-Schema-Version", T::VERSION);
-    if T::AUTHENTICATED {
-        request = request.header(
-            "Authorization",
-            &format!("Bearer {}", req.client().api_key.as_ref().unwrap()),
-        );
+    pnq.push_str("v=");
+    pnq.push_str(T::VERSION);
+
+    if let Some(extra) = extra_queries {
+        pnq.push('&');
+        pnq.push_str(extra.as_ref());
     }
 
-    let request = request.body(hyper::Body::empty()).unwrap();
-
-    Ok(request)
-}
-
-fn build_query<T: Endpoint, Q: Into<String>>(
-    host: &str,
-    path: &str,
-    lang: Language,
-    extra_queries: Option<Q>,
-) -> Uri {
-    let (scheme, host) = host.split_once("://").expect("invalid host");
-
-    let mut args = Vec::new();
     if T::LOCALE {
-        args.push(format!("lang={}", lang.as_str()));
-    }
-    if let Some(q) = extra_queries {
-        args.push(q.into());
+        pnq.push_str("&lang=");
+        pnq.push_str(client.language.as_str());
     }
 
-    let query = args.join("&");
+    if T::AUTHENTICATED {
+        pnq.push_str("&access_token=");
+        pnq.push_str(client.api_key.as_ref().unwrap());
+    }
 
-    let pnq = format!("/{}?{}", &path, &query);
-
-    Uri::builder()
+    let (scheme, host) = client.host.split_once("://").expect("invalid host");
+    let uri = Uri::builder()
         .scheme(scheme)
         .authority(host)
         .path_and_query(pnq)
         .build()
-        .expect("invalid uri")
+        .expect("invalid uri");
+
+    let request = hyper::Request::builder()
+        .uri(uri)
+        .body(hyper::Body::empty())
+        .unwrap();
+
+    Ok(request)
 }
 
 /// returns the remaining ids not found in cache
