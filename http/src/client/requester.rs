@@ -22,7 +22,7 @@ use tokio::sync::{
     Mutex,
 };
 #[cfg(feature = "tracing")]
-use tracing::instrument;
+use tracing::{instrument, Instrument};
 
 use crate::{
     cache::in_memory::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult,
@@ -564,23 +564,33 @@ async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
     request: Request<hyper::Body>,
 ) -> EndpointResult<Response<hyper::Body>> {
     wait_for_rate_limit(req).await?;
+
     #[cfg(feature = "tracing")]
-    {
+    let span = {
         let uri = request.uri().path();
         let ids = request
             .uri()
             .query()
             .unwrap_or_default()
-            .strip_prefix("ids=")
+            .split("ids=")
+            .nth(1)
+            .unwrap_or_default()
+            .split("&")
+            .next()
             .unwrap_or_default();
+        let span = tracing::info_span!("gw2 request", %uri, %ids);
+        let entered = span.enter();
         tracing::info!(%uri, %ids, "gw2 request");
-    }
+        drop(entered);
+        span
+    };
 
-    req.client()
-        .client
-        .request(request)
-        .await
-        .map_err(Into::into)
+    let fut = req.client().client.request(request);
+
+    #[cfg(feature = "tracing")]
+    let fut = fut.instrument(span);
+
+    fut.await.map_err(Into::into)
 }
 
 #[cfg_attr(
