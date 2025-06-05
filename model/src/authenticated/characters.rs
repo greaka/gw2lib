@@ -82,6 +82,7 @@ pub enum Discipline {
     Scribe,
     Tailor,
     Weaponsmith,
+    Homesteader,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
