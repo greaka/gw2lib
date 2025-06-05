@@ -1,5 +1,5 @@
 VERSION 0.6
-FROM earthly/dind:ubuntu
+FROM earthly/dind:ubuntu-24.04-docker-27.3.1-1
 
 tools:
   RUN apt-get update
