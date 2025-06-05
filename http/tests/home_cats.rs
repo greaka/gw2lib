@@ -9,18 +9,21 @@ pub mod setup;
 
 #[test]
 fn all() {
-    let client = crate::setup::setup();
+    let client = setup::setup();
     let _: Vec<Cat> = client.all().unwrap();
+    let _: Cat = client.try_single(15).unwrap();
 }
 
 #[test]
 fn ids() {
-    let client = crate::setup::setup();
-    let _: Vec<CatId> = client.ids::<Cat, _>().unwrap();
+    let client = setup::setup();
+    let _: Vec<CatId> = client.ids::<Cat>().unwrap();
+    let _: Vec<CatId> = client.try_ids::<Cat>().unwrap();
 }
 
 #[test]
 fn guardian_cat() {
-    let client = crate::setup::setup();
+    let client = setup::setup();
     let _: Cat = client.single(15).unwrap();
+    let _: Cat = client.try_single(15).unwrap();
 }

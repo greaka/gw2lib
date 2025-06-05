@@ -10,7 +10,8 @@ macro_rules! parse_single {
         #[test]
         fn $name() {
             let client = crate::setup::setup();
-            let x: gw2lib::model::items::Item = client.single($id).unwrap();
+            let _: gw2lib::model::items::Item = client.single($id).unwrap();
+            let x: gw2lib::model::items::Item = client.try_single($id).unwrap();
             #[allow(clippy::redundant_closure_call)]
             ($validate)(x);
         }
@@ -59,17 +60,17 @@ mod single {
     parse_single!(key, 82444, check_type!(Key));
     parse_single!(powercore, 95864, check_type!(PowerCore));
     parse_single!(jadetechmodule, 95948, check_type!(JadeTechModule));
-    parse_single!(gathering_bait, 95993, |x: Item| assert!(
-        x.details
-            == Details::Gathering(GatheringToolsDetails {
-                _type: GatheringToolsType::Bait,
-            })
+    parse_single!(gathering_bait, 95993, |x: Item| assert_eq!(
+        x.details,
+        Details::Gathering(GatheringToolsDetails {
+            _type: GatheringToolsType::Bait,
+        })
     ));
-    parse_single!(gathering_lure, 98073, |x: Item| assert!(
-        x.details
-            == Details::Gathering(GatheringToolsDetails {
-                _type: GatheringToolsType::Lure,
-            })
+    parse_single!(gathering_lure, 98073, |x: Item| assert_eq!(
+        x.details,
+        Details::Gathering(GatheringToolsDetails {
+            _type: GatheringToolsType::Lure,
+        })
     ));
     parse_single!(spear, 30691, |x: Item| assert!(matches!(
         x.details,

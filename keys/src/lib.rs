@@ -100,6 +100,7 @@ pub enum ApiKeyPermissions {
     Builds,
     Guilds,
     TradingPost,
+    Wvw,
 }
 
 mod timestamp_parser {

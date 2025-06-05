@@ -16,38 +16,38 @@ path = "src/lib.rs"
 
 [dependencies]
 chrono = "0.4.24"
-dashmap = "5.4.0"
+dashmap = "6.1.0"
 serde = "1.0.160"
-thiserror = "1.0.40"
-async-trait = "0.1.68"
+thiserror = "2.0.8"
 either = "1.8.1"
 futures = "0.3.28"
 serde_json = "1.0.96"
 static_init = "1.0.3"
-urlencoding = "2.1.2"
+rand = "0.8.5"
+hyper-util = "0.1.10"
 
 [dependencies.tracing]
 version = "0.1.37"
 optional = true
 
 [dependencies.redis]
-version = "0.23.0"
+version = "0.27.6"
 default-features = false
-features = ["tokio-comp"]
+features = ["tokio-comp", "tls-rustls"]
 optional = true
 
 [dependencies.tokio]
 version = "1.27.0"
 default-features = false
-features = ["sync", "rt", "time"]
+features = ["sync", "rt", "time", "macros"]
 
 [dependencies.hyper]
-version = "0.14.26"
+version = "1.5.2"
 default-features = false
-features = ["runtime", "http1", "client"]
+features = ["http1", "client"]
 
 [dependencies.hyper-rustls]
-version = "0.24.0"
+version = "0.27.4"
 default-features = false
 features = ["http1", "native-tokio", "logging", "tls12"]
 

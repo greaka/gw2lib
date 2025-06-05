@@ -6,6 +6,7 @@ pub mod setup;
 
 #[test]
 fn all() {
-    let client = crate::setup::setup();
+    let client = setup::setup();
     let _: Vec<ItemStat> = client.all().unwrap();
+    let _: ItemStat = client.try_single(161).unwrap();
 }

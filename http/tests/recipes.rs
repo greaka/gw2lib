@@ -11,6 +11,7 @@ macro_rules! parse_single {
         fn $name() {
             let client = crate::setup::setup();
             let x: gw2lib::model::items::recipes::Recipe = client.single($id).unwrap();
+            let _: gw2lib::model::items::recipes::Recipe = client.try_single($id).unwrap();
             #[allow(clippy::redundant_closure_call)]
             ($validate)(x);
         }
@@ -28,8 +29,9 @@ macro_rules! check_type {
 
 #[test]
 fn all() {
-    let client = crate::setup::setup();
+    let client = setup::setup();
     let _: Vec<Recipe> = client.all().unwrap();
+    let _: Recipe = client.try_single(13598).unwrap();
 }
 
 mod single {

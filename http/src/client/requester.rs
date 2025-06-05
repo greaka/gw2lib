@@ -7,7 +7,6 @@ use std::{
     sync::{Arc, Weak},
 };
 
-use async_trait::async_trait;
 use chrono::{Duration, NaiveDateTime, Utc};
 use dashmap::{mapref::entry::Entry, DashMap};
 use either::Either;
@@ -15,7 +14,7 @@ use futures::{stream::FuturesUnordered, StreamExt};
 use gw2lib_model::{
     BulkEndpoint, Endpoint, EndpointWithId, ErrorResponse, FixedEndpoint, Language, PagedEndpoint,
 };
-use hyper::{body::Buf, client::connect::Connect, Request, Response, Uri};
+use hyper::{body::Buf, Request, Response, Uri};
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{
     broadcast::{self, Receiver, Sender},
@@ -25,11 +24,10 @@ use tokio::sync::{
 use tracing::{instrument, Instrument};
 
 use crate::{
-    cache::in_memory::hash, ApiError, Cache, CachedRequest, Client, EndpointError, EndpointResult,
-    Inflight, RateLimiter,
+    cache::in_memory::hash, rate_limit::ApiPermit, ApiError, Cache, CachedRequest, Client,
+    EndpointError, EndpointResult, Inflight, RateLimiter,
 };
 
-#[async_trait]
 #[must_use]
 pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync {
     type Caching: Cache + Send + Sync + 'static;
@@ -100,25 +98,42 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         get_or_ids::<T, T, Self, AUTHENTICATED, FORCE>(self).await
     }
 
+    /// retrieves an item from cache
+    /// ```
+    /// use gw2lib::{model::items::Item, Client, Requester};
+    ///
+    /// let client = Client::default();
+    /// let from_cache: Option<Item> = client.try_get();
+    /// ```
+    #[cfg_attr(feature = "tracing", instrument(name = "get cached", skip_all, fields(endpoint = %T::URL)))]
+    async fn try_get<T>(&self) -> Option<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + FixedEndpoint + Send + Sync + 'static,
+    {
+        check_cache::<T, str, T, Self, AUTHENTICATED, FORCE>(self, "").await
+    }
+
     /// request a single item
     #[cfg_attr(feature = "tracing", instrument(skip_all, fields(id, endpoint = %T::URL)))]
-    async fn single<
-        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
-        I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
-    >(
+    async fn single<T>(
         &self,
-        id: impl Into<I> + Send,
-    ) -> EndpointResult<T> {
+        id: impl Into<<T as EndpointWithId>::IdType> + Send,
+    ) -> EndpointResult<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
+    {
         let id = id.into();
         #[cfg(feature = "tracing")]
         tracing::Span::current().record("id", id.to_string());
         let lang = self.client().language;
-        if let Some(c) = self.try_get(&id).await {
+        if let Some(c) = self.try_single(&id).await {
             return Ok(c);
         }
 
         let tx = loop {
-            let either = check_inflight::<T, I, T, String>(
+            let either = check_inflight::<T, <T as EndpointWithId>::IdType, T, String>(
                 &self.client().inflight,
                 &id,
                 lang,
@@ -129,7 +144,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                 Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
                 Some(Either::Right(tx)) => break tx,
                 None => {
-                    if let Some(c) = self.try_get(&id).await {
+                    if let Some(c) = self.try_single(&id).await {
                         return Ok(c);
                     }
                 }
@@ -144,7 +159,10 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
         let result =
-            cache_response::<I, T, T, Self, AUTHENTICATED, FORCE>(self, &id, response).await?;
+            cache_response::<<T as EndpointWithId>::IdType, T, T, Self, AUTHENTICATED, FORCE>(
+                self, &id, response,
+            )
+            .await?;
         // ignoring the error is fine here
         // the receiving side will check the cache if nothing got sent
         let _ = tx.lock().await.send(result.clone());
@@ -157,49 +175,73 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// use gw2lib::{model::items::Item, Client, Requester};
     ///
     /// let client = Client::default();
-    /// let from_cache: Option<Item> = client.try_get(&19721);
+    /// let from_cache: Option<Item> = client.try_single(&19721);
     /// ```
-    #[cfg_attr(feature = "tracing", instrument(name = "get cached", skip_all, fields(id, endpoint = %T::URL)))]
-    async fn try_get<
-        T: DeserializeOwned + Serialize + Clone + Endpoint + Send + Sync + 'static,
-        I: DeserializeOwned + Display + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-        id: impl Into<&I> + Send,
-    ) -> Option<T> {
-        let id = id.into();
+    #[cfg_attr(feature = "tracing", instrument(name = "single cached", skip_all, fields(id, endpoint = %T::URL)))]
+    async fn try_single<T>(&self, id: &<T as EndpointWithId>::IdType) -> Option<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            DeserializeOwned + Display + Hash + Clone + Send + Sync + 'static,
+    {
         #[cfg(feature = "tracing")]
         tracing::Span::current().record("id", id.to_string());
-        check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, id).await
+        check_cache::<T, <T as EndpointWithId>::IdType, T, Self, AUTHENTICATED, FORCE>(self, id)
+            .await
     }
 
     /// request all available ids
     #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
-    async fn ids<
-        T: DeserializeOwned + Serialize + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<I>> {
-        get_or_ids::<T, Vec<I>, Self, AUTHENTICATED, FORCE>(self).await
+    async fn ids<T>(&self) -> EndpointResult<Vec<<T as EndpointWithId>::IdType>>
+    where
+        T: DeserializeOwned + Serialize + EndpointWithId + Clone + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
+    {
+        get_or_ids::<T, Vec<<T as EndpointWithId>::IdType>, Self, AUTHENTICATED, FORCE>(self).await
+    }
+
+    /// retrieves an item from cache
+    /// ```
+    /// use gw2lib::{
+    ///     model::items::{Item, ItemId},
+    ///     Client, Requester,
+    /// };
+    ///
+    /// let client = Client::default();
+    /// let from_cache: Option<Vec<ItemId>> = client.try_ids::<Item>();
+    /// ```
+    #[cfg_attr(feature = "tracing", instrument(name = "get cached ids", skip_all, fields(endpoint = %T::URL)))]
+    async fn try_ids<T>(&self) -> Option<Vec<<T as EndpointWithId>::IdType>>
+    where
+        T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
+    {
+        check_cache::<Vec<<T as EndpointWithId>::IdType>, str, T, Self, AUTHENTICATED, FORCE>(
+            self, "",
+        )
+        .await
     }
 
     /// request multiple ids at once
     #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
-    async fn many<
+    async fn many<T>(
+        &self,
+        ids: Vec<impl Into<<T as EndpointWithId>::IdType> + Send>,
+    ) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
-    >(
-        &self,
-        ids: Vec<impl Into<I> + Send>,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
+    {
         let mut result = Vec::with_capacity(ids.len());
         let ids = if !FORCE {
             let ids = extract_many_from_cache(self, ids, &mut result).await;
@@ -216,7 +258,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
         let mut remaining_ids = Vec::with_capacity(ids.len());
         for id in ids {
             let retain = loop {
-                let either = check_inflight::<T, I, T, String>(
+                let either = check_inflight::<T, <T as EndpointWithId>::IdType, T, String>(
                     &self.client().inflight,
                     &id,
                     self.client().language,
@@ -233,8 +275,15 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                         break true;
                     }
                     None => {
-                        if let Some(c) =
-                            check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, &id).await
+                        if let Some(c) = check_cache::<
+                            T,
+                            <T as EndpointWithId>::IdType,
+                            T,
+                            Self,
+                            AUTHENTICATED,
+                            FORCE,
+                        >(self, &id)
+                        .await
                         {
                             result.push(c);
                             break false;
@@ -325,19 +374,19 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     /// more cache friendly, being able to utilize the cache and inflight
     /// mechanisms.
     #[cfg_attr(feature = "tracing", instrument(skip_all, fields(endpoint = %T::URL)))]
-    async fn all<
+    async fn all<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
+    {
         if T::ALL {
             self.get_all_by_ids_all().await
         // paging cannot utilize the cache, so we won't use it by default
@@ -352,19 +401,18 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     #[cfg_attr(feature = "tracing", instrument(name = "get all by ids all", skip_all, fields(endpoint = %T::URL)))]
-    async fn get_all_by_ids_all<
+    async fn get_all_by_ids_all<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
+    {
         if !T::ALL {
             return Err(EndpointError::UnsupportedEndpointQuery);
         }
@@ -402,6 +450,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
 
         let pages = ((remaining as f64) / 200_f64).ceil() as usize;
         for page in 0..pages {
+            // todo: run in parallel
+            // todo: cache
             self.page(page + 1, 200, &mut result).await?;
         }
 
@@ -412,20 +462,20 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
     #[cfg_attr(feature = "tracing", instrument(name = "get all by requesting ids", skip_all, fields(endpoint = %T::URL)))]
-    async fn get_all_by_requesting_ids<
+    async fn get_all_by_requesting_ids<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
-        let ids = self.ids::<T, I>().await?;
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
+    {
+        let ids = self.ids::<T>().await?;
         self.many(ids).await
     }
 }
@@ -563,7 +613,7 @@ async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
     request: Request<hyper::Body>,
 ) -> EndpointResult<Response<hyper::Body>> {
-    wait_for_rate_limit(req).await?;
+    let _permit = wait_for_rate_limit(req).await?;
 
     #[cfg(feature = "tracing")]
     let span = {
@@ -599,10 +649,12 @@ async fn exec_req<Req: Requester<A, F>, const A: bool, const F: bool>(
 )]
 async fn wait_for_rate_limit<Req: Requester<A, F>, const A: bool, const F: bool>(
     req: &Req,
-) -> EndpointResult<()> {
-    let time = req.client().rate_limiter.take(1).await?;
-    tokio::time::sleep(time).await;
-    Ok(())
+) -> EndpointResult<ApiPermit<Req::RateLimiting>> {
+    let permit = req.client().rate_limiter.take(1).await?;
+
+    permit
+        .await
+        .map_err(|_| EndpointError::RateLimiterCrashed("failed to receive request permit".into()))
 }
 
 fn build_request<T: Endpoint, Q: AsRef<str>, Req: Requester<A, F>, const A: bool, const F: bool>(

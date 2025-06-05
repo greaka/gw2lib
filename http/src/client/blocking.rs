@@ -1,7 +1,7 @@
 use std::{fmt::Display, hash::Hash};
 
 use chrono::Duration;
-use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
+use gw2lib_model::{BulkEndpoint, EndpointWithId, FixedEndpoint};
 use serde::{de::DeserializeOwned, Serialize};
 
 use super::requester::Requester as Req;
@@ -65,14 +65,27 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
         block(Req::get(self))
     }
 
+    /// retrieves an item from cache
+    /// ```
+    /// use gw2lib::{model::items::Item, Client, Requester};
+    ///
+    /// let client = Client::default();
+    /// let from_cache: Option<Item> = client.try_get();
+    /// ```
+    async fn try_get<T>(&self) -> Option<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + FixedEndpoint + Send + Sync + 'static,
+    {
+        block(Req::try_get(self))
+    }
+
     /// request a single item
-    fn single<
-        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId<IdType = I> + 'static,
-        I: Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
-    >(
-        &self,
-        id: I,
-    ) -> EndpointResult<T> {
+    fn single<T>(&self, id: <T as EndpointWithId>::IdType) -> EndpointResult<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
+    {
         block(Req::single(self, id))
     }
 
@@ -81,63 +94,70 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// use gw2lib::{model::items::Item, Client, Requester};
     ///
     /// let client = Client::default();
-    /// let from_cache: Option<Item> = client.try_get(&19721);
+    /// let from_cache: Option<Item> = client.try_single(&19721);
     /// ```
-    fn try_get<
-        T: DeserializeOwned + Serialize + Clone + Endpoint + Send + Sync + 'static,
-        I: DeserializeOwned + Display + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-        id: &I,
-    ) -> Option<T> {
-        block(Req::try_get(self, id))
+    fn try_single<T>(&self, id: &<T as EndpointWithId>::IdType) -> Option<T>
+    where
+        T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            DeserializeOwned + Display + Hash + Clone + Send + Sync + 'static,
+    {
+        block(Req::try_single(self, id))
     }
 
     /// request all available ids
-    fn ids<
-        T: DeserializeOwned + Serialize + EndpointWithId<IdType = I> + Clone + Send + Sync + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<I>> {
-        block(Req::ids::<T, I>(self))
+    fn ids<T>(&self) -> EndpointResult<Vec<<T as EndpointWithId>::IdType>>
+    where
+        T: DeserializeOwned + Serialize + EndpointWithId + Clone + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
+    {
+        block(Req::ids::<T>(self))
+    }
+
+    /// retrieves an item from cache
+    /// ```
+    /// use gw2lib::{
+    ///     model::items::{Item, ItemId},
+    ///     Client, Requester,
+    /// };
+    ///
+    /// let client = Client::default();
+    /// let from_cache: Option<Vec<ItemId>> = client.try_ids::<Item>();
+    /// ```
+    fn try_ids<T>(&self) -> Option<Vec<<T as EndpointWithId>::IdType>>
+    where
+        T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
+    {
+        block(Req::try_ids::<T>(self))
     }
 
     /// request multiple ids at once
-    fn many<
+    fn many<T>(&self, ids: Vec<<T as EndpointWithId>::IdType>) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
-    >(
-        &self,
-        ids: Vec<I>,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Hash + Clone + Eq + Send + Sync + 'static,
+    {
         block(Req::many(self, ids))
     }
 
     /// requests a page of items and returns the number of total items across
     /// all pages
-    fn page<
-        T: DeserializeOwned
-            + EndpointWithId<IdType = I>
-            + BulkEndpoint
-            + Clone
-            + Send
-            + Sync
-            + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-        page: usize,
-        page_size: u8,
-        result: &mut Vec<T>,
-    ) -> EndpointResult<usize> {
+    fn page<T>(&self, page: usize, page_size: u8, result: &mut Vec<T>) -> EndpointResult<usize>
+    where
+        T: DeserializeOwned + EndpointWithId + BulkEndpoint + Clone + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
+    {
         block(Req::page(self, page, page_size, result))
     }
 
@@ -148,75 +168,67 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// this needs to perform an additional request to get all ids, but is much
     /// more cache friendly, being able to utilize the cache and inflight
     /// mechanisms.
-    fn all<
+    fn all<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
+    {
         block(Req::all(self))
     }
 
     /// Gets all items by querying ids=all
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
-    fn get_all_by_ids_all<
+    fn get_all_by_ids_all<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
+    {
         block(Req::get_all_by_ids_all(self))
     }
 
     /// Gets all items by querying all pages
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
-    fn get_all_by_paging<
-        T: DeserializeOwned
-            + EndpointWithId<IdType = I>
-            + BulkEndpoint
-            + Clone
-            + Send
-            + Sync
-            + 'static,
-        I: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+    fn get_all_by_paging<T>(&self) -> EndpointResult<Vec<T>>
+    where
+        T: DeserializeOwned + EndpointWithId + BulkEndpoint + Clone + Send + Sync + 'static,
+        <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
+    {
         block(Req::get_all_by_paging(self))
     }
 
     /// Gets all items by querying all ids
     ///
     /// use [`Self::all`] to use the most efficient way to request all items
-    fn get_all_by_requesting_ids<
+    fn get_all_by_requesting_ids<T>(&self) -> EndpointResult<Vec<T>>
+    where
         T: DeserializeOwned
             + Serialize
-            + EndpointWithId<IdType = I>
+            + EndpointWithId
             + BulkEndpoint
             + Clone
             + Send
             + Sync
             + 'static,
-        I: Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
-    >(
-        &self,
-    ) -> EndpointResult<Vec<T>> {
+        <T as EndpointWithId>::IdType:
+            Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + Eq + 'static,
+    {
         block(Req::get_all_by_requesting_ids(self))
     }
 }

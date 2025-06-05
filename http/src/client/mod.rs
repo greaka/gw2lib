@@ -15,8 +15,11 @@ mod blocking;
 use chrono::Duration;
 use dashmap::DashMap;
 use gw2lib_model::Language;
-use hyper::client::{connect::Connect, HttpConnector};
 use hyper_rustls::HttpsConnector;
+use hyper_util::{
+    client::legacy::{connect::HttpConnector, Client as HyperClient},
+    rt::TokioExecutor,
+};
 use static_init::dynamic;
 use tokio::sync::Mutex;
 
@@ -36,12 +39,12 @@ pub struct Client<
 > {
     pub host: String,
     pub language: Language,
-    client: hyper::Client<Conn, hyper::Body>,
+    client: HyperClient<Conn, hyper::Body>,
     api_key: Option<String>,
     identifier: Option<String>,
     cache: Arc<C>,
     inflight: Inflight,
-    rate_limiter: R,
+    rate_limiter: Arc<R>,
 }
 
 impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
@@ -53,7 +56,6 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
     /// [`Client::default`].
     pub fn empty() -> Self {
         let client = create_client();
-        let rate_limiter = NoopRateLimiter {};
         Self {
             host: "https://api.guildwars2.com".to_string(),
             language: Language::En,
@@ -62,7 +64,7 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
             identifier: None,
             cache: Arc::new(NoopCache {}),
             inflight: Default::default(),
-            rate_limiter,
+            rate_limiter: Arc::new(NoopRateLimiter),
         }
     }
 }
@@ -70,7 +72,7 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
 impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpConnector>, false> {
     fn default() -> Self {
         let client = create_client();
-        let rate_limiter = BucketRateLimiter::default();
+        let rate_limiter = Arc::new(BucketRateLimiter::default());
         let cache = Arc::new(InMemoryCache::default());
         periodically_cleanup_cache(cache.clone());
         Self {
@@ -119,7 +121,7 @@ impl<
     ///
     /// for https hosts use [`Client::host`]
     pub fn host_http(self, host: impl Into<String>) -> Client<C, R, HttpConnector, AUTHENTICATED> {
-        let client = hyper::Client::new();
+        let client = HyperClient::new();
         Client {
             host: host.into(),
             language: self.language,
@@ -173,13 +175,13 @@ impl<
     /// let client = client.identifier(&account.id);
     ///
     /// // make a request
-    /// let characters: Vec<CharacterId> = client.ids::<Character, CharacterId>().unwrap();
+    /// let characters: Vec<CharacterId> = client.ids::<Character>().unwrap();
     ///
     /// let client = Client::default().api_key("<different subtoken>");
     /// let client = client.identifier(account.id);
     ///
     /// // cache hit
-    /// let characters: Vec<CharacterId> = client.ids::<Character, CharacterId>().unwrap();
+    /// let characters: Vec<CharacterId> = client.ids::<Character>().unwrap();
     /// ```
     pub fn identifier(self, id: impl Into<String>) -> Self {
         Client {
@@ -228,7 +230,7 @@ impl<
     /// let new_client = Client::default().rate_limiter(rate_limiter.clone());
     pub fn rate_limiter<NR: RateLimiter + Send + Sync + 'static>(
         self,
-        rate_limiter: NR,
+        rate_limiter: Arc<NR>,
     ) -> Client<C, NR, Conn, AUTHENTICATED> {
         Client {
             host: self.host,
@@ -319,13 +321,14 @@ impl<
     }
 }
 
-fn create_client() -> hyper::Client<HttpsConnector<HttpConnector>, hyper::Body> {
+fn create_client() -> HyperClient<HttpsConnector<HttpConnector>, hyper::Body> {
     let https = hyper_rustls::HttpsConnectorBuilder::new()
         .with_native_roots()
-        .https_only()
+        .unwrap()
+        .https_or_http()
         .enable_http1()
         .build();
-    hyper::Client::builder().build(https)
+    HyperClient::builder(TokioExecutor::new()).build(https)
 }
 
 fn periodically_cleanup_cache(cache: Arc<dyn CleanupCache + Send + Sync + 'static>) {
@@ -334,10 +337,12 @@ fn periodically_cleanup_cache(cache: Arc<dyn CleanupCache + Send + Sync + 'stati
         Mutex::new(Vec::with_capacity(1));
 
     let task = async move {
-        let mut caches = CACHES.lock().await;
-        caches.push(Arc::downgrade(&cache));
-        if caches.len() == 1 {
-            drop(caches);
+        let count = {
+            let mut caches = CACHES.lock().await;
+            caches.push(Arc::downgrade(&cache));
+            caches.len()
+        };
+        if count == 1 {
             loop {
                 tokio::time::sleep(std::time::Duration::from_secs(60)).await;
 

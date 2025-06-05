@@ -1,9 +1,28 @@
-use std::{future::Future, time::Duration};
+use std::{
+    collections::VecDeque,
+    fmt::Display,
+    future::Future,
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
-use async_trait::async_trait;
-use redis::{aio::Connection, Client, RedisError};
+use futures::{FutureExt, StreamExt};
+use rand::distributions::{Alphanumeric, DistString};
+use redis::{
+    aio::MultiplexedConnection, AsyncConnectionConfig, Client, PushInfo, RedisError, RedisResult,
+    ToRedisArgs,
+};
+use tokio::{
+    select,
+    sync::{broadcast, broadcast::Sender, oneshot, oneshot::Receiver, Mutex},
+    time,
+    time::{Duration, Instant},
+};
 
-use crate::{rate_limit::RateLimiter, EndpointError};
+use crate::{
+    rate_limit::{ApiPermit, RateLimiter},
+    EndpointError,
+};
 
 #[derive(Debug, Clone)]
 pub struct RedisRateLimiter {
@@ -12,6 +31,14 @@ pub struct RedisRateLimiter {
     /// requests per minute
     refill: usize,
     client: Client,
+    connections: Arc<Mutex<VecDeque<MultiplexedConnection>>>,
+    push_sender: Sender<PushInfo>,
+
+    // redis keys
+    bucket: Arc<str>,
+    semaphore: Arc<str>,
+    pubsub: Arc<str>,
+    waitlist: Arc<str>,
 }
 
 impl RedisRateLimiter {
@@ -27,15 +54,34 @@ impl RedisRateLimiter {
 
     /// burst takes the maximum number of requests in burst
     /// refill sets the requests per minute
-    pub async fn with_values(
+    /// a refill value above 60000 might break the rate limiter
+    pub fn with_values(
         client: Client,
         burst: usize,
         refill: usize,
+    ) -> impl Future<Output = Result<Self, RedisError>> {
+        Self::with_values_and_shard(client, burst, refill, "")
+    }
+
+    /// different shards use separate rate limits
+    pub async fn with_values_and_shard(
+        client: Client,
+        burst: usize,
+        refill: usize,
+        shard: impl Display,
     ) -> Result<Self, RedisError> {
+        let (tx, _) = broadcast::channel(burst);
         let this = Self {
             burst,
             refill,
             client,
+            connections: Default::default(),
+            push_sender: tx,
+
+            bucket: format!("ratelimit_bucket_{}", shard).into(),
+            semaphore: format!("ratelimit_semaphore_{}", shard).into(),
+            pubsub: format!("ratelimit_pub_{}", shard).into(),
+            waitlist: format!("ratelimit_waitlist_{}", shard).into(),
         };
 
         this.setup().await?;
@@ -45,22 +91,52 @@ impl RedisRateLimiter {
 
     async fn setup(&self) -> Result<(), RedisError> {
         let mut conn = self.connection().await?;
+
         redis::cmd("FUNCTION")
             .arg("LOAD")
             .arg("REPLACE")
             .arg(include_str!("lib.lua"))
-            .query_async(&mut conn)
+            .query_async(&mut *conn)
             .await
     }
 
-    fn connection(&self) -> impl Future<Output = Result<Connection, RedisError>> + '_ {
-        self.client.get_async_connection()
-    }
-}
+    async fn connection(&self) -> Result<ConnectionGuard, RedisError> {
+        // fixme: find a logic to open less parallel connections
+        let conn = loop {
+            let conn = {
+                let mut conns = self.connections.lock().await;
+                conns.pop_front()
+            };
+            if let Some(mut conn) = conn {
+                let res: Result<RedisResult<String>, _> = time::timeout(
+                    Duration::from_millis(100),
+                    redis::cmd("PING").query_async(&mut conn),
+                )
+                .await;
+                match res {
+                    Ok(Ok(msg)) if msg == "PONG" => break conn,
+                    _ => continue,
+                }
+            } else {
+                let config = AsyncConnectionConfig::new().set_push_sender(self.push_sender.clone());
+                break self
+                    .client
+                    .get_multiplexed_async_connection_with_config(&config)
+                    .await?;
+            }
+        };
 
-#[async_trait]
-impl RateLimiter for RedisRateLimiter {
-    async fn take(&self, num: usize) -> Result<Duration, EndpointError> {
+        Ok(ConnectionGuard {
+            conn: Some(conn),
+            pool: self.connections.clone(),
+        })
+    }
+
+    async fn redis_take(
+        &self,
+        num: usize,
+        id: impl ToRedisArgs,
+    ) -> Result<Duration, EndpointError> {
         if num > self.burst {
             return Err(EndpointError::RateLimiterBucketExceeded);
         }
@@ -69,32 +145,170 @@ impl RateLimiter for RedisRateLimiter {
             .connection()
             .await
             .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
         let wait = redis::cmd("FCALL")
             .arg("ratelimit_take")
-            .arg(1)
-            .arg("gw2lib_ratelimit")
+            .arg(4)
+            .arg(self.bucket.as_ref())
+            .arg(self.semaphore.as_ref())
+            .arg(self.pubsub.as_ref())
+            .arg(self.waitlist.as_ref())
             .arg(num)
             .arg(self.burst)
             .arg(self.refill)
-            .query_async(&mut conn)
+            .arg(id)
+            .query_async(&mut *conn)
             .await
             .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
 
         Ok(Duration::from_millis(wait))
     }
 
-    async fn penalize(&self) -> Result<(), EndpointError> {
+    async fn redis_poke(&self) -> Result<(), EndpointError> {
         let mut conn = self
             .connection()
             .await
             .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
+        redis::cmd("FCALL")
+            .arg("ratelimit_poke")
+            .arg(4)
+            .arg(self.bucket.as_ref())
+            .arg(self.semaphore.as_ref())
+            .arg(self.pubsub.as_ref())
+            .arg(self.waitlist.as_ref())
+            .arg(self.burst)
+            .arg(self.refill)
+            .query_async(&mut *conn)
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))
+    }
+
+    async fn redis_release(&self, num: usize) -> Result<(), EndpointError> {
+        let mut conn = self
+            .connection()
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
+        redis::cmd("FCALL")
+            .arg("ratelimit_release")
+            .arg(4)
+            .arg(self.bucket.as_ref())
+            .arg(self.semaphore.as_ref())
+            .arg(self.pubsub.as_ref())
+            .arg(self.waitlist.as_ref())
+            .arg(num)
+            .arg(self.burst)
+            .arg(self.refill)
+            .query_async(&mut *conn)
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))
+    }
+
+    async fn redis_penalize(&self) -> Result<(), EndpointError> {
+        let mut conn = self
+            .connection()
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
         redis::cmd("FCALL")
             .arg("ratelimit_penalize")
             .arg(1)
-            .arg("gw2lib_ratelimit")
+            .arg(self.bucket.as_ref())
             .arg(self.refill)
-            .query_async(&mut conn)
+            .query_async(&mut *conn)
             .await
             .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))
+    }
+}
+
+impl RateLimiter for RedisRateLimiter {
+    async fn take(
+        self: &Arc<Self>,
+        num: usize,
+    ) -> Result<Receiver<ApiPermit<Self>>, EndpointError> {
+        let id = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+
+        let mut conn = self
+            .connection()
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
+        let mut sub = self.push_sender.subscribe();
+
+        conn.subscribe(self.pubsub.as_ref())
+            .await
+            .map_err(|e| EndpointError::RateLimiterCrashed(e.to_string()))?;
+
+        let eta = self.redis_take(num, &id).await?;
+
+        let (tx, rx) = oneshot::channel();
+        let this = self.clone();
+
+        crate::block::spawn(async move {
+            let mut target_time = Instant::now() + eta + Duration::from_secs(1);
+            let mut counter = 0;
+            loop {
+                select! {
+                    msg = sub.recv() => match msg {
+                        Some(msg) => {
+                            let msg: String = msg.get_payload().unwrap();
+                            if msg == id {
+                                counter += 1;
+                                if counter >= num {
+                                    break;
+                                }
+                            }
+                        }
+                        None => break,
+                    },
+                    _ = time::sleep_until(target_time) => {
+                        target_time += Duration::from_secs(5);
+                        this.redis_poke().await.ok();
+                    }
+                }
+            }
+
+            let permit = ApiPermit::new(this, num);
+            // ok() will drop the permit on error, adding the permits back
+            tx.send(permit).ok();
+        });
+
+        Ok(rx)
+    }
+
+    async fn release_semaphore(&self, num: usize) -> Result<(), EndpointError> {
+        self.redis_release(num).await
+    }
+
+    async fn penalize(&self) -> Result<(), EndpointError> {
+        self.redis_penalize().await
+    }
+}
+
+struct ConnectionGuard {
+    conn: Option<MultiplexedConnection>,
+    pool: Arc<Mutex<VecDeque<MultiplexedConnection>>>,
+}
+
+impl Deref for ConnectionGuard {
+    type Target = MultiplexedConnection;
+
+    fn deref(&self) -> &Self::Target {
+        self.conn.as_ref().unwrap()
+    }
+}
+
+impl DerefMut for ConnectionGuard {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.conn.as_mut().unwrap()
+    }
+}
+
+impl Drop for ConnectionGuard {
+    fn drop(&mut self) {
+        crate::block::spawn(async {
+            self.pool.lock().await.push_back(self.conn.take().unwrap());
+        });
     }
 }

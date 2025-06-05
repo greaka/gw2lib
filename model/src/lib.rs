@@ -13,6 +13,9 @@ pub mod pvp;
 pub mod tradingpost;
 pub mod wvw;
 
+// todo: restructure
+// todo: non_exhaustive
+
 #[derive(Hash, Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Language {
     En,

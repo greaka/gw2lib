@@ -4,7 +4,6 @@ use std::{
     hash::{BuildHasher, Hash, Hasher},
 };
 
-use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use dashmap::{mapref::entry::Entry, DashMap};
 use gw2lib_model::{Endpoint, Language};
@@ -26,7 +25,6 @@ impl Default for InMemoryCache {
     }
 }
 
-#[async_trait]
 impl Cache for InMemoryCache {
     async fn insert<T, I, E, A>(
         &self,

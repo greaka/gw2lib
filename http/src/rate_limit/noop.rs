@@ -1,14 +1,26 @@
-use std::time::Duration;
+use std::sync::Arc;
 
-use async_trait::async_trait;
+use tokio::sync::{oneshot, oneshot::Receiver};
 
-use crate::{rate_limit::RateLimiter, EndpointError};
+use crate::{
+    rate_limit::{ApiPermit, RateLimiter},
+    EndpointError,
+};
 
 pub struct NoopRateLimiter;
-#[async_trait]
+
 impl RateLimiter for NoopRateLimiter {
-    async fn take(&self, _num: usize) -> Result<Duration, EndpointError> {
-        Ok(Duration::ZERO)
+    async fn take(
+        self: &Arc<Self>,
+        num: usize,
+    ) -> Result<Receiver<ApiPermit<Self>>, EndpointError> {
+        let (tx, rx) = oneshot::channel();
+        tx.send(ApiPermit::new(self.clone(), num)).ok();
+        Ok(rx)
+    }
+
+    async fn release_semaphore(&self, _num: usize) -> Result<(), EndpointError> {
+        Ok(())
     }
 
     async fn penalize(&self) -> Result<(), EndpointError> {

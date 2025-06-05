@@ -3,7 +3,6 @@ use std::{
     hash::Hash,
 };
 
-use async_trait::async_trait;
 use chrono::{NaiveDateTime, Utc};
 use gw2lib_model::{Endpoint, Language};
 use redis::{
@@ -19,7 +18,6 @@ pub struct RedisCache {
     client: Client,
 }
 
-#[async_trait]
 impl Cache for RedisCache {
     async fn insert<T, I, E, A>(
         &self,

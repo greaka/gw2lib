@@ -27,7 +27,9 @@ pub fn setup() -> Client<InMemoryCache, RedisRateLimiter, HttpsConnector<HttpCon
         .unwrap_or(API_KEY.into());
     let client = redis::Client::open("redis://localhost").unwrap();
     let rate_limiter = RedisRateLimiter::new(client).unwrap();
-    Client::default().api_key(apikey).rate_limiter(rate_limiter)
+    Client::default()
+        .api_key(apikey)
+        .rate_limiter(rate_limiter.into())
 }
 
 pub fn character_name() -> String {

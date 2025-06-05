@@ -1,13 +1,12 @@
 use std::{fmt::Display, hash::Hash};
 
-use async_trait::async_trait;
 use chrono::NaiveDateTime;
 use gw2lib_model::{Endpoint, Language};
 
 use crate::cache::Cache;
 
 pub struct NoopCache;
-#[async_trait]
+
 impl Cache for NoopCache {
     async fn insert<T, I, E, A>(
         &self,

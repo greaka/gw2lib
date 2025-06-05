@@ -14,6 +14,7 @@ pub mod setup;
 fn get() {
     let client = setup::setup();
     let _: Build = client.get().unwrap();
+    let _: Build = client.try_get().unwrap();
 }
 
 //#[test]
@@ -108,7 +109,7 @@ mod rate_limit {
     fn hit() {
         // 1 request every 3 seconds
         let rate_limiter = BucketRateLimiter::new(1, 20);
-        let client = setup::setup().rate_limiter(rate_limiter);
+        let client = setup::setup().rate_limiter(rate_limiter.into());
         let client = client.forced();
 
         let start = chrono::Utc::now();
