@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-// todo: remove this pub use on next breaking version
-pub use crate::game_mechanics::pets::PetId;
 use crate::{
-    game_mechanics::{skills::SkillId, specializations::SpecializationId, traits::TraitId},
+    game_mechanics::{
+        pets::PetId, skills::SkillId, specializations::SpecializationId, traits::TraitId,
+    },
     items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, AttributeType, ItemId},
     misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,

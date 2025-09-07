@@ -2,6 +2,7 @@ pub(crate) mod block;
 pub mod cache;
 mod client;
 pub mod rate_limit;
+// todo: multi account ux
 pub use client::*;
 pub use gw2lib_model as model;
 use thiserror::Error;
@@ -23,7 +24,7 @@ pub enum EndpointError {
     #[error("requested too many tokens at once")]
     RateLimiterBucketExceeded,
     #[error("connection to gw2 api failed: {0}")]
-    RequestFailed(#[from] hyper::Error),
+    RequestFailed(#[from] reqwest::Error),
     #[error("gw2 api returned non success status: {0}")]
     ApiError(ApiError),
     #[error("failed to retrieve item from already running request: {0}")]
@@ -41,7 +42,7 @@ pub enum ApiError {
     #[error("too many requests")]
     RateLimited,
     #[error("{0}: {1}")]
-    Other(hyper::StatusCode, String),
+    Other(reqwest::StatusCode, String),
 }
 
 type EndpointResult<T> = Result<T, EndpointError>;

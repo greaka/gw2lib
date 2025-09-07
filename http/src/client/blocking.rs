@@ -11,7 +11,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     Req<AUTHENTICATED, FORCE>
 {
     #[doc(hidden)]
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED>;
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED>;
 
     #[doc(hidden)]
     fn cache_duration(&self) -> Duration;
@@ -34,8 +34,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     fn cached(
         &self,
         cache_duration: Duration,
-    ) -> CachedRequest<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED, FORCE>
-    {
+    ) -> CachedRequest<Self::Caching, Self::RateLimiting, AUTHENTICATED, FORCE> {
         Req::cached(self, cache_duration)
     }
 
@@ -51,10 +50,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// let build_id: Build = client.get().unwrap();
     /// // this will not check the cache and ask the api directly
     /// let build_id: Build = client.forced().get().unwrap();
-    fn forced(
-        &self,
-    ) -> CachedRequest<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED, true>
-    {
+    fn forced(&self) -> CachedRequest<Self::Caching, Self::RateLimiting, AUTHENTICATED, true> {
         Req::forced(self)
     }
 
@@ -236,7 +232,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 impl<T: Req<AUTHENTICATED, FORCE>, const AUTHENTICATED: bool, const FORCE: bool>
     Requester<AUTHENTICATED, FORCE> for T
 {
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED> {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
         Req::client(self)
     }
 

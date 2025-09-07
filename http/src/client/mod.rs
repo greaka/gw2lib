@@ -2,7 +2,7 @@ mod requester;
 use core::default::Default;
 use std::{
     any::{Any, TypeId},
-    sync::{Arc, Weak},
+    sync::{Arc, Once, Weak},
 };
 
 #[cfg(feature = "blocking")]
@@ -15,13 +15,10 @@ mod blocking;
 use chrono::Duration;
 use dashmap::DashMap;
 use gw2lib_model::Language;
-use hyper_rustls::HttpsConnector;
-use hyper_util::{
-    client::legacy::{connect::HttpConnector, Client as HyperClient},
-    rt::TokioExecutor,
-};
+use reqwest::Client as ReqwestClient;
 use static_init::dynamic;
 use tokio::sync::Mutex;
+use url::{ParseError, Url};
 
 use crate::{
     cache::{CleanupCache, InMemoryCache},
@@ -30,24 +27,24 @@ use crate::{
 
 pub(crate) type Inflight = Arc<DashMap<(TypeId, u64), Box<dyn Any + Send + Sync>>>;
 
+#[derive(Clone)]
 #[must_use]
 pub struct Client<
     C: Cache + Send + Sync + 'static,
     R: RateLimiter + Send + Sync + 'static,
-    Conn: Connect + Clone + Send + Sync + 'static,
     const AUTHENTICATED: bool,
 > {
-    pub host: String,
+    pub host: Arc<str>,
     pub language: Language,
-    client: HyperClient<Conn, hyper::Body>,
-    api_key: Option<String>,
-    identifier: Option<String>,
+    client: ReqwestClient,
+    api_key: Option<Arc<str>>,
+    identifier: Option<Arc<str>>,
     cache: Arc<C>,
     inflight: Inflight,
     rate_limiter: Arc<R>,
 }
 
-impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
+impl Client<NoopCache, NoopRateLimiter, false> {
     /// creates a new gw2 api client
     /// ### Warning
     /// this is not the same as [`Client::default`]!
@@ -57,7 +54,7 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
     pub fn empty() -> Self {
         let client = create_client();
         Self {
-            host: "https://api.guildwars2.com".to_string(),
+            host: "https://api.guildwars2.com".into(),
             language: Language::En,
             client,
             api_key: None,
@@ -69,14 +66,14 @@ impl Client<NoopCache, NoopRateLimiter, HttpsConnector<HttpConnector>, false> {
     }
 }
 
-impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpConnector>, false> {
+impl Default for Client<InMemoryCache, BucketRateLimiter, false> {
     fn default() -> Self {
         let client = create_client();
         let rate_limiter = Arc::new(BucketRateLimiter::default());
         let cache = Arc::new(InMemoryCache::default());
         periodically_cleanup_cache(cache.clone());
         Self {
-            host: "https://api.guildwars2.com".to_string(),
+            host: "https://api.guildwars2.com".into(),
             language: Language::En,
             client,
             api_key: None,
@@ -92,46 +89,19 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, HttpsConnector<HttpCon
 impl<
         C: Cache + Send + Sync + 'static,
         R: RateLimiter + Send + Sync + 'static,
-        Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
-    > Client<C, R, Conn, AUTHENTICATED>
+    > Client<C, R, AUTHENTICATED>
 {
     /// sets the host name
     ///
     /// default is `https://api.guildwars2.com` (no trailing slash)
-    /// for non https hosts use [`Client::host_http`]
-    pub fn host(
-        self,
-        host: impl Into<String>,
-    ) -> Client<C, R, HttpsConnector<HttpConnector>, AUTHENTICATED> {
-        let client = create_client();
-        Client {
+    pub fn host(self, host: impl Into<Arc<str>>) -> Result<Self, ParseError> {
+        let host = host.into();
+        Url::parse(&host)?;
+        Ok(Client {
             host: host.into(),
-            language: self.language,
-            client,
-            api_key: self.api_key,
-            identifier: self.identifier,
-            cache: self.cache,
-            inflight: self.inflight,
-            rate_limiter: self.rate_limiter,
-        }
-    }
-
-    /// sets the non https host name
-    ///
-    /// for https hosts use [`Client::host`]
-    pub fn host_http(self, host: impl Into<String>) -> Client<C, R, HttpConnector, AUTHENTICATED> {
-        let client = HyperClient::new();
-        Client {
-            host: host.into(),
-            language: self.language,
-            client,
-            api_key: self.api_key,
-            identifier: self.identifier,
-            cache: self.cache,
-            inflight: self.inflight,
-            rate_limiter: self.rate_limiter,
-        }
+            ..self
+        })
     }
 
     /// sets the language
@@ -143,7 +113,7 @@ impl<
     }
 
     /// sets a new api key
-    pub fn api_key(self, key: impl Into<String>) -> Client<C, R, Conn, true> {
+    pub fn api_key(self, key: impl Into<Arc<str>>) -> Client<C, R, true> {
         let key = key.into();
         Client {
             host: self.host,
@@ -177,13 +147,14 @@ impl<
     /// // make a request
     /// let characters: Vec<CharacterId> = client.ids::<Character>().unwrap();
     ///
-    /// let client = Client::default().api_key("<different subtoken>");
+    /// // new api key
+    /// let client = client.api_key("<different subtoken>");
     /// let client = client.identifier(account.id);
     ///
     /// // cache hit
     /// let characters: Vec<CharacterId> = client.ids::<Character>().unwrap();
     /// ```
-    pub fn identifier(self, id: impl Into<String>) -> Self {
+    pub fn identifier(self, id: impl Into<Arc<str>>) -> Self {
         Client {
             identifier: Some(id.into()),
             ..self
@@ -202,7 +173,7 @@ impl<
     pub fn cache<NC: Cache + Send + Sync + 'static>(
         self,
         cache: Arc<NC>,
-    ) -> Client<NC, R, Conn, AUTHENTICATED> {
+    ) -> Client<NC, R, AUTHENTICATED> {
         periodically_cleanup_cache(cache.clone());
         Client {
             host: self.host,
@@ -231,7 +202,7 @@ impl<
     pub fn rate_limiter<NR: RateLimiter + Send + Sync + 'static>(
         self,
         rate_limiter: Arc<NR>,
-    ) -> Client<C, NR, Conn, AUTHENTICATED> {
+    ) -> Client<C, NR, AUTHENTICATED> {
         Client {
             host: self.host,
             language: self.language,
@@ -248,15 +219,13 @@ impl<
 impl<
         C: Cache + Send + Sync + 'static,
         R: RateLimiter + Send + Sync + 'static,
-        Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
-    > requester::Requester<AUTHENTICATED, false> for Client<C, R, Conn, AUTHENTICATED>
+    > Requester<AUTHENTICATED, false> for Client<C, R, AUTHENTICATED>
 {
     type Caching = C;
-    type Connector = Conn;
     type RateLimiting = R;
 
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Connector, AUTHENTICATED> {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
         self
     }
 
@@ -265,54 +234,29 @@ impl<
     }
 }
 
-impl<
-        C: Cache + Send + Sync + 'static,
-        R: RateLimiter + Clone + Send + Sync + 'static,
-        Conn: Connect + Clone + Send + Sync + 'static,
-        const AUTHENTICATED: bool,
-    > Clone for Client<C, R, Conn, AUTHENTICATED>
-{
-    fn clone(&self) -> Self {
-        Self {
-            host: self.host.clone(),
-            language: self.language,
-            client: self.client.clone(),
-            api_key: self.api_key.clone(),
-            identifier: self.identifier.clone(),
-            cache: self.cache.clone(),
-            inflight: self.inflight.clone(),
-            rate_limiter: self.rate_limiter.clone(),
-        }
-    }
-}
-
 #[must_use]
 pub struct CachedRequest<
     'client,
     C: Cache + Send + Sync + 'static,
     R: RateLimiter + Send + Sync + 'static,
-    Conn: Connect + Clone + Send + Sync + 'static,
     const AUTHENTICATED: bool,
     const FORCE: bool,
 > {
-    client: &'client Client<C, R, Conn, AUTHENTICATED>,
+    client: &'client Client<C, R, AUTHENTICATED>,
     cache_duration: Duration,
 }
 
 impl<
         C: Cache + Send + Sync + 'static,
         R: RateLimiter + Send + Sync + 'static,
-        Conn: Connect + Clone + Send + Sync + 'static,
         const AUTHENTICATED: bool,
         const FORCE: bool,
-    > requester::Requester<AUTHENTICATED, FORCE>
-    for CachedRequest<'_, C, R, Conn, AUTHENTICATED, FORCE>
+    > Requester<AUTHENTICATED, FORCE> for CachedRequest<'_, C, R, AUTHENTICATED, FORCE>
 {
     type Caching = C;
-    type Connector = Conn;
     type RateLimiting = R;
 
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Conn, AUTHENTICATED> {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
         self.client
     }
 
@@ -321,14 +265,25 @@ impl<
     }
 }
 
-fn create_client() -> HyperClient<HttpsConnector<HttpConnector>, hyper::Body> {
-    let https = hyper_rustls::HttpsConnectorBuilder::new()
-        .with_native_roots()
+fn create_client() -> ReqwestClient {
+    #[cfg(feature = "rustls")]
+    {
+        static INIT_CRYPTO: Once = Once::new();
+        INIT_CRYPTO.call_once(|| {
+            rustls::crypto::ring::default_provider()
+                .install_default()
+                .ok();
+        });
+    }
+    ReqwestClient::builder()
+        .gzip(true)
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION"),
+        ))
+        .build()
         .unwrap()
-        .https_or_http()
-        .enable_http1()
-        .build();
-    HyperClient::builder(TokioExecutor::new()).build(https)
 }
 
 fn periodically_cleanup_cache(cache: Arc<dyn CleanupCache + Send + Sync + 'static>) {
