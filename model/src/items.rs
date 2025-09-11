@@ -249,6 +249,7 @@ pub enum UnlockType {
     GearLoadoutTab,
     BuildLibrarySlot,
     BuildLoadoutTab,
+    MagicDoorSkin,
     Minipet,
     Ms,
     Outfit,
