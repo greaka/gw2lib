@@ -136,6 +136,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                 )
                 .await;
                 match either {
+                    // todo: check cache again
                     Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
                     Some(Either::Right(tx)) => break tx,
                     None => {
@@ -599,6 +600,7 @@ async fn get_or_ids<
         )
         .await;
         match either {
+            // todo: check cache again
             Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
             Some(Either::Right(tx)) => break tx,
             None => {
