@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, Endpoint, FixedEndpoint};
+use crate::{Authenticated, Endpoint, FixedEndpoint, items::ItemId};
 
 pub type AccountMaterials = Vec<AccountMaterial>;
 
@@ -13,7 +13,8 @@ pub struct AccountMaterial {
 }
 
 impl Endpoint for AccountMaterials {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account/materials";
     const VERSION: &'static str = "2022-07-25T00:00:00.000Z";

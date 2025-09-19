@@ -22,7 +22,8 @@ pub struct World {
 }
 
 impl Endpoint for World {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/worlds";
     const VERSION: &'static str = "2022-07-22T00:00:00.000Z";

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Endpoint, FixedEndpoint, TimeStamp};
+use crate::{Authenticated, Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 pub mod commerce;
@@ -51,7 +51,8 @@ pub struct Tokeninfo {
 }
 
 impl Endpoint for Tokeninfo {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/tokeninfo";
     const VERSION: &'static str = "2021-01-11T00:00:00.000Z";

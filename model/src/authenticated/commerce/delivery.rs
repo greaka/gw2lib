@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, Endpoint, FixedEndpoint};
+use crate::{Authenticated, Endpoint, FixedEndpoint, items::ItemId};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct DeliveryItem {
@@ -15,7 +15,8 @@ pub struct Delivery {
 }
 
 impl Endpoint for Delivery {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/commerce/delivery";
     const VERSION: &'static str = "2023-07-01T00:00:00.000Z";

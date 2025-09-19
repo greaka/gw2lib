@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::items::recipes::Recipe, Requester};
+use gw2lib::{Requester, model::items::recipes::Recipe};
 
 pub mod setup;
 

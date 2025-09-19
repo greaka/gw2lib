@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::maps::Map, Requester};
+use gw2lib::{Requester, model::maps::Map};
 
 pub mod setup;
 

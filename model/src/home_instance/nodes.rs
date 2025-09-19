@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication};
 
 pub type NodeId = String;
 
@@ -14,7 +14,8 @@ impl EndpointWithId for Node {
     type IdType = NodeId;
 }
 impl Endpoint for Node {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/home/nodes";
     const VERSION: &'static str = "2023-08-14T00:00:00.000Z";

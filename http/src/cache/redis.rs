@@ -6,10 +6,10 @@ use std::{
 use chrono::{NaiveDateTime, Utc};
 use gw2lib_model::{Endpoint, Language};
 use redis::{
-    aio::{Connection, ConnectionLike},
     AsyncCommands, Client, Cmd, RedisError,
+    aio::{Connection, ConnectionLike},
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::cache::Cache;
 

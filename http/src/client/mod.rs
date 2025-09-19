@@ -2,6 +2,7 @@ mod requester;
 use core::default::Default;
 use std::{
     any::{Any, TypeId},
+    marker::PhantomData,
     sync::{Arc, Once, Weak},
 };
 
@@ -14,15 +15,15 @@ mod blocking;
 
 use chrono::Duration;
 use dashmap::DashMap;
-use gw2lib_model::Language;
+use gw2lib_model::{Authenticated, Authentication, Language, NoAuthentication};
 use reqwest::Client as ReqwestClient;
 use static_init::dynamic;
 use tokio::sync::Mutex;
 use url::{ParseError, Url};
 
 use crate::{
-    cache::{CleanupCache, InMemoryCache},
     BucketRateLimiter, Cache, NoopCache, NoopRateLimiter, RateLimiter,
+    cache::{CleanupCache, InMemoryCache},
 };
 
 pub(crate) type Inflight = Arc<DashMap<(TypeId, u64), Box<dyn Any + Send + Sync>>>;
@@ -32,7 +33,7 @@ pub(crate) type Inflight = Arc<DashMap<(TypeId, u64), Box<dyn Any + Send + Sync>
 pub struct Client<
     C: Cache + Send + Sync + 'static,
     R: RateLimiter + Send + Sync + 'static,
-    const AUTHENTICATED: bool,
+    Auth: Authentication,
 > {
     pub host: Arc<str>,
     pub language: Language,
@@ -42,12 +43,13 @@ pub struct Client<
     cache: Arc<C>,
     inflight: Inflight,
     rate_limiter: Arc<R>,
+    _phantom: PhantomData<Auth>,
 }
 
-impl Client<NoopCache, NoopRateLimiter, false> {
+impl Client<NoopCache, NoopRateLimiter, NoAuthentication> {
     /// creates a new gw2 api client
-    /// ### Warning
-    /// this is not the same as [`Client::default`]!
+    /// ### Remarks
+    /// This is different from [`Client::default`]!
     /// This initializes a client without any caching or rate limiting.
     /// If you want to use a default cache and rate limiter, use
     /// [`Client::default`].
@@ -62,11 +64,12 @@ impl Client<NoopCache, NoopRateLimiter, false> {
             cache: Arc::new(NoopCache {}),
             inflight: Default::default(),
             rate_limiter: Arc::new(NoopRateLimiter),
+            _phantom: PhantomData,
         }
     }
 }
 
-impl Default for Client<InMemoryCache, BucketRateLimiter, false> {
+impl Default for Client<InMemoryCache, BucketRateLimiter, NoAuthentication> {
     fn default() -> Self {
         let client = create_client();
         let rate_limiter = Arc::new(BucketRateLimiter::default());
@@ -81,16 +84,14 @@ impl Default for Client<InMemoryCache, BucketRateLimiter, false> {
             cache,
             inflight: Default::default(),
             rate_limiter,
+            _phantom: PhantomData,
         }
     }
 }
 
 /// constructing client
-impl<
-        C: Cache + Send + Sync + 'static,
-        R: RateLimiter + Send + Sync + 'static,
-        const AUTHENTICATED: bool,
-    > Client<C, R, AUTHENTICATED>
+impl<C: Cache + Send + Sync + 'static, R: RateLimiter + Send + Sync + 'static, Auth: Authentication>
+    Client<C, R, Auth>
 {
     /// sets the host name
     ///
@@ -98,10 +99,7 @@ impl<
     pub fn host(self, host: impl Into<Arc<str>>) -> Result<Self, ParseError> {
         let host = host.into();
         Url::parse(&host)?;
-        Ok(Client {
-            host: host.into(),
-            ..self
-        })
+        Ok(Client { host, ..self })
     }
 
     /// sets the language
@@ -113,7 +111,7 @@ impl<
     }
 
     /// sets a new api key
-    pub fn api_key(self, key: impl Into<Arc<str>>) -> Client<C, R, true> {
+    pub fn api_key(self, key: impl Into<Arc<str>>) -> Client<C, R, Authenticated> {
         let key = key.into();
         Client {
             host: self.host,
@@ -124,6 +122,7 @@ impl<
             cache: self.cache,
             inflight: self.inflight,
             rate_limiter: self.rate_limiter,
+            _phantom: PhantomData,
         }
     }
 
@@ -170,10 +169,7 @@ impl<
     ///
     /// let cache = Arc::new(InMemoryCache::default());
     /// let client = Client::empty().cache(cache);
-    pub fn cache<NC: Cache + Send + Sync + 'static>(
-        self,
-        cache: Arc<NC>,
-    ) -> Client<NC, R, AUTHENTICATED> {
+    pub fn cache<NC: Cache + Send + Sync + 'static>(self, cache: Arc<NC>) -> Client<NC, R, Auth> {
         periodically_cleanup_cache(cache.clone());
         Client {
             host: self.host,
@@ -184,6 +180,7 @@ impl<
             cache,
             inflight: self.inflight,
             rate_limiter: self.rate_limiter,
+            _phantom: PhantomData,
         }
     }
 
@@ -202,7 +199,7 @@ impl<
     pub fn rate_limiter<NR: RateLimiter + Send + Sync + 'static>(
         self,
         rate_limiter: Arc<NR>,
-    ) -> Client<C, NR, AUTHENTICATED> {
+    ) -> Client<C, NR, Auth> {
         Client {
             host: self.host,
             language: self.language,
@@ -212,20 +209,20 @@ impl<
             cache: self.cache,
             inflight: self.inflight,
             rate_limiter,
+            _phantom: PhantomData,
         }
     }
 }
 
-impl<
-        C: Cache + Send + Sync + 'static,
-        R: RateLimiter + Send + Sync + 'static,
-        const AUTHENTICATED: bool,
-    > Requester<AUTHENTICATED, false> for Client<C, R, AUTHENTICATED>
+impl<C: Cache + Send + Sync + 'static, R: RateLimiter + Send + Sync + 'static, Auth: Authentication>
+    Requester for Client<C, R, Auth>
 {
+    type Authenticated = Auth;
     type Caching = C;
+    type Force = NotForced;
     type RateLimiting = R;
 
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Auth> {
         self
     }
 
@@ -234,29 +231,33 @@ impl<
     }
 }
 
+#[expect(private_bounds)]
 #[must_use]
 pub struct CachedRequest<
     'client,
     C: Cache + Send + Sync + 'static,
     R: RateLimiter + Send + Sync + 'static,
-    const AUTHENTICATED: bool,
-    const FORCE: bool,
+    Auth: Authentication,
+    Forced: Force,
 > {
-    client: &'client Client<C, R, AUTHENTICATED>,
+    client: &'client Client<C, R, Auth>,
     cache_duration: Duration,
+    _phantom: PhantomData<Forced>,
 }
 
 impl<
-        C: Cache + Send + Sync + 'static,
-        R: RateLimiter + Send + Sync + 'static,
-        const AUTHENTICATED: bool,
-        const FORCE: bool,
-    > Requester<AUTHENTICATED, FORCE> for CachedRequest<'_, C, R, AUTHENTICATED, FORCE>
+    Cacher: Cache + Send + Sync + 'static,
+    RateLimit: RateLimiter + Send + Sync + 'static,
+    Auth: Authentication,
+    Forced: Force,
+> Requester for CachedRequest<'_, Cacher, RateLimit, Auth, Forced>
 {
-    type Caching = C;
-    type RateLimiting = R;
+    type Authenticated = Auth;
+    type Caching = Cacher;
+    type Force = Forced;
+    type RateLimiting = RateLimit;
 
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Auth> {
         self.client
     }
 
@@ -320,3 +321,19 @@ fn periodically_cleanup_cache(cache: Arc<dyn CleanupCache + Send + Sync + 'stati
 
     crate::block::spawn(task);
 }
+
+pub struct Forced;
+pub struct NotForced;
+trait Force: Sized + Sync + 'static {
+    const FORCE: bool;
+}
+impl Force for Forced {
+    const FORCE: bool = true;
+}
+impl Force for NotForced {
+    const FORCE: bool = false;
+}
+
+trait AllowsClient<ClientAuth> {}
+impl<ClientAuth> AllowsClient<ClientAuth> for ClientAuth {}
+impl AllowsClient<Authenticated> for NoAuthentication {}

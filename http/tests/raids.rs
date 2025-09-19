@@ -1,8 +1,8 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::misc::raids::{Raid, RaidId},
     Requester,
+    model::misc::raids::{Raid, RaidId},
 };
 
 pub mod setup;

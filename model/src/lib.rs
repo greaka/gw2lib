@@ -65,7 +65,7 @@ pub struct ErrorResponse {
 
 pub trait Endpoint: Sized {
     /// whether this endpoint requires authentication
-    const AUTHENTICATED: bool;
+    type Authenticated: Authentication;
 
     /// whether this endpoint supports the language parameter
     const LOCALE: bool;
@@ -106,3 +106,16 @@ pub trait BulkEndpoint: EndpointWithId {
 pub trait PagedEndpoint: Endpoint {}
 
 impl<T: BulkEndpoint> PagedEndpoint for T {}
+
+pub struct Authenticated;
+pub struct NoAuthentication;
+
+pub trait Authentication: Send + Sync + 'static {
+    const AUTHENTICATED: bool;
+}
+impl Authentication for Authenticated {
+    const AUTHENTICATED: bool = true;
+}
+impl Authentication for NoAuthentication {
+    const AUTHENTICATED: bool = false;
+}

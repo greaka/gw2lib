@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::items::Item, Requester};
+use gw2lib::{Requester, model::items::Item};
 
 pub mod setup;
 
@@ -34,11 +34,11 @@ fn parse_all() {
 
 mod single {
     use gw2lib::{
+        Requester,
         model::items::{
             Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType, WeaponDetails,
             WeaponType,
         },
-        Requester,
     };
     parse_single!(armor, 80248, check_type!(Armor));
     parse_single!(back, 77474, check_type!(Back));

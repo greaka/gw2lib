@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::items::skins::Skin, Requester};
+use gw2lib::{Requester, model::items::skins::Skin};
 
 pub mod setup;
 
@@ -36,11 +36,11 @@ fn parse_all() {
 
 mod single {
     use gw2lib::{
-        model::items::{
-            skins::{Details, GatheringToolsDetails, Skin, SkinType},
-            GatheringToolsType,
-        },
         Requester,
+        model::items::{
+            GatheringToolsType,
+            skins::{Details, GatheringToolsDetails, Skin, SkinType},
+        },
     };
     parse_single!(armor, 123, check_type!(Armor));
     parse_single!(back, 6344, check_type!(Back));

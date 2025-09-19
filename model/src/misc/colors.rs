@@ -1,7 +1,7 @@
 use either::Either;
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication, items::ItemId};
 
 pub type RGB = (u8, u8, u8);
 pub type ColorId = u16;
@@ -69,7 +69,8 @@ impl EndpointWithId for Color {
     type IdType = ColorId;
 }
 impl Endpoint for Color {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/colors";
     const VERSION: &'static str = "2021-01-11T00:00:00.000Z";

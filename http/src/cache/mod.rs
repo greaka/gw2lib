@@ -2,7 +2,7 @@ use std::{fmt::Display, future::Future, hash::Hash, ops::Deref, pin::Pin};
 
 use chrono::NaiveDateTime;
 use gw2lib_model::{Endpoint, Language};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 pub(crate) mod in_memory;
 pub use in_memory::InMemoryCache;
@@ -47,6 +47,7 @@ pub trait Cache {
 
     fn cleanup(&self) -> impl Future<Output = ()> + Send;
 
+    #[expect(async_fn_in_trait)]
     async fn wipe(&self) {
         self.wipe_static().await;
         self.wipe_authenticated().await;

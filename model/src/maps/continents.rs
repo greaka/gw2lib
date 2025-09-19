@@ -2,11 +2,11 @@ mod floors;
 
 use std::collections::BTreeSet;
 
-use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, ser::SerializeSeq};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 pub use crate::maps::continents::floors::*;
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication};
 
 pub type ContinentId = u32;
 
@@ -86,7 +86,8 @@ impl EndpointWithId for Continent {
     type IdType = ContinentId;
 }
 impl Endpoint for Continent {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/continents";
     const VERSION: &'static str = "2023-03-31T00:00:00.000Z";

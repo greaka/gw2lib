@@ -3,8 +3,8 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication,
     maps::continents::{ContinentId, ContinentRectangle, FloorId, MapRectangle, RegionId},
-    BulkEndpoint, Endpoint, EndpointWithId,
 };
 
 pub mod continents;
@@ -74,7 +74,8 @@ impl EndpointWithId for Map {
     type IdType = MapId;
 }
 impl Endpoint for Map {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/maps";
     const VERSION: &'static str = "2023-04-02T00:00:00.000Z";

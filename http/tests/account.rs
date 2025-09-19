@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::authenticated::account::Account, Requester};
+use gw2lib::{Requester, model::authenticated::account::Account};
 use gw2lib_model::authenticated::account::{
     bank::Bank, inventory::AccountInventory, materials::AccountMaterials, raids::RaidEvent,
     wallet::Wallet,

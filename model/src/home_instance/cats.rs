@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication};
 
 pub type CatId = u32;
 
@@ -15,7 +15,8 @@ impl EndpointWithId for Cat {
     type IdType = CatId;
 }
 impl Endpoint for Cat {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/home/cats";
     const VERSION: &'static str = "2023-08-14T00:00:00.000Z";

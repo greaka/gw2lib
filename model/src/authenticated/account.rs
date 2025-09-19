@@ -45,7 +45,8 @@ pub struct Account {
 }
 
 impl Endpoint for Account {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account";
     const VERSION: &'static str = "2022-07-22T00:00:00.000Z";

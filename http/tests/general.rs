@@ -4,8 +4,8 @@
 use std::sync::Arc;
 
 use gw2lib::{
-    model::misc::{build::Build, colors::ColorId},
     Requester,
+    model::misc::{build::Build, colors::ColorId},
 };
 
 pub mod setup;
@@ -101,7 +101,7 @@ mod cache {
 }
 
 mod rate_limit {
-    use gw2lib::{rate_limit::BucketRateLimiter, Requester};
+    use gw2lib::{Requester, rate_limit::BucketRateLimiter};
 
     use super::*;
 

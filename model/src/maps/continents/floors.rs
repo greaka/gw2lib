@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 use crate::{
+    Endpoint, EndpointWithId, NoAuthentication,
     maps::{
-        continents::{ContinentId, Dimensions},
         MapId,
+        continents::{ContinentId, Dimensions},
     },
-    Endpoint, EndpointWithId,
 };
 
 pub type FloorId = i16;
@@ -283,7 +283,8 @@ impl EndpointWithId for Floor {
 }
 
 impl Endpoint for Floor {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/continents";
     const VERSION: &'static str = "2023-03-31T00:00:00.000Z";

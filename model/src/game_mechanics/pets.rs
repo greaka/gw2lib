@@ -22,7 +22,8 @@ pub struct Pet {
 }
 
 impl Endpoint for Pet {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/pets";
     const VERSION: &'static str = "2024-03-09T00:00:00.000Z";

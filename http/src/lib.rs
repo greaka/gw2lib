@@ -17,8 +17,6 @@ use crate::{
 pub enum EndpointError {
     #[error("unsupported query type for this endpoint")]
     UnsupportedEndpointQuery,
-    #[error("endpoint requires authentication")]
-    NotAuthenticated,
     #[error("unexpected rate limiting error: {0}")]
     RateLimiterCrashed(String),
     #[error("requested too many tokens at once")]

@@ -40,7 +40,7 @@ where
     amount: usize,
 }
 
-impl<'a, R: RateLimiter + ?Sized> ApiPermit<R> {
+impl<R: RateLimiter + ?Sized> ApiPermit<R> {
     pub fn new(rate_limiter: Arc<R>, amount: usize) -> Self {
         Self {
             rate_limiter,
@@ -57,7 +57,7 @@ impl<'a, R: RateLimiter + ?Sized> ApiPermit<R> {
     }
 }
 
-impl<'a, R: RateLimiter + ?Sized> Drop for ApiPermit<R> {
+impl<R: RateLimiter + ?Sized> Drop for ApiPermit<R> {
     fn drop(&mut self) {
         let rate_limiter = self.rate_limiter.clone();
         let amount = self.amount;

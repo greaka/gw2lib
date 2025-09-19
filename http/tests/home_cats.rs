@@ -1,8 +1,8 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::home_instance::cats::{Cat, CatId},
     Requester,
+    model::home_instance::cats::{Cat, CatId},
 };
 
 pub mod setup;

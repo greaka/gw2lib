@@ -3,11 +3,11 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication,
     items::{
         ArmorSlot, DamageType, GatheringToolsType, Rarity, Restrictions, WeaponType, WeightClass,
     },
     misc::colors::ColorId,
-    BulkEndpoint, Endpoint, EndpointWithId,
 };
 
 pub type SkinId = u32;
@@ -136,7 +136,8 @@ impl EndpointWithId for Skin {
 }
 
 impl Endpoint for Skin {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/skins";
     const VERSION: &'static str = "2023-03-20T19:00:00.000Z";

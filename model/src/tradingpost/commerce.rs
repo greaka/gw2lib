@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{items::ItemId, BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication, items::ItemId};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
@@ -22,7 +22,8 @@ impl EndpointWithId for Listings {
     type IdType = ItemId;
 }
 impl Endpoint for Listings {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/commerce/listings";
     const VERSION: &'static str = "2021-01-11T00:00:00.000Z";
@@ -56,7 +57,8 @@ impl EndpointWithId for Prices {
     type IdType = ItemId;
 }
 impl Endpoint for Prices {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/commerce/prices";
     const VERSION: &'static str = "2021-01-11T00:00:00.000Z";

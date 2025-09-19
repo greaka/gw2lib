@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication};
 
 pub type RaidId = String;
 pub type WingId = String;
@@ -30,7 +30,8 @@ impl EndpointWithId for Raid {
 }
 
 impl Endpoint for Raid {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/raids";
     const VERSION: &'static str = "2023-08-02T00:00:00.000Z";

@@ -1,10 +1,10 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
+    Requester,
     model::authenticated::characters::{
         Backstory, Character, CharacterId, Core, Crafting, Equipment, Inventory, Recipes, Training,
     },
-    Requester,
 };
 
 use crate::setup::character_name;

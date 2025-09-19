@@ -5,8 +5,8 @@ use std::{
 };
 
 use chrono::{NaiveDateTime, Utc};
-use dashmap::{mapref::entry::Entry, DashMap};
-use gw2lib_model::{Endpoint, Language};
+use dashmap::{DashMap, mapref::entry::Entry};
+use gw2lib_model::{Authentication, Endpoint, Language};
 
 use crate::cache::Cache;
 
@@ -40,7 +40,7 @@ impl Cache for InMemoryCache {
         A: Hash + Sync + 'static,
     {
         let hash = hash::<_, T, I, A>(self.statics.hasher(), id, E::LOCALE.then_some(lang), auth);
-        let map = if E::AUTHENTICATED {
+        let map = if E::Authenticated::AUTHENTICATED {
             &self.authenticated
         } else {
             &self.statics
@@ -56,7 +56,7 @@ impl Cache for InMemoryCache {
         A: Hash + Sync + 'static,
     {
         let hash = hash::<_, T, I, A>(self.statics.hasher(), id, E::LOCALE.then_some(lang), auth);
-        let map = if E::AUTHENTICATED {
+        let map = if E::Authenticated::AUTHENTICATED {
             &self.authenticated
         } else {
             &self.statics

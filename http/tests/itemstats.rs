@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::items::itemstats::ItemStat, Requester};
+use gw2lib::{Requester, model::items::itemstats::ItemStat};
 
 pub mod setup;
 

@@ -2,10 +2,10 @@ use std::{fmt::Display, hash::Hash};
 
 use chrono::Duration;
 use gw2lib_model::{BulkEndpoint, EndpointWithId, FixedEndpoint};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 
 use super::requester::Requester as Req;
-use crate::{block::block, CachedRequest, Client, EndpointResult};
+use crate::{CachedRequest, Client, EndpointResult, block::block};
 
 pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     Req<AUTHENTICATED, FORCE>
@@ -63,7 +63,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 
     /// retrieves an item from cache
     /// ```
-    /// use gw2lib::{model::items::Item, Client, Requester};
+    /// use gw2lib::{Client, Requester, model::items::Item};
     ///
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_get();
@@ -87,7 +87,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
 
     /// retrieves an item from cache
     /// ```
-    /// use gw2lib::{model::items::Item, Client, Requester};
+    /// use gw2lib::{Client, Requester, model::items::Item};
     ///
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_single(&19721);
@@ -114,8 +114,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// retrieves an item from cache
     /// ```
     /// use gw2lib::{
-    ///     model::items::{Item, ItemId},
     ///     Client, Requester,
+    ///     model::items::{Item, ItemId},
     /// };
     ///
     /// let client = Client::default();

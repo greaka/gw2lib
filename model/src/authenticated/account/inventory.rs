@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    Authenticated, Endpoint, FixedEndpoint,
     authenticated::characters::Binding,
-    items::{skins::SkinId, ItemId},
-    Endpoint, FixedEndpoint,
+    items::{ItemId, skins::SkinId},
 };
 
 pub type AccountInventory = Vec<Option<AccountInventoryItem>>;
@@ -21,7 +21,8 @@ pub struct AccountInventoryItem {
 }
 
 impl Endpoint for AccountInventory {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account/inventory";
     const VERSION: &'static str = "2023-07-01T00:00:00.000Z";

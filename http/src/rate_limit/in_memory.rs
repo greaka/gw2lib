@@ -3,11 +3,11 @@ use std::{
     time::{Duration, Instant},
 };
 
-use tokio::sync::{oneshot, oneshot::Receiver, Mutex, Semaphore};
+use tokio::sync::{Mutex, Semaphore, oneshot, oneshot::Receiver};
 
 use crate::{
-    rate_limit::{ApiPermit, RateLimiter},
     EndpointError,
+    rate_limit::{ApiPermit, RateLimiter},
 };
 
 pub struct BucketRateLimiter {

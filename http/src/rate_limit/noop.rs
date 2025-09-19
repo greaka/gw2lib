@@ -3,8 +3,8 @@ use std::sync::Arc;
 use tokio::sync::{oneshot, oneshot::Receiver};
 
 use crate::{
-    rate_limit::{ApiPermit, RateLimiter},
     EndpointError,
+    rate_limit::{ApiPermit, RateLimiter},
 };
 
 pub struct NoopRateLimiter;

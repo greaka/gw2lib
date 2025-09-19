@@ -5,7 +5,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{misc::currencies::CurrencyId, Endpoint, FixedEndpoint};
+use crate::{Authenticated, Endpoint, FixedEndpoint, misc::currencies::CurrencyId};
 
 type InnerWallet = HashMap<CurrencyId, u32>;
 
@@ -14,7 +14,8 @@ type InnerWallet = HashMap<CurrencyId, u32>;
 pub struct Wallet(#[serde(with = "internal_wallet")] pub InnerWallet);
 
 impl Endpoint for Wallet {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account/wallet";
     const VERSION: &'static str = "2022-07-25T00:00:00.000Z";
@@ -40,9 +41,9 @@ mod internal_wallet {
     use std::collections::HashMap;
 
     use serde::{
+        Deserialize, Deserializer, Serialize,
         de::{SeqAccess, Visitor},
         ser::Serializer,
-        Deserialize, Deserializer, Serialize,
     };
 
     use super::InnerWallet;

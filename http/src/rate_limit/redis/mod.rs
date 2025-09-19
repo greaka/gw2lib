@@ -10,19 +10,19 @@ use futures::{FutureExt, StreamExt};
 use kanal::{AsyncReceiver, AsyncSender};
 use rand::distributions::{Alphanumeric, DistString};
 use redis::{
-    aio::MultiplexedConnection, AsyncConnectionConfig, Client, PushInfo, RedisError, RedisResult,
-    ToRedisArgs,
+    AsyncConnectionConfig, Client, PushInfo, RedisError, RedisResult, ToRedisArgs,
+    aio::MultiplexedConnection,
 };
 use tokio::{
     select,
-    sync::{broadcast, broadcast::Sender, oneshot, oneshot::Receiver, Mutex},
+    sync::{Mutex, broadcast, broadcast::Sender, oneshot, oneshot::Receiver},
     time,
     time::{Duration, Instant},
 };
 
 use crate::{
-    rate_limit::{ApiPermit, RateLimiter},
     EndpointError,
+    rate_limit::{ApiPermit, RateLimiter},
 };
 
 #[derive(Debug, Clone)]

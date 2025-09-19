@@ -7,11 +7,11 @@ use std::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication,
     game_mechanics::skills::SkillId,
     guild::upgrades::GuildUpgradeId,
     items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId},
     misc::{colors::ColorId, minis::MiniPetId},
-    BulkEndpoint, Endpoint, EndpointWithId,
 };
 
 pub type ItemId = u32;
@@ -557,7 +557,8 @@ impl EndpointWithId for Item {
 }
 
 impl Endpoint for Item {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/items";
     const VERSION: &'static str = "2022-07-22T00:00:00.000Z";

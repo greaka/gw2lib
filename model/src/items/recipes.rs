@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 pub use crate::authenticated::characters::Discipline;
 use crate::{
-    guild::upgrades::GuildUpgradeId, items::ItemId, misc::currencies::CurrencyId, BulkEndpoint,
-    Endpoint, EndpointWithId,
+    BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication, guild::upgrades::GuildUpgradeId,
+    items::ItemId, misc::currencies::CurrencyId,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -105,7 +105,8 @@ impl EndpointWithId for Recipe {
     type IdType = RecipeId;
 }
 impl Endpoint for Recipe {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/recipes";
     const VERSION: &'static str = "2023-03-20T13:00:00.000Z";

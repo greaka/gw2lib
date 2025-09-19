@@ -4,7 +4,7 @@
 use gw2lib::rate_limit::BucketRateLimiter;
 #[cfg(feature = "redis")]
 use gw2lib::rate_limit::RedisRateLimiter;
-use gw2lib::{self, cache::InMemoryCache, Client};
+use gw2lib::{self, Client, cache::InMemoryCache};
 use hyper::client::HttpConnector;
 use hyper_rustls::HttpsConnector;
 

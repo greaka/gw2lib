@@ -1,8 +1,8 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::maps::continents::{Continent, Floor},
     Requester,
+    model::maps::continents::{Continent, Floor},
 };
 
 pub mod setup;

@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    Authenticated, BulkEndpoint, Endpoint, EndpointWithId, TimeStamp,
     game_mechanics::{
         pets::PetId, skills::SkillId, specializations::SpecializationId, traits::TraitId,
     },
-    items::{itemstats::StatsId, recipes::RecipeId, skins::SkinId, AttributeType, ItemId},
+    items::{AttributeType, ItemId, itemstats::StatsId, recipes::RecipeId, skins::SkinId},
     misc::{colors::ColorId, titles::TitleId},
     pvp::amulets::AmuletId,
     wvw::abilities::AbilityId,
-    BulkEndpoint, Endpoint, EndpointWithId, TimeStamp,
 };
 
 pub type Age = u64;
@@ -380,7 +380,8 @@ impl EndpointWithId for Character {
 }
 
 impl Endpoint for Character {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -403,7 +404,8 @@ impl EndpointWithId for Core {
 }
 
 impl Endpoint for Core {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -418,7 +420,8 @@ impl EndpointWithId for Backstory {
 }
 
 impl Endpoint for Backstory {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -433,7 +436,8 @@ impl EndpointWithId for Crafting {
 }
 
 impl Endpoint for Crafting {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -448,7 +452,8 @@ impl EndpointWithId for Equipment {
 }
 
 impl Endpoint for Equipment {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -463,7 +468,8 @@ impl EndpointWithId for Inventory {
 }
 
 impl Endpoint for Inventory {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -478,7 +484,8 @@ impl EndpointWithId for Recipes {
 }
 
 impl Endpoint for Recipes {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
@@ -493,7 +500,8 @@ impl EndpointWithId for Training {
 }
 
 impl Endpoint for Training {
-    const AUTHENTICATED: bool = true;
+    type Authenticated = Authenticated;
+
     const LOCALE: bool = false;
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";

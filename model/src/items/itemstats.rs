@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{items::AttributeType, BulkEndpoint, Endpoint, EndpointWithId};
+use crate::{BulkEndpoint, Endpoint, EndpointWithId, NoAuthentication, items::AttributeType};
 
 pub type StatsId = u32;
 
@@ -26,7 +26,8 @@ impl EndpointWithId for ItemStat {
 }
 
 impl Endpoint for ItemStat {
-    const AUTHENTICATED: bool = false;
+    type Authenticated = NoAuthentication;
+
     const LOCALE: bool = true;
     const URL: &'static str = "v2/itemstats";
     const VERSION: &'static str = "2023-03-20T19:00:00.000Z";

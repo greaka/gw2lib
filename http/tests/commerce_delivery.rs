@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::authenticated::commerce::delivery::Delivery, Requester};
+use gw2lib::{Requester, model::authenticated::commerce::delivery::Delivery};
 
 pub mod setup;
 
