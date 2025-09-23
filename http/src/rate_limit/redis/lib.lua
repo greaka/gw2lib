@@ -44,7 +44,7 @@ local function claim(bucket, semaphore, pub, waitlist, burst, refill)
     end
 
     local sum = 0
-    for i in ids do
+    for i in ipairs(ids) do
         redis.call('PUBLISH', pub, i)
         sum = sum + 1
     end

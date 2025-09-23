@@ -14,7 +14,6 @@ pub mod setup;
 fn get() {
     let client = setup::setup();
     let _: Build = client.get().unwrap();
-    let _: Build = client.try_get().unwrap();
 }
 
 //#[test]
@@ -56,7 +55,7 @@ mod cache {
         let _: Build = client.get().unwrap();
 
         let start = chrono::Utc::now();
-        let _: Vec<ColorId> = client.ids::<Color, ColorId>().unwrap();
+        let _: Vec<ColorId> = client.ids::<Color>().unwrap();
         let end = chrono::Utc::now();
         let cached = dbg!(end - start).num_nanoseconds().unwrap();
         assert!(dbg!(cached) > 100_000);

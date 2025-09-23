@@ -8,5 +8,4 @@ pub mod setup;
 fn eff_testing() {
     let client = setup::setup();
     let _: Delivery = client.get().unwrap();
-    let _: Delivery = client.try_get().unwrap();
 }

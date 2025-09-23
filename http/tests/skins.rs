@@ -10,8 +10,7 @@ macro_rules! parse_single {
         #[test]
         fn $name() {
             let client = crate::setup::setup();
-            let _: gw2lib::model::items::skins::Skin = client.single($id).unwrap();
-            let x: gw2lib::model::items::skins::Skin = client.try_single($id).unwrap();
+            let x: gw2lib::model::items::skins::Skin = client.single($id).unwrap();
             #[allow(clippy::redundant_closure_call)]
             ($validate)(x);
         }
@@ -29,9 +28,8 @@ macro_rules! check_type {
 
 #[test]
 fn parse_all() {
-    let client = setup::setup();
+    let client = crate::setup::setup();
     let _: Vec<Skin> = client.all().unwrap();
-    let _: Skin = client.try_single(123).unwrap();
 }
 
 mod single {

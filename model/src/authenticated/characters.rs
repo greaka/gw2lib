@@ -76,6 +76,7 @@ pub enum Discipline {
     Armorsmith,
     Artificer,
     Chef,
+    Homesteader,
     Huntsman,
     Jeweler,
     Leatherworker,

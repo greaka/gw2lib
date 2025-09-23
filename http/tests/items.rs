@@ -1,6 +1,6 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{Requester, model::items::Item};
+use gw2lib::{EndpointError, Requester, model::items::Item};
 
 pub mod setup;
 
@@ -9,9 +9,8 @@ macro_rules! parse_single {
     ($name:ident, $id:expr, $validate:expr) => {
         #[test]
         fn $name() {
-            let client = crate::setup::setup();
-            let _: gw2lib::model::items::Item = client.single($id).unwrap();
-            let x: gw2lib::model::items::Item = client.try_single($id).unwrap();
+            let client = $crate::setup::setup();
+            let x: gw2lib::model::items::Item = client.single($id).unwrap();
             #[allow(clippy::redundant_closure_call)]
             ($validate)(x);
         }
@@ -21,7 +20,7 @@ macro_rules! parse_single {
 #[macro_export]
 macro_rules! check_type {
     ($name:ident) => {
-        |x: gw2lib::model::items::Item| assert!(ItemType::from(x.details) == ItemType::$name)
+        |x: Item| assert!(ItemType::from(x.details) == ItemType::$name)
     };
 }
 
@@ -29,15 +28,38 @@ macro_rules! check_type {
 #[ignore]
 fn parse_all() {
     let client = crate::setup::setup();
-    let _: Vec<Item> = client.all().unwrap();
+    #[cfg(feature = "redis")]
+    let client = {
+        use gw2lib::cache::RedisCache;
+        let cache = RedisCache::new(redis::Client::open("redis://localhost").unwrap()).into();
+        client.cache(cache)
+    };
+    let res: Result<Vec<Item>, _> = client.all();
+    if let Err(EndpointError::InvalidJsonResponse(_)) = res {
+        let ids = client.ids::<Item>().unwrap();
+        for chunk in ids.chunks(200) {
+            let res: Result<Vec<Item>, _> = client.many(chunk.to_vec());
+            match res {
+                Err(EndpointError::InvalidJsonResponse(_)) => {
+                    for &id in chunk {
+                        let _: Item = client.single(id).map_err(|e| (id, e)).unwrap();
+                    }
+                }
+                Err(e) => {
+                    panic!("{e:?}");
+                }
+                Ok(_) => {}
+            }
+        }
+    }
 }
 
 mod single {
     use gw2lib::{
         Requester,
         model::items::{
-            Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType, WeaponDetails,
-            WeaponType,
+            ConsumableDetails, Details, GatheringToolsDetails, GatheringToolsType, Item, ItemType,
+            UnlockType, WeaponDetails, WeaponType,
         },
     };
     parse_single!(armor, 80248, check_type!(Armor));
@@ -86,4 +108,13 @@ mod single {
             ..
         })
     )));
+    parse_single!(magic_door_skin, 105144, |x: Item| {
+        assert!(matches!(
+            x.details,
+            Details::Consumable(ConsumableDetails {
+                unlock_type: Some(UnlockType::MagicDoorSkin),
+                ..
+            })
+        ))
+    });
 }

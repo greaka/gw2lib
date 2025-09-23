@@ -6,7 +6,6 @@ pub mod setup;
 
 #[test]
 fn all() {
-    let client = setup::setup();
+    let client = crate::setup::setup();
     let _: Vec<Map> = client.all().unwrap();
-    let _: Map = client.try_single(161).unwrap();
 }
