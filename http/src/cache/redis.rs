@@ -4,10 +4,10 @@ use std::{
 };
 
 use chrono::{NaiveDateTime, Utc};
-use gw2lib_model::{Endpoint, Language};
+use gw2lib_model::{Authentication, Endpoint, Language};
 use redis::{
     AsyncCommands, Client, Cmd, RedisError,
-    aio::{Connection, ConnectionLike},
+    aio::{ConnectionLike, MultiplexedConnection},
 };
 use serde::{Serialize, de::DeserializeOwned};
 
@@ -78,8 +78,8 @@ impl RedisCache {
 }
 
 impl RedisCache {
-    async fn connection(&self) -> Option<Connection> {
-        self.client.get_async_connection().await.ok()
+    async fn connection(&self) -> Option<MultiplexedConnection> {
+        self.client.get_multiplexed_async_connection().await.ok()
     }
 
     async fn delete_keys(&self, pattern: &str) {
@@ -102,7 +102,7 @@ impl RedisCache {
     }
 
     async fn delete_keys_from_cursor(
-        conn: &mut Connection,
+        conn: &mut MultiplexedConnection,
         mut cmd: Cmd,
         cursor: &mut u64,
     ) -> Result<(), RedisError> {
@@ -135,7 +135,7 @@ impl RedisCache {
 
         push("gw2lib");
 
-        if E::AUTHENTICATED {
+        if <E::Authenticated as Authentication>::AUTHENTICATED {
             push("auth");
         } else {
             push("static");
@@ -147,7 +147,7 @@ impl RedisCache {
             push(lang.as_str());
         }
 
-        if E::AUTHENTICATED {
+        if <E::Authenticated as Authentication>::AUTHENTICATED {
             write!(key, "{}_", auth.as_ref().unwrap()).unwrap();
         }
 

@@ -66,7 +66,8 @@ pub trait Requester: Sized + Sync {
     fn cached(
         &self,
         cache_duration: Duration,
-    ) -> CachedRequest<Self::Caching, Self::RateLimiting, Self::Authenticated, Self::Force> {
+    ) -> CachedRequest<'_, Self::Caching, Self::RateLimiting, Self::Authenticated, Self::Force>
+    {
         CachedRequest {
             client: self.client(),
             cache_duration,
@@ -198,7 +199,6 @@ pub trait Requester: Sized + Sync {
         T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
         <T as EndpointWithId>::IdType:
             DeserializeOwned + Display + Hash + Clone + Send + Sync + 'static,
-        <T as Endpoint>::Authenticated: AllowsClient<Self::Authenticated>,
     {
         check_cache::<T, <T as EndpointWithId>::IdType, T, Self>(self, id).await
     }
@@ -231,7 +231,6 @@ pub trait Requester: Sized + Sync {
         T: DeserializeOwned + Serialize + Clone + EndpointWithId + Send + Sync + 'static,
         <T as EndpointWithId>::IdType:
             Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
-        <T as Endpoint>::Authenticated: AllowsClient<Self::Authenticated>,
     {
         check_cache::<Vec<<T as EndpointWithId>::IdType>, str, T, Self>(self, "").await
     }
@@ -630,15 +629,15 @@ async fn get_or_ids<
     Ok(result)
 }
 
-#[cfg_attr(feature = "tracing", instrument(name = "execute request", skip_all, fields(uri = %request.uri().path())))]
+#[cfg_attr(feature = "tracing", instrument(name = "execute request", skip_all, fields(uri = %request.url().path())))]
 async fn exec_req<Req: Requester>(req: &Req, request: Request) -> EndpointResult<Response> {
     let _permit = wait_for_rate_limit(req).await?;
 
     #[cfg(feature = "tracing")]
     let span = {
-        let uri = request.uri().path();
+        let uri = request.url().path();
         let ids = request
-            .uri()
+            .url()
             .query()
             .unwrap_or_default()
             .split("ids=")

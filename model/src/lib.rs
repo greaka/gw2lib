@@ -15,6 +15,7 @@ pub mod wvw;
 
 // todo: restructure
 // todo: non_exhaustive
+// todo: upmerge endpoint changes from master
 
 #[derive(Hash, Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Language {

@@ -8,6 +8,7 @@ use std::{
 
 #[cfg(feature = "blocking")]
 pub use blocking::Requester;
+use requester::Requester as Req;
 #[cfg(not(feature = "blocking"))]
 pub use requester::Requester;
 #[cfg(feature = "blocking")]
@@ -215,7 +216,7 @@ impl<C: Cache + Send + Sync + 'static, R: RateLimiter + Send + Sync + 'static, A
 }
 
 impl<C: Cache + Send + Sync + 'static, R: RateLimiter + Send + Sync + 'static, Auth: Authentication>
-    Requester for Client<C, R, Auth>
+    Req for Client<C, R, Auth>
 {
     type Authenticated = Auth;
     type Caching = C;
@@ -250,7 +251,7 @@ impl<
     RateLimit: RateLimiter + Send + Sync + 'static,
     Auth: Authentication,
     Forced: Force,
-> Requester for CachedRequest<'_, Cacher, RateLimit, Auth, Forced>
+> Req for CachedRequest<'_, Cacher, RateLimit, Auth, Forced>
 {
     type Authenticated = Auth;
     type Caching = Cacher;

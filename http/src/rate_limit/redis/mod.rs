@@ -6,12 +6,11 @@ use std::{
     sync::Arc,
 };
 
-use futures::{FutureExt, StreamExt};
 use kanal::{AsyncReceiver, AsyncSender};
-use rand::distributions::{Alphanumeric, DistString};
+use rand::distr::{Alphanumeric, SampleString};
 use redis::{
-    AsyncConnectionConfig, Client, PushInfo, RedisError, RedisResult, ToRedisArgs,
-    aio::MultiplexedConnection,
+    AsyncConnectionConfig, Client, PushInfo, RedisResult, ToRedisArgs, aio::MultiplexedConnection,
+    from_owned_redis_value,
 };
 use tokio::{
     select,
@@ -123,7 +122,7 @@ impl RedisRateLimiter {
                     Ok(Ok(msg)) if msg == "PONG" => break conn,
                     _ => continue,
                 }
-            } else if self.wait_sender.sender_count() + count > self.burst {
+            } else if self.wait_sender.sender_count() + count > self.burst as u32 {
                 self.wait_receiver
                     .recv()
                     .await
@@ -230,7 +229,7 @@ impl RateLimiter for RedisRateLimiter {
         self: &Arc<Self>,
         num: usize,
     ) -> Result<Receiver<ApiPermit<Self>>, EndpointError> {
-        let id = Alphanumeric.sample_string(&mut rand::thread_rng(), 16);
+        let id = Alphanumeric.sample_string(&mut rand::rng(), 16);
 
         let mut conn = self.connection().await?;
 
@@ -251,8 +250,11 @@ impl RateLimiter for RedisRateLimiter {
             loop {
                 select! {
                     msg = sub.recv() => match msg {
-                        Some(msg) => {
-                            let msg: String = msg.get_payload().unwrap();
+                        Ok(mut msg) => {
+                            let Some(data) = msg.data.pop() else {
+                                break;
+                            };
+                            let Ok(msg): RedisResult<String> = from_owned_redis_value(data) else {break;};
                             if msg == id {
                                 counter += 1;
                                 if counter >= num {
@@ -260,7 +262,7 @@ impl RateLimiter for RedisRateLimiter {
                                 }
                             }
                         }
-                        None => break,
+                        Err(_) => break,
                     },
                     _ = time::sleep_until(target_time) => {
                         target_time += Duration::from_secs(5);
@@ -308,9 +310,12 @@ impl DerefMut for ConnectionGuard {
 
 impl Drop for ConnectionGuard {
     fn drop(&mut self) {
-        crate::block::spawn(async {
-            self.pool.lock().await.push_back(self.conn.take().unwrap());
-            self.notify.try_send(()).ok();
+        let conn = self.conn.take().unwrap();
+        let pool = self.pool.clone();
+        let notify = self.notify.clone();
+        crate::block::spawn(async move {
+            pool.lock().await.push_back(conn);
+            notify.try_send(()).ok();
         });
     }
 }

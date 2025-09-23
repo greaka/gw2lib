@@ -3,6 +3,9 @@ pub mod cache;
 mod client;
 pub mod rate_limit;
 // todo: multi account ux
+// todo: more debug logging
+// todo: blocking
+// todo: all_by_ids_all
 pub use client::*;
 pub use gw2lib_model as model;
 use thiserror::Error;

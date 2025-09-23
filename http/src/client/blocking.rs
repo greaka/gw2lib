@@ -1,17 +1,17 @@
+#![allow(private_bounds)]
+
 use std::{fmt::Display, hash::Hash};
 
 use chrono::Duration;
-use gw2lib_model::{BulkEndpoint, EndpointWithId, FixedEndpoint};
+use gw2lib_model::{BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
 use serde::{Serialize, de::DeserializeOwned};
 
 use super::requester::Requester as Req;
-use crate::{CachedRequest, Client, EndpointResult, block::block};
+use crate::{CachedRequest, Client, EndpointResult, Forced, block::block, client::AllowsClient};
 
-pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
-    Req<AUTHENTICATED, FORCE>
-{
+pub trait Requester: Req {
     #[doc(hidden)]
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED>;
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Authenticated>;
 
     #[doc(hidden)]
     fn cache_duration(&self) -> Duration;
@@ -34,7 +34,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     fn cached(
         &self,
         cache_duration: Duration,
-    ) -> CachedRequest<Self::Caching, Self::RateLimiting, AUTHENTICATED, FORCE> {
+    ) -> CachedRequest<'_, Self::Caching, Self::RateLimiting, Self::Authenticated, Self::Force>
+    {
         Req::cached(self, cache_duration)
     }
 
@@ -50,12 +51,23 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// let build_id: Build = client.get().unwrap();
     /// // this will not check the cache and ask the api directly
     /// let build_id: Build = client.forced().get().unwrap();
-    fn forced(&self) -> CachedRequest<Self::Caching, Self::RateLimiting, AUTHENTICATED, true> {
+    fn forced(
+        &self,
+    ) -> CachedRequest<'_, Self::Caching, Self::RateLimiting, Self::Authenticated, Forced> {
         Req::forced(self)
     }
 
     /// call the fixed endpoint
-    fn get<T: DeserializeOwned + Serialize + Clone + Send + Sync + FixedEndpoint + 'static>(
+    fn get<
+        T: DeserializeOwned
+            + Serialize
+            + Clone
+            + Send
+            + Sync
+            + FixedEndpoint
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
+            + 'static,
+    >(
         &self,
     ) -> EndpointResult<T> {
         block(Req::get(self))
@@ -68,7 +80,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// let client = Client::default();
     /// let from_cache: Option<Item> = client.try_get();
     /// ```
-    async fn try_get<T>(&self) -> Option<T>
+    fn try_get<T>(&self) -> Option<T>
     where
         T: DeserializeOwned + Serialize + Clone + FixedEndpoint + Send + Sync + 'static,
     {
@@ -78,7 +90,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// request a single item
     fn single<T>(&self, id: <T as EndpointWithId>::IdType) -> EndpointResult<T>
     where
-        T: DeserializeOwned + Serialize + Clone + Send + Sync + EndpointWithId + 'static,
+        T: DeserializeOwned
+            + Serialize
+            + Clone
+            + Send
+            + Sync
+            + EndpointWithId
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
+            + 'static,
         <T as EndpointWithId>::IdType:
             Display + DeserializeOwned + Hash + Send + Sync + Clone + 'static,
     {
@@ -104,7 +123,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// request all available ids
     fn ids<T>(&self) -> EndpointResult<Vec<<T as EndpointWithId>::IdType>>
     where
-        T: DeserializeOwned + Serialize + EndpointWithId + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + Serialize
+            + EndpointWithId
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         <T as EndpointWithId>::IdType:
             Display + DeserializeOwned + Serialize + Hash + Clone + Send + Sync + 'static,
     {
@@ -136,6 +162,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
         T: DeserializeOwned
             + Serialize
             + EndpointWithId
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
             + BulkEndpoint
             + Clone
             + Send
@@ -151,7 +178,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// all pages
     fn page<T>(&self, page: usize, page_size: u8, result: &mut Vec<T>) -> EndpointResult<usize>
     where
-        T: DeserializeOwned + EndpointWithId + BulkEndpoint + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + EndpointWithId
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
+            + BulkEndpoint
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
     {
         block(Req::page(self, page, page_size, result))
@@ -170,6 +204,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
             + Serialize
             + EndpointWithId
             + BulkEndpoint
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
             + Clone
             + Send
             + Sync
@@ -189,6 +224,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
             + Serialize
             + EndpointWithId
             + BulkEndpoint
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
             + Clone
             + Send
             + Sync
@@ -203,7 +239,14 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     /// use [`Self::all`] to use the most efficient way to request all items
     fn get_all_by_paging<T>(&self) -> EndpointResult<Vec<T>>
     where
-        T: DeserializeOwned + EndpointWithId + BulkEndpoint + Clone + Send + Sync + 'static,
+        T: DeserializeOwned
+            + EndpointWithId
+            + BulkEndpoint
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
+            + Clone
+            + Send
+            + Sync
+            + 'static,
         <T as EndpointWithId>::IdType: Display + DeserializeOwned + Hash + Clone + Sync + 'static,
     {
         block(Req::get_all_by_paging(self))
@@ -217,6 +260,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
         T: DeserializeOwned
             + Serialize
             + EndpointWithId
+            + Endpoint<Authenticated: AllowsClient<Self::Authenticated>>
             + BulkEndpoint
             + Clone
             + Send
@@ -229,10 +273,8 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>:
     }
 }
 
-impl<T: Req<AUTHENTICATED, FORCE>, const AUTHENTICATED: bool, const FORCE: bool>
-    Requester<AUTHENTICATED, FORCE> for T
-{
-    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, AUTHENTICATED> {
+impl<T: Req> Requester for T {
+    fn client(&self) -> &Client<Self::Caching, Self::RateLimiting, Self::Authenticated> {
         Req::client(self)
     }
 
