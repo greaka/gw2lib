@@ -75,10 +75,10 @@ pub trait Requester: Req {
 
     /// retrieves an item from cache
     /// ```
-    /// use gw2lib::{Client, Requester, model::items::Item};
+    /// use gw2lib::{Client, Requester, model::misc::build::Build};
     ///
     /// let client = Client::default();
-    /// let from_cache: Option<Item> = client.try_get();
+    /// let from_cache: Option<Build> = client.try_get();
     /// ```
     fn try_get<T>(&self) -> Option<T>
     where

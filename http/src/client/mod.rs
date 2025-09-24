@@ -142,7 +142,7 @@ impl<C: Cache + Send + Sync + 'static, R: RateLimiter + Send + Sync + 'static, A
     ///
     /// let client = Client::default().api_key("<subtoken>");
     /// let account: Account = client.get().unwrap();
-    /// let client = client.identifier(&account.id);
+    /// let client = client.identifier(account.id.as_str());
     ///
     /// // make a request
     /// let characters: Vec<CharacterId> = client.ids::<Character>().unwrap();

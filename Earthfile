@@ -1,10 +1,10 @@
-VERSION 0.6
-FROM earthly/dind:ubuntu
+VERSION 0.8
+FROM ubuntu
 
 tools:
   RUN apt-get update
   RUN apt-get install -y --no-install-recommends build-essential
-  RUN echo "install rust"
+  DO github.com/earthly/lib+INSTALL_DIND
   RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   ENV PATH="/root/.cargo/bin:${PATH}"
   RUN cargo --color=always install cargo-nextest --locked
@@ -63,7 +63,7 @@ test-all:
   END
 
 BASE_TESTS:
-  COMMAND
+  FUNCTION
 
   COPY integration-compose.yml ./
   COPY Cargo.toml ./
@@ -71,7 +71,7 @@ BASE_TESTS:
   COPY +build-tests/tests.tar.zst ./
 
 COPY_SRC:
-  COMMAND
+  FUNCTION
   
   COPY --dir .config ./
   COPY --dir http ./
