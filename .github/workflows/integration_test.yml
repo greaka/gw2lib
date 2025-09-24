@@ -30,7 +30,10 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
         run: docker login --username "$DOCKERHUB_USERNAME" --password "$DOCKERHUB_TOKEN"
       - name: download latest earthly
-        run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+        uses: earthly/actions-setup@b81a8e082d9fae6174210cfc6e54bd2feb124d94
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 0.8.16
       - name: export secrets
         if: ${{ !(github.event_name == 'push' && github.ref_name == 'master') }}
         run: |
@@ -60,7 +63,10 @@ jobs:
           fi
           git checkout -b "$branch" || true
       - name: download latest earthly
-        run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/download/v0.6.15/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+        uses: earthly/actions-setup@b81a8e082d9fae6174210cfc6e54bd2feb124d94
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: 0.8.16
       - name: export secrets
         if: ${{ !(github.event_name == 'push' && github.ref_name == 'master') }}
         run: |
