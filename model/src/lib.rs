@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
+pub mod achievements;
 pub mod authenticated;
 pub mod game_mechanics;
 pub mod guild;

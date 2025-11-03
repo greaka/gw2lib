@@ -1,3 +1,4 @@
+pub mod achievements;
 pub mod bank;
 pub mod inventory;
 pub mod materials;
