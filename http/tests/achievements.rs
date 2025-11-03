@@ -1,10 +1,11 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::achievements::{
-    Achievements,
-    categories::AchievementCategories,
-    groups::AchievementGroups,
-}, Requester};
+use gw2lib::{
+    model::achievements::{
+        categories::AchievementCategories, groups::AchievementGroups, Achievements,
+    },
+    Requester,
+};
 
 pub mod setup;
 

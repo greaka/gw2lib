@@ -1,8 +1,8 @@
-
-use crate::{authenticated::account::wizards_vault::WizardsVaultObjective,
-    Endpoint, FixedEndpoint};
 use serde::{Deserialize, Serialize};
 
+use crate::{
+    authenticated::account::wizards_vault::WizardsVaultObjective, Endpoint, FixedEndpoint,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WizardsVaultSpecials {

@@ -1,17 +1,11 @@
-use crate::{
-    Endpoint,
-    FixedEndpoint,
-    misc::{
-        minis::MiniPetId,
-        titles::TitleId,
-    },
-    items::{
-        skins::SkinId,
-        ItemId,
-    },
-    maps::continents::{MasteryPointId, MasteryPointRegion},
-};
 use serde::{Deserialize, Serialize};
+
+use crate::{
+    items::{skins::SkinId, ItemId},
+    maps::continents::{MasteryPointId, MasteryPointRegion},
+    misc::{minis::MiniPetId, titles::TitleId},
+    Endpoint, FixedEndpoint,
+};
 
 pub mod categories;
 pub mod groups;
@@ -30,9 +24,11 @@ pub enum AchievementFlags {
     IgnoreNearlyComplete,
     /// can be repeated multiple times
     Repeatable,
-    /// hidden achievement; must fulfil unlock requirements before making progress or showing in the hero panel
+    /// hidden achievement; must fulfil unlock requirements before making
+    /// progress or showing in the hero panel
     Hidden,
-    /// must fulfil unlock requirements before making progress but will show in the hero panel before unlocking
+    /// must fulfil unlock requirements before making progress but will show in
+    /// the hero panel before unlocking
     RequiresUnlock,
     /// unknown
     RepairOnLogin,
@@ -56,7 +52,8 @@ pub enum AchievementType {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AchievementTier {
-    /// The number of "things" (achievement-specific) that must be completed to achieve this tier.
+    /// The number of "things" (achievement-specific) that must be completed to
+    /// achieve this tier.
     count: u32,
     /// The amount of AP awarded for completing this tier.
     points: u32,
@@ -144,7 +141,6 @@ pub enum AchievementBit {
     Skin(AchievementSkinBit),
 }
 
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Achievement {
     /// The achievement id.
@@ -166,15 +162,18 @@ pub struct Achievement {
     flags: Vec<AchievementFlags>,
     /// Describes the achievement's tiers.
     tiers: Vec<AchievementTier>,
-    /// Contains an array of achievement ids required to progress the given achievement.
+    /// Contains an array of achievement ids required to progress the given
+    /// achievement.
     prerequisites: Vec<AchievementId>,
     /// Describes the rewards given for the achievement.
     rewards: Vec<AchievementReward>,
     // TODO: discern whether should be Option<Vec<T>> or Vec<T>, given the fact that you
     // might want a way to check other than whether or not Vec.is_empty()?
-    /// Contains a number of objects, each corresponding to a bitmask value that can give further information on the progress towards the achievement.
+    /// Contains a number of objects, each corresponding to a bitmask value that
+    /// can give further information on the progress towards the achievement.
     bits: Option<Vec<AchievementBit>>,
-    /// The maximum number of AP that can be rewarded by an achievement flagged as Repeatable.
+    /// The maximum number of AP that can be rewarded by an achievement flagged
+    /// as Repeatable.
     point_cap: Option<u32>,
 }
 

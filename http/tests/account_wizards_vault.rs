@@ -1,11 +1,12 @@
 #![cfg(feature = "blocking")]
 
-use gw2lib::{model::authenticated::account::wizards_vault::{
-    daily::WizardsVaultDailies,
-    listings::WizardsVaultListings,
-    special::WizardsVaultSpecials,
-    weekly::WizardsVaultWeeklies,
-}, Requester};
+use gw2lib::{
+    model::authenticated::account::wizards_vault::{
+        daily::WizardsVaultDailies, listings::WizardsVaultListings, special::WizardsVaultSpecials,
+        weekly::WizardsVaultWeeklies,
+    },
+    Requester,
+};
 
 pub mod setup;
 

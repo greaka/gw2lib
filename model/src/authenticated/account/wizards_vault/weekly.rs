@@ -1,14 +1,18 @@
-use crate::{authenticated::account::wizards_vault::{AstralAcclaim, WizardsVaultObjective},
-    Endpoint, FixedEndpoint, items::ItemId};
 use serde::{Deserialize, Serialize};
 
+use crate::{
+    authenticated::account::wizards_vault::{AstralAcclaim, WizardsVaultObjective},
+    items::ItemId,
+    Endpoint, FixedEndpoint,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WizardsVaultWeeklies {
     // TODO: figure out if u32 is unreasonable here
     ///  The current progress to the meta achievement for the weekly.
     meta_progress_current: u32,
-    /// The threshold for the meta progress to be 'complete', and the meta reward claimable.
+    /// The threshold for the meta progress to be 'complete', and the meta
+    /// reward claimable.
     meta_progress_complete: u32,
     /// The ID of the item you receive for claiming the meta reward.
     meta_reward_item_id: ItemId,

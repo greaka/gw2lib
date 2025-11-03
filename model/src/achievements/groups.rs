@@ -1,9 +1,6 @@
-use crate::{
-    Endpoint, FixedEndpoint,
-    achievements::categories::AchievementCategoryId
-};
+use serde::{Deserialize, Serialize};
 
-use serde::{Deserialize,Serialize};
+use crate::{achievements::categories::AchievementCategoryId, Endpoint, FixedEndpoint};
 
 pub type AchievementGroupGuid = String;
 pub type AchievementGroupOrder = u32;
@@ -16,7 +13,8 @@ pub struct AchievementGroup {
     name: String,
     /// The group description.
     description: String,
-    /// A number describing where to sort this group among other groups. Lowest numbers go first, highest numbers go last.
+    /// A number describing where to sort this group among other groups. Lowest
+    /// numbers go first, highest numbers go last.
     order: AchievementGroupOrder,
     /// An array containing a number of category IDs that this group contains.
     categories: Vec<AchievementCategoryId>,

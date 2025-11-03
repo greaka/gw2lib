@@ -1,7 +1,8 @@
-use crate::{
-    items::ItemId, authenticated::account::wizards_vault::AstralAcclaim, Endpoint, FixedEndpoint
-};
 use serde::{Deserialize, Serialize};
+
+use crate::{
+    authenticated::account::wizards_vault::AstralAcclaim, items::ItemId, Endpoint, FixedEndpoint,
+};
 
 pub type WizardsVaultListingId = u32;
 
@@ -30,9 +31,11 @@ pub struct WizardsVaultListing {
     cost: AstralAcclaim,
     // u8 felt a little too small given that I can see some items with a purchase
     // limit of 150 even in the wiki.
-    /// Not included if the reward is unlimited (e.g. the unlimited Bag of Coins (1 Gold)).
+    /// Not included if the reward is unlimited (e.g. the unlimited Bag of Coins
+    /// (1 Gold)).
     purchased: Option<u16>,
-    /// Not included if the reward is unlimited (e.g. the unlimited Bag of Coins (1 Gold)).
+    /// Not included if the reward is unlimited (e.g. the unlimited Bag of Coins
+    /// (1 Gold)).
     purchase_limit: Option<u16>,
 }
 

@@ -7,7 +7,8 @@ pub mod weekly;
 
 pub type WizardsVaultObjectiveId = u32;
 
-// TODO: can I set this to u16? You can't currently have more than what, 1,500 acclaim?
+// TODO: can I set this to u16? You can't currently have more than what, 1,500
+// acclaim?
 pub type AstralAcclaim = u16;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
