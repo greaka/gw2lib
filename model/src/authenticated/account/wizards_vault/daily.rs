@@ -1,26 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    authenticated::account::wizards_vault::{AstralAcclaim, WizardsVaultObjective},
-    items::ItemId,
+    authenticated::account::wizards_vault::{WizardsVaultObjective, WizardsVaultPeriodicCommon},
     Endpoint, FixedEndpoint,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WizardsVaultDailies {
-    // TODO: figure out if u32 is unreasonable here
-    ///  The current progress to the meta achievement for the daily.
-    meta_progress_current: u32,
-    /// The threshold for the meta progress to be 'complete', and the meta
-    /// reward claimable.
-    meta_progress_complete: u32,
-    /// The ID of the item you receive for claiming the meta reward.
-    meta_reward_item_id: ItemId,
-    /// The amount of Astral Acclaim you receive for claiming the meta reward.
-    meta_reward_astral: AstralAcclaim,
-    /// Whether the account has claimed the meta reward.
-    meta_reward_claimed: bool,
-    /// An array of objects detailing each daily objective.
+    #[serde(flatten)]
+    periodic: WizardsVaultPeriodicCommon,
     objectives: Vec<WizardsVaultObjective>,
 }
 

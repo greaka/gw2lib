@@ -7,16 +7,10 @@ pub type AchievementGroupOrder = u32;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AchievementGroup {
-    /// The group's GUID.
     id: AchievementGroupGuid,
-    /// The group name.
     name: String,
-    /// The group description.
     description: String,
-    /// A number describing where to sort this group among other groups. Lowest
-    /// numbers go first, highest numbers go last.
     order: AchievementGroupOrder,
-    /// An array containing a number of category IDs that this group contains.
     categories: Vec<AchievementCategoryId>,
 }
 
