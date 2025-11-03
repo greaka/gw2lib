@@ -24,8 +24,8 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
 
 - achievements
   - [x] achievements
-    - [ ] daily
-      - [ ] tomorrow
+    - [ ] daily (deprecated)
+      - [ ] tomorrow (deprecated)
     - [x] groups
     - [x] categories
 - authenticated
@@ -61,6 +61,11 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
     - [ ] skins
     - [ ] titles
     - [x] wallet
+    - wizardsvault
+      - [x] listings
+      - [x] daily
+      - [x] weekly
+      - [x] special
     - [ ] worldbosses
   - characters
     - [x] :id

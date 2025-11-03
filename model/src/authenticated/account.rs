@@ -4,6 +4,7 @@ pub mod inventory;
 pub mod materials;
 pub mod raids;
 pub mod wallet;
+pub mod wizards_vault;
 
 use std::collections::BTreeSet;
 
