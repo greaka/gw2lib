@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{achievements::categories::AchievementCategoryId, Endpoint, FixedEndpoint};
+use crate::{achievements::categories::AchievementCategoryId, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
 
 pub type AchievementGroupGuid = String;
 pub type AchievementGroupOrder = u32;
@@ -14,13 +14,23 @@ pub struct AchievementGroup {
     categories: Vec<AchievementCategoryId>,
 }
 
-pub type AchievementGroups = Vec<AchievementGroup>;
+impl EndpointWithId for AchievementGroup {
+    type IdType = AchievementGroupGuid;
+}
 
-impl Endpoint for AchievementGroups {
+impl Endpoint for AchievementGroup {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/achievements/groups";
     const VERSION: &'static str = "2025-08-29T01:00:00.000Z";
 }
 
-impl FixedEndpoint for AchievementGroups {}
+impl FixedEndpoint for AchievementGroup {}
+
+impl BulkEndpoint for AchievementGroup {
+    const ALL: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
+}
