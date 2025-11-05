@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{achievements::categories::AchievementCategoryId, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint};
+use crate::{
+    achievements::categories::AchievementCategoryId, BulkEndpoint, Endpoint, EndpointWithId,
+    FixedEndpoint,
+};
 
 pub type AchievementGroupGuid = String;
 pub type AchievementGroupOrder = u32;

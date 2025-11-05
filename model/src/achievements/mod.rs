@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    items::{skins::SkinId, ItemId}, maps::continents::{MasteryPointId, MasteryPointRegion}, misc::{minis::MiniPetId, titles::TitleId}, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint
+    items::{skins::SkinId, ItemId},
+    maps::continents::{MasteryPointId, MasteryPointRegion},
+    misc::{minis::MiniPetId, titles::TitleId},
+    BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint,
 };
 
 pub mod categories;
@@ -94,8 +97,7 @@ pub struct AchievementSkinBit {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct AchievementEmptyBit {
-}
+pub struct AchievementEmptyBit {}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]

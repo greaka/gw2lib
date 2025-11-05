@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    authenticated::account::wizards_vault::AstralAcclaim, items::ItemId, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint
+    authenticated::account::wizards_vault::AstralAcclaim, items::ItemId, BulkEndpoint, Endpoint,
+    EndpointWithId, FixedEndpoint,
 };
 
 pub type WizardsVaultListingId = u32;
