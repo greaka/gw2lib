@@ -2,7 +2,7 @@
 
 use gw2lib::{
     model::authenticated::account::wizards_vault::{
-        daily::WizardsVaultDailies, listings::WizardsVaultListings, special::WizardsVaultSpecials,
+        daily::WizardsVaultDailies, listings::WizardsVaultListing, special::WizardsVaultSpecials,
         weekly::WizardsVaultWeeklies,
     },
     Requester,
@@ -19,7 +19,7 @@ fn dailies() {
 #[test]
 fn listings() {
     let client = setup::setup();
-    let _: WizardsVaultListings = client.get().unwrap();
+    let _: Vec<WizardsVaultListing> = client.all().unwrap();
 }
 
 #[test]

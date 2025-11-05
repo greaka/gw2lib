@@ -2,7 +2,7 @@
 
 use gw2lib::{
     model::achievements::{
-        categories::AchievementCategories, groups::AchievementGroups, Achievements,
+        categories::AchievementCategory, groups::AchievementGroup, Achievement,
     },
     Requester,
 };
@@ -10,19 +10,25 @@ use gw2lib::{
 pub mod setup;
 
 #[test]
+fn achievement_single() {
+    let client = setup::setup();
+    let _: Achievement = client.single(739).unwrap();
+}
+
+#[test]
 fn achievements() {
     let client = setup::setup();
-    let _: Achievements = client.get().unwrap();
+    let _: Vec<Achievement> = client.all().unwrap();
 }
 
 #[test]
 fn achievement_categories() {
     let client = setup::setup();
-    let _: AchievementCategories = client.get().unwrap();
+    let _: Vec<AchievementCategory> = client.all().unwrap();
 }
 
 #[test]
 fn achievement_groups() {
     let client = setup::setup();
-    let _: AchievementGroups = client.get().unwrap();
+    let _: Vec<AchievementGroup> = client.all().unwrap();
 }
