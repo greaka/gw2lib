@@ -29,7 +29,7 @@ pub struct AchievementAccess {
 pub struct AchievementDetails {
     id: AchievementId,
     required_access: Option<AchievementAccess>,
-    flags: Vec<DailyAchievementType>,
+    flags: Option<Vec<DailyAchievementType>>,
     level: Option<[u8; 2]>,
 }
 
