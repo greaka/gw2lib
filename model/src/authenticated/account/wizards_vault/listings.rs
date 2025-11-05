@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    authenticated::account::wizards_vault::AstralAcclaim, items::ItemId, Endpoint, FixedEndpoint,
+    authenticated::account::wizards_vault::AstralAcclaim, items::ItemId, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint
 };
 
 pub type WizardsVaultListingId = u32;
@@ -25,13 +25,23 @@ pub struct WizardsVaultListing {
     purchase_limit: Option<u16>,
 }
 
-pub type WizardsVaultListings = Vec<WizardsVaultListing>;
-
-impl Endpoint for WizardsVaultListings {
+impl Endpoint for WizardsVaultListing {
     const AUTHENTICATED: bool = true;
     const LOCALE: bool = false;
     const URL: &'static str = "v2/account/wizardsvault/listings";
     const VERSION: &'static str = "2025-08-29T01:00:00.000Z";
 }
 
-impl FixedEndpoint for WizardsVaultListings {}
+impl EndpointWithId for WizardsVaultListing {
+    type IdType = WizardsVaultListingId;
+}
+
+impl FixedEndpoint for WizardsVaultListing {}
+
+impl BulkEndpoint for WizardsVaultListing {
+    const ALL: bool = true;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
+}
