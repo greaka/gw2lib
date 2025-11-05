@@ -1,10 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    items::{skins::SkinId, ItemId},
-    maps::continents::{MasteryPointId, MasteryPointRegion},
-    misc::{minis::MiniPetId, titles::TitleId},
-    Endpoint, FixedEndpoint,
+    items::{skins::SkinId, ItemId}, maps::continents::{MasteryPointId, MasteryPointRegion}, misc::{minis::MiniPetId, titles::TitleId}, BulkEndpoint, Endpoint, EndpointWithId, FixedEndpoint
 };
 
 pub mod categories;
@@ -63,6 +60,7 @@ pub struct AchievementTitleReward {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum AchievementReward {
     Coins(AchievementCoinsReward),
     Item(AchievementItemReward),
@@ -95,12 +93,24 @@ pub struct AchievementSkinBit {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AchievementEmptyBit {
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum AchievementBit {
     Text(AchievementTextBit),
     Item(AchievementItemBit),
     Minipet(AchievementMinipetBit),
     Skin(AchievementSkinBit),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum AchievementUntaggedBit {
+    Tagged(AchievementBit),
+    Empty(AchievementEmptyBit),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -112,22 +122,34 @@ pub struct Achievement {
     requirement: String,
     locked_text: String,
     #[serde(rename = "type")]
-    _type: AchievementType,
+    _type: Option<AchievementType>,
     flags: Vec<AchievementFlags>,
     tiers: Vec<AchievementTier>,
+    #[serde(default)]
     prerequisites: Vec<AchievementId>,
+    #[serde(default)]
     rewards: Vec<AchievementReward>,
-    bits: Option<Vec<AchievementBit>>,
-    point_cap: Option<u32>,
+    bits: Option<Vec<AchievementUntaggedBit>>,
+    point_cap: Option<i32>,
 }
 
-pub type Achievements = Vec<Achievement>;
+impl EndpointWithId for Achievement {
+    type IdType = AchievementId;
+}
 
-impl Endpoint for Achievements {
+impl Endpoint for Achievement {
     const AUTHENTICATED: bool = false;
     const LOCALE: bool = true;
     const URL: &'static str = "v2/achievements";
     const VERSION: &'static str = "2025-08-29T01:00:00.000Z";
 }
 
-impl FixedEndpoint for Achievements {}
+impl FixedEndpoint for Achievement {}
+
+impl BulkEndpoint for Achievement {
+    const ALL: bool = false;
+
+    fn id(&self) -> &Self::IdType {
+        &self.id
+    }
+}
