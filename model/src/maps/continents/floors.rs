@@ -43,65 +43,59 @@ impl Display for ContinentFloorId {
 }
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
-#[serde(from = "(f32, f32)", into = "(f32, f32)")]
+#[serde(from = "[f32; 2]", into = "[f32; 2]")]
 pub struct Coordinates {
     pub x: f32,
     pub y: f32,
 }
-impl From<(f32, f32)> for Coordinates {
-    fn from((x, y): (f32, f32)) -> Self {
+impl From<[f32; 2]> for Coordinates {
+    fn from([x, y]: [f32; 2]) -> Self {
         Self { x, y }
     }
 }
-impl From<Coordinates> for (f32, f32) {
+impl From<Coordinates> for [f32; 2] {
     fn from(v: Coordinates) -> Self {
-        (v.x, v.y)
+        [v.x, v.y]
     }
 }
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
-#[serde(
-    from = "(Coordinates, Coordinates)",
-    into = "(Coordinates, Coordinates)"
-)]
+#[serde(from = "[Coordinates; 2]", into = "[Coordinates; 2]")]
 pub struct ContinentRectangle {
     pub top_left: Coordinates,
     pub bottom_right: Coordinates,
 }
-impl From<(Coordinates, Coordinates)> for ContinentRectangle {
-    fn from((top_left, bottom_right): (Coordinates, Coordinates)) -> Self {
+impl From<[Coordinates; 2]> for ContinentRectangle {
+    fn from([top_left, bottom_right]: [Coordinates; 2]) -> Self {
         Self {
             top_left,
             bottom_right,
         }
     }
 }
-impl From<ContinentRectangle> for (Coordinates, Coordinates) {
+impl From<ContinentRectangle> for [Coordinates; 2] {
     fn from(v: ContinentRectangle) -> Self {
-        (v.top_left, v.bottom_right)
+        [v.top_left, v.bottom_right]
     }
 }
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
-#[serde(
-    from = "(Coordinates, Coordinates)",
-    into = "(Coordinates, Coordinates)"
-)]
+#[serde(from = "[Coordinates; 2]", into = "[Coordinates; 2]")]
 pub struct MapRectangle {
     pub bottom_left: Coordinates,
     pub top_right: Coordinates,
 }
-impl From<(Coordinates, Coordinates)> for MapRectangle {
-    fn from((bottom_left, top_right): (Coordinates, Coordinates)) -> Self {
+impl From<[Coordinates; 2]> for MapRectangle {
+    fn from([bottom_left, top_right]: [Coordinates; 2]) -> Self {
         Self {
             bottom_left,
             top_right,
         }
     }
 }
-impl From<MapRectangle> for (Coordinates, Coordinates) {
+impl From<MapRectangle> for [Coordinates; 2] {
     fn from(v: MapRectangle) -> Self {
-        (v.bottom_left, v.top_right)
+        [v.bottom_left, v.top_right]
     }
 }
 

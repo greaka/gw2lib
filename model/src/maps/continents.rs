@@ -10,19 +10,19 @@ use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 pub type ContinentId = u32;
 
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(from = "(u32, u32)", into = "(u32, u32)")]
+#[serde(from = "[u32; 2]", into = "[u32; 2]")]
 pub struct Dimensions {
     pub width: u32,
     pub height: u32,
 }
-impl From<(u32, u32)> for Dimensions {
-    fn from((width, height): (u32, u32)) -> Self {
+impl From<[u32; 2]> for Dimensions {
+    fn from([width, height]: [u32; 2]) -> Self {
         Self { width, height }
     }
 }
-impl From<Dimensions> for (u32, u32) {
+impl From<Dimensions> for [u32; 2] {
     fn from(v: Dimensions) -> Self {
-        (v.width, v.height)
+        [v.width, v.height]
     }
 }
 
