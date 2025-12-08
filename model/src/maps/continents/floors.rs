@@ -65,17 +65,20 @@ pub struct ContinentRectangle {
     pub top_left: Coordinates,
     pub bottom_right: Coordinates,
 }
-impl From<[Coordinates; 2]> for ContinentRectangle {
-    fn from([top_left, bottom_right]: [Coordinates; 2]) -> Self {
+impl<C: Into<Coordinates>> From<[C; 2]> for ContinentRectangle {
+    fn from([top_left, bottom_right]: [C; 2]) -> Self {
         Self {
-            top_left,
-            bottom_right,
+            top_left: top_left.into(),
+            bottom_right: bottom_right.into(),
         }
     }
 }
-impl From<ContinentRectangle> for [Coordinates; 2] {
+impl<C> From<ContinentRectangle> for [C; 2]
+where
+    Coordinates: Into<C>,
+{
     fn from(v: ContinentRectangle) -> Self {
-        [v.top_left, v.bottom_right]
+        [v.top_left.into(), v.bottom_right.into()]
     }
 }
 
@@ -85,17 +88,20 @@ pub struct MapRectangle {
     pub bottom_left: Coordinates,
     pub top_right: Coordinates,
 }
-impl From<[Coordinates; 2]> for MapRectangle {
-    fn from([bottom_left, top_right]: [Coordinates; 2]) -> Self {
+impl<C: Into<Coordinates>> From<[C; 2]> for MapRectangle {
+    fn from([bottom_left, top_right]: [C; 2]) -> Self {
         Self {
-            bottom_left,
-            top_right,
+            bottom_left: bottom_left.into(),
+            top_right: top_right.into(),
         }
     }
 }
-impl From<MapRectangle> for [Coordinates; 2] {
+impl<C> From<MapRectangle> for [C; 2]
+where
+    Coordinates: Into<C>,
+{
     fn from(v: MapRectangle) -> Self {
-        [v.bottom_left, v.top_right]
+        [v.bottom_left.into(), v.top_right.into()]
     }
 }
 
