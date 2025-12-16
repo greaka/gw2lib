@@ -3,18 +3,27 @@ mod floors;
 use std::collections::BTreeSet;
 
 use serde::{ser::SerializeSeq, Deserialize, Deserializer, Serialize, Serializer};
-use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 pub use crate::maps::continents::floors::*;
 use crate::{BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type ContinentId = u32;
 
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize_tuple, Deserialize_tuple)]
-#[cfg_attr(test, serde(deny_unknown_fields))]
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(from = "[u32; 2]", into = "[u32; 2]")]
 pub struct Dimensions {
     pub width: u32,
     pub height: u32,
+}
+impl From<[u32; 2]> for Dimensions {
+    fn from([width, height]: [u32; 2]) -> Self {
+        Self { width, height }
+    }
+}
+impl From<Dimensions> for [u32; 2] {
+    fn from(v: Dimensions) -> Self {
+        [v.width, v.height]
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]

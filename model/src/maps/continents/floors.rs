@@ -4,7 +4,6 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use serde_tuple::{Deserialize_tuple, Serialize_tuple};
 
 use crate::{
     maps::{
@@ -43,25 +42,67 @@ impl Display for ContinentFloorId {
     }
 }
 
-#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize_tuple, Deserialize_tuple)]
-#[cfg_attr(test, serde(deny_unknown_fields))]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
+#[serde(from = "[f32; 2]", into = "[f32; 2]")]
 pub struct Coordinates {
     pub x: f32,
     pub y: f32,
 }
+impl From<[f32; 2]> for Coordinates {
+    fn from([x, y]: [f32; 2]) -> Self {
+        Self { x, y }
+    }
+}
+impl From<Coordinates> for [f32; 2] {
+    fn from(v: Coordinates) -> Self {
+        [v.x, v.y]
+    }
+}
 
-#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize_tuple, Deserialize_tuple)]
-#[cfg_attr(test, serde(deny_unknown_fields))]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
+#[serde(from = "[Coordinates; 2]", into = "[Coordinates; 2]")]
 pub struct ContinentRectangle {
     pub top_left: Coordinates,
     pub bottom_right: Coordinates,
 }
+impl<C: Into<Coordinates>> From<[C; 2]> for ContinentRectangle {
+    fn from([top_left, bottom_right]: [C; 2]) -> Self {
+        Self {
+            top_left: top_left.into(),
+            bottom_right: bottom_right.into(),
+        }
+    }
+}
+impl<C> From<ContinentRectangle> for [C; 2]
+where
+    Coordinates: Into<C>,
+{
+    fn from(v: ContinentRectangle) -> Self {
+        [v.top_left.into(), v.bottom_right.into()]
+    }
+}
 
-#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize_tuple, Deserialize_tuple)]
-#[cfg_attr(test, serde(deny_unknown_fields))]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
+#[serde(from = "[Coordinates; 2]", into = "[Coordinates; 2]")]
 pub struct MapRectangle {
     pub bottom_left: Coordinates,
     pub top_right: Coordinates,
+}
+impl<C: Into<Coordinates>> From<[C; 2]> for MapRectangle {
+    fn from([bottom_left, top_right]: [C; 2]) -> Self {
+        Self {
+            bottom_left: bottom_left.into(),
+            top_right: top_right.into(),
+        }
+    }
+}
+impl<C> From<MapRectangle> for [C; 2]
+where
+    Coordinates: Into<C>,
+{
+    fn from(v: MapRectangle) -> Self {
+        [v.bottom_left.into(), v.top_right.into()]
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
