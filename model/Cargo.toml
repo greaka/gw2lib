@@ -17,6 +17,10 @@ path = "src/lib.rs"
 [dependencies]
 urlencoding = "2.1.2"
 
+[dependencies.uuid]
+version = "1.21"
+features = ["serde"]
+
 [dependencies.either]
 version = "1.8.1"
 features = ["serde"]

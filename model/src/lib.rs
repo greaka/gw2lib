@@ -90,6 +90,11 @@ pub trait EndpointWithId: Endpoint {
     fn format_url(id: &str) -> String {
         format!("{}/{}", Self::URL, id)
     }
+
+    #[expect(unused_variables)]
+    fn extra_queries(id: &str) -> Option<String> {
+        None
+    }
 }
 
 pub trait FixedEndpoint: Endpoint {}

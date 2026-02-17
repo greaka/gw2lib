@@ -136,10 +136,11 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
             }
         };
 
+        let formated_id = T::format_id(&id);
         let request = build_request::<T, String, Self, AUTHENTICATED, FORCE>(
             self,
-            T::format_url(T::format_id(&id).as_ref()),
-            None,
+            T::format_url(&formated_id),
+            T::extra_queries(&formated_id),
         )?;
 
         let response = exec_req::<Self, AUTHENTICATED, FORCE>(self, request).await?;
