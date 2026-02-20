@@ -18,6 +18,8 @@ pub type GuildId = Uuid;
 pub enum GuildEmblemFlag {
     FlipBackgroundHorizontal,
     FlipBackgroundVertical,
+    FlipForegroundHorizontal,
+    FlipForegroundVertical,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
