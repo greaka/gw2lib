@@ -52,7 +52,7 @@ pub struct Guild {
     pub id: GuildId,
     pub name: String,
     pub tag: String,
-    pub emblem: GuildEmblem,
+    pub emblem: Option<GuildEmblem>,
 }
 
 impl Endpoint for Guild {
