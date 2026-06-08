@@ -255,6 +255,7 @@ pub enum UnlockType {
     Outfit,
     RandomUnlock,
     SharedSlot,
+    WardrobeTemplateTab,
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Debug, Serialize, Deserialize)]
