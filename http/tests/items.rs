@@ -118,4 +118,13 @@ mod single {
             })
         ))
     });
+    parse_single!(wardrobe_template_tab, 106996, |x: Item| {
+        assert!(matches!(
+            x.details,
+            Details::Consumable(ConsumableDetails {
+                unlock_type: Some(UnlockType::WardrobeTemplateTab),
+                ..
+            })
+        ))
+    });
 }
