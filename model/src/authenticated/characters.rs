@@ -499,3 +499,68 @@ impl Endpoint for Training {
     const URL: &'static str = "v2/characters";
     const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Heropoints(pub Vec<String>);
+
+impl EndpointWithId for Heropoints {
+    type IdType = CharacterId;
+
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/heropoints", Self::URL, id)
+    }
+}
+
+impl Endpoint for Heropoints {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
+pub struct SabZone {
+    pub id: u32,
+    pub mode: String,
+    pub d: u32,
+    pub z: u32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
+pub struct SabUnlock {
+    pub id: u32,
+    pub name: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
+pub struct SabSong {
+    pub id: u32,
+    pub name: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[cfg_attr(test, serde(deny_unknown_fields))]
+pub struct Sab {
+    pub zones: Vec<SabZone>,
+    pub unlocks: Vec<SabUnlock>,
+    pub songs: Vec<SabSong>,
+}
+
+impl EndpointWithId for Sab {
+    type IdType = CharacterId;
+
+    fn format_url(id: &str) -> String {
+        format!("{}/{}/sab", Self::URL, id)
+    }
+}
+
+impl Endpoint for Sab {
+    const AUTHENTICATED: bool = true;
+    const LOCALE: bool = false;
+    const URL: &'static str = "v2/characters";
+    const VERSION: &'static str = "2022-06-14T00:00:00.000Z";
+}

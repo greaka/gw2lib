@@ -6,6 +6,7 @@ use crate::{Endpoint, FixedEndpoint, TimeStamp};
 pub mod account;
 pub mod characters;
 pub mod commerce;
+pub mod pvp;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[cfg_attr(test, serde(deny_unknown_fields))]

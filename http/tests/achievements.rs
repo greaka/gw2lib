@@ -1,9 +1,7 @@
 #![cfg(feature = "blocking")]
 
 use gw2lib::{
-    model::achievements::{
-        categories::AchievementCategory, groups::AchievementGroup, Achievement,
-    },
+    model::achievements::{categories::AchievementCategory, groups::AchievementGroup, Achievement},
     Requester,
 };
 

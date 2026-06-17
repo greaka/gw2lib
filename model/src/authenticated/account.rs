@@ -1,10 +1,28 @@
 pub mod achievements;
 pub mod bank;
+pub mod dailycrafting;
+pub mod dungeons;
+pub mod dyes;
+pub mod finishers;
+pub mod gliders;
+pub mod home;
 pub mod inventory;
+pub mod luck;
+pub mod mailcarriers;
+pub mod mapchests;
+pub mod masteries;
 pub mod materials;
+pub mod minis;
+pub mod mounts;
+pub mod outfits;
+pub mod pvp;
 pub mod raids;
+pub mod recipes;
+pub mod skins;
+pub mod titles;
 pub mod wallet;
 pub mod wizards_vault;
+pub mod worldbosses;
 
 use std::collections::BTreeSet;
 

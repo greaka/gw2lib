@@ -32,92 +32,91 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
   - [x] account
     - [x] achievements
     - [x] bank
-    - [ ] dailycrafting
-    - [ ] dungeons
-    - [ ] dyes
-    - [ ] finishers
-    - [x] inventory
-    - [ ] gliders
+    - [x] dailycrafting
+    - [x] dungeons
+    - [x] dyes
+    - [x] finishers
+    - [x] gliders
     - home
-      - [ ] cats
-      - [ ] nodes
-    - [ ] inventory
-    - [ ] luck
-    - [ ] mailcarries
-    - [ ] mapchests
-    - [ ] masteries
+      - [x] cats
+      - [x] nodes
+    - [x] inventory
+    - [x] luck
+    - [x] mailcarriers
+    - [x] mapchests
+    - [x] masteries
     - mastery
-      - [ ] points
+      - [x] points
     - [x] materials
-    - [ ] minis
+    - [x] minis
     - mounts
-      - [ ] skins
-      - [ ] types
-    - [ ] outfits
+      - [x] skins
+      - [x] types
+    - [x] outfits
     - pvp
-      - [ ] heroes
+      - [x] heroes
     - [x] raids
-    - [ ] recipes
-    - [ ] skins
-    - [ ] titles
+    - [x] recipes
+    - [x] skins
+    - [x] titles
     - [x] wallet
     - wizardsvault
       - [x] listings
       - [x] daily
       - [x] weekly
       - [x] special
-    - [ ] worldbosses
+    - [x] worldbosses
   - characters
     - [x] :id
       - [x] backstory
       - [x] core
       - [x] crafting
       - [x] equipment
-      - [ ] heropoints
+      - [x] heropoints
       - [x] inventory
       - [x] recipes
-      - [ ] sab
+      - [x] sab
       - [x] skills
       - [x] specializations
       - [x] training
   - commerce
     - [x] delivery
-    - [ ] transactions
+    - [x] transactions
   - pvp
-    - [ ] stats
-    - [ ] games
-    - [ ] standings
-  - [ ] tokeninfo
+    - [x] stats
+    - [x] games
+    - [x] standings
+  - [x] tokeninfo
 - daily rewards
-  - [ ] dailycrafting
-  - [ ] mapchests
-  - [ ] worldbosses
+  - [x] dailycrafting
+  - [x] mapchests
+  - [x] worldbosses
 - game mechanics
-  - [ ] masteries
-  - [ ] mounts
-    - [ ] skins
-    - [ ] types
-  - [ ] outfits
+  - [x] masteries
+  - [x] mounts
+    - [x] skins
+    - [x] types
+  - [x] outfits
   - [x] pets
-  - [ ] professions
-  - [ ] races
-  - [ ] specializations
-  - [ ] skills
-  - [ ] traits
-  - [ ] legends
+  - [x] professions
+  - [x] races
+  - [x] specializations
+  - [x] skills
+  - [x] traits
+  - [x] legends
 - guild
   - guild
-    - [ ] :id
-    - [ ] permissions
+    - [x] :id
+    - [x] permissions
     - [ ] search
-    - [ ] upgrades
-  - [ ] emblem
+    - [x] upgrades
+  - [x] emblem
 - guild authenticated
   - guild
     - :id
-      - [ ] log
-      - [ ] members
-      - [ ] ranks
+      - [x] log
+      - [x] members
+      - [x] ranks
       - [ ] stash
       - [ ] treasury
       - [ ] teams
@@ -127,12 +126,12 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
     - [x] cats
     - [x] nodes
 - items
-  - [ ] finishers
+  - [x] finishers
   - [x] items
   - [x] itemstats
-  - [ ] materials
+  - [x] materials
   - pvp
-    - [ ] amulets
+    - [x] amulets
   - [x] recipes
     - [ ] search
   - [x] skins
@@ -141,25 +140,25 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
   - [x] maps
 - Miscellaneous
   - [x] build
-  - [ ] colors
-  - [ ] currencies
-  - [ ] dungeons
-  - [ ] files
-  - [ ] quaggans
-  - [ ] minis
+  - [x] colors
+  - [x] currencies
+  - [x] dungeons
+  - [x] files
+  - [x] quaggans
+  - [x] minis
   - [x] raids
-  - [ ] titles
+  - [x] titles
   - [x] worlds
 - Story
   - backstory
-    - [ ] answers
-    - [ ] questions
-  - [ ] stories
-    - [ ] seasons
+    - [x] answers
+    - [x] questions
+  - [x] stories
+    - [x] seasons
 - sPvP
-  - [ ] pvp
-    - [ ] ranks
-    - [ ] seasons
+  - [x] pvp
+    - [x] ranks
+    - [x] seasons
       - [ ] leaderboards
 - trading post
   - commerce
@@ -169,9 +168,9 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
       - [ ] gems
     - [ ] prices
 - world v world
-  - [ ] wvw
-    - [ ] abilities
-    - [ ] matches
-    - [ ] objectives
-    - [ ] ranks
-    - [ ] upgrades
+  - [x] wvw
+    - [x] abilities
+    - [x] matches
+    - [x] objectives
+    - [x] ranks
+    - [x] upgrades

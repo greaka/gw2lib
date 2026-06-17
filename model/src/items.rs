@@ -1,4 +1,6 @@
+pub mod finishers;
 pub mod itemstats;
+pub mod materials;
 pub mod recipes;
 pub mod skins;
 

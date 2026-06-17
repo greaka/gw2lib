@@ -1,4 +1,10 @@
+pub mod legends;
+pub mod masteries;
+pub mod mounts;
+pub mod outfits;
 pub mod pets;
+pub mod professions;
+pub mod races;
 pub mod skills;
 pub mod specializations;
 pub mod traits;

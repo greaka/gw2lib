@@ -1,7 +1,10 @@
 pub mod build;
 pub mod colors;
 pub mod currencies;
+pub mod dungeons;
+pub mod files;
 pub mod minis;
+pub mod quaggans;
 pub mod raids;
 pub mod titles;
 pub mod worlds;

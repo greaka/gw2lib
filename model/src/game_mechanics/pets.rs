@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub use crate::game_mechanics::skills::SkillId;
-use crate::*;
+use crate::{game_mechanics::skills::SkillId, BulkEndpoint, Endpoint, EndpointWithId};
 
 pub type PetId = u16;
 

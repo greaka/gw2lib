@@ -128,7 +128,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
             match either {
                 Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
                 Some(Either::Right(tx)) => break tx,
-                None => {
+                _none => {
                     if let Some(c) = self.try_get(&id).await {
                         return Ok(c);
                     }
@@ -232,7 +232,7 @@ pub trait Requester<const AUTHENTICATED: bool, const FORCE: bool>: Sized + Sync 
                         txs.insert(id.clone(), tx);
                         break true;
                     }
-                    None => {
+                    _none => {
                         if let Some(c) =
                             check_cache::<T, I, T, Self, AUTHENTICATED, FORCE>(self, &id).await
                         {
@@ -539,7 +539,7 @@ async fn get_or_ids<
         match either {
             Some(Either::Left(mut rx)) => return rx.recv().await.map_err(Into::into),
             Some(Either::Right(tx)) => break tx,
-            None => {
+            _none => {
                 if let Some(c) = check_cache::<K, str, T, Req, A, F>(req, "").await {
                     return Ok(c);
                 }

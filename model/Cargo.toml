@@ -26,3 +26,6 @@ version = "1.0.160"
 features = [
     "derive"
 ]
+
+[dependencies.serde_json]
+version = "1.0"

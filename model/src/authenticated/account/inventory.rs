@@ -1,24 +1,27 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    authenticated::characters::Binding,
+    authenticated::characters::{Binding, Stats},
     items::{skins::SkinId, ItemId},
+    misc::colors::ColorId,
     Endpoint, FixedEndpoint,
 };
 
-pub type AccountInventory = Vec<Option<AccountInventoryItem>>;
-
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[cfg_attr(test, serde(deny_unknown_fields))]
-pub struct AccountInventoryItem {
+pub struct SharedInventorySlot {
     pub id: ItemId,
-    pub count: u8,
-    pub charges: Option<u8>,
-    pub upgrades: Option<Vec<ItemId>>,
+    pub count: u32,
+    pub charges: Option<u32>,
     pub skin: Option<SkinId>,
+    pub upgrades: Option<Vec<ItemId>>,
     pub infusions: Option<Vec<ItemId>>,
+    pub dyes: Option<Vec<Option<ColorId>>>,
+    pub stats: Option<Stats>,
     pub binding: Option<Binding>,
 }
+
+pub type AccountInventory = Vec<Option<SharedInventorySlot>>;
 
 impl Endpoint for AccountInventory {
     const AUTHENTICATED: bool = true;

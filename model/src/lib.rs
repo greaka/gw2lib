@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod achievements;
 pub mod authenticated;
+pub mod daily_rewards;
 pub mod game_mechanics;
 pub mod guild;
 pub mod home_instance;
@@ -11,6 +12,7 @@ pub mod items;
 pub mod maps;
 pub mod misc;
 pub mod pvp;
+pub mod story;
 pub mod tradingpost;
 pub mod wvw;
 
@@ -62,21 +64,9 @@ pub struct ErrorResponse {
 }
 
 pub trait Endpoint: Sized {
-    /// whether this endpoint requires authentication
     const AUTHENTICATED: bool;
-
-    /// whether this endpoint supports the language parameter
     const LOCALE: bool;
-
-    /// endpoint url in the format `v2/account`
-    /// ### Remarks
-    /// Among other things, this URL is used to fetch ids.
-    /// `v2/characters/My Character/core` still requires `v2/characters` to be
-    /// set here. For special cases like characters, override the fetch url
-    /// of single items here: [EndpointWithId::format_url]
     const URL: &'static str;
-
-    /// version of the endpoint to request
     const VERSION: &'static str;
 }
 
@@ -95,7 +85,6 @@ pub trait EndpointWithId: Endpoint {
 pub trait FixedEndpoint: Endpoint {}
 
 pub trait BulkEndpoint: EndpointWithId {
-    /// whether this endpoint supports `ids=all`
     const ALL: bool;
 
     fn id(&self) -> &Self::IdType;
