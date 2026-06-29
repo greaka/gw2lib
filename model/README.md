@@ -20,7 +20,7 @@ You don't even need to fork this library to test your struct!
 
 Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/commit/bcb0bd3e99f135f54fb01d088714ce8471a56d86)
 
-> Last update: 2025/11/03
+> Last update: 2026/06/29
 
 - achievements
   - [x] achievements
@@ -101,7 +101,7 @@ Example commit adding an endpoint: [bcb0bd3](https://github.com/greaka/gw2lib/co
   - [x] pets
   - [ ] professions
   - [ ] races
-  - [ ] specializations
+  - [x] specializations
   - [ ] skills
   - [ ] traits
   - [ ] legends
