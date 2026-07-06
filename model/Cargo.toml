@@ -1,6 +1,6 @@
 [package]
 name = "gw2lib-model"
-version = "2.2.3"
+version = "2.2.4"
 authors = ["Greaka <cargo@greaka.de>"]
 edition = "2021"
 workspace = "../"
